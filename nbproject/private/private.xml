@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/ProductsDAO.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/service/CustomerService.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/MainFrame.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/CustomerManagementView.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/CustomerController.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestDAO.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestService.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/ProductManagementView.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestGUI.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/ProductController.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/BrandsDAO.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/CategoryController.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/CategoryManagementView.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/CategoriesDAO.java</file>
+        </group>
+    </open-files>
+</project-private>
