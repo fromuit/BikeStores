@@ -3,11 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view;
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
+import javax.swing.*;
 
 /**
  *
@@ -112,7 +110,7 @@ public class MainFrame extends JFrame {
     categoryView.setVisible(true);
     try {
         categoryView.setSelected(true);
-    } catch (Exception e) {
+    } catch (PropertyVetoException e) {
     }
 }
 

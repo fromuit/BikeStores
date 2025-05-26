@@ -4,13 +4,11 @@
  */
 package view;
 import controller.ProductController;
-import model.Production.Products;
+import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
+import model.Production.Products;
 
 
 /**
@@ -18,7 +16,7 @@ import java.util.List;
  * @author duyng
  */
 public class ProductManagementView extends JInternalFrame {
-    private ProductController controller;
+    private final ProductController controller;
     private JTable productTable;
     private DefaultTableModel tableModel;
     private JTextField txtProductName, txtBrandID, txtCategoryID, txtModelYear, txtListPrice;
@@ -227,14 +225,14 @@ public class ProductManagementView extends JInternalFrame {
         }
         
         try {
-            Integer.parseInt(txtBrandID.getText().trim());
+            Integer.valueOf(txtBrandID.getText().trim());
         } catch (NumberFormatException e) {
             showError("Brand ID must be a valid number");
             return false;
         }
         
         try {
-            Integer.parseInt(txtCategoryID.getText().trim());
+            Integer.valueOf(txtCategoryID.getText().trim());
         } catch (NumberFormatException e) {
             showError("Category ID must be a valid number");
             return false;

@@ -4,15 +4,12 @@
  */
 package utils;
 import dao.CustomersDAO;
-import dao.CustomersDAO;
 import dao.ProductsDAO;
-import dao.ProductsDAO;
-import model.Sales.Customers;
-import model.Production.Products;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import utils.DatabaseUtil;
+import model.Production.Products;
+import model.Sales.Customers;
 /**
  *
  * @author duyng

@@ -3,11 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package utils;
-import service.CustomerService;
-import service.ProductService;
-import model.Sales.Customers;
-import model.Production.Products;
 import java.util.ArrayList;
+import model.Production.Products;
+import model.Sales.Customers;
 import service.CustomerService;
 import service.ProductService;
 /**
