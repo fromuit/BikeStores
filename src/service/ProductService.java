@@ -43,11 +43,12 @@ public class ProductService {
         // using LIKE queries)
         // Example: return productDAO.searchProductsByName(searchTerm);
         
-        System.out.println("ProductService: searchProducts called with '" + searchTerm
-                + "'. Not implemented yet. Returning all products.");
+        ArrayList<Products>allProducts = productDAO.searchProductsByName(searchTerm);
+        
         // For now, returning all products as a fallback until DAO layer is implemented
-        return productDAO.getAllProducts();
+        return allProducts;
     }
+    
 
     public boolean addProduct(Products product) throws ValidationException {
         validateProduct(product);

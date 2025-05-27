@@ -12,6 +12,9 @@ import model.Production.Products;
 import java.util.ArrayList;
 import model.Administration.User;
 import utils.SessionManager;
+import dao.CategoriesDAO;
+import java.lang.reflect.Array;
+import model.Production.Categories;
 
 /**
  *
@@ -44,7 +47,7 @@ public class ProductManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "ID", "Name", "Brand ID", "Category ID", "Model Year", "List Price" };
+        String[] columnNames = { "ID", "Name", "Brand ID", "Category ID", "Model Year", "List Price", "Category" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -87,9 +90,13 @@ public class ProductManagementView extends JInternalFrame {
         // Category objects and use a custom renderer
         // }
         // For now, adding some dummy categories for UI demonstration
-        cmbCategoryFilter.addItem("Electronics");
-        cmbCategoryFilter.addItem("Books");
-        cmbCategoryFilter.addItem("Clothing");
+        CategoriesDAO category = new CategoriesDAO();
+        ArrayList<Categories> categories = new ArrayList<>();
+        categories=category.getAllCategories();
+        for (Categories ctgr : categories){
+        cmbCategoryFilter.addItem(ctgr.getCategoryName());
+        }
+
     }
 
     private void setupLayout() {
@@ -199,7 +206,8 @@ public class ProductManagementView extends JInternalFrame {
                         product.getBrandID(),
                         product.getCategoryID(),
                         product.getModelYear(),
-                        product.getListPrice()
+                        product.getListPrice(),
+                        product.getCategory()
                 };
                 tableModel.addRow(row);
             }
