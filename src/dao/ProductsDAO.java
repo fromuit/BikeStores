@@ -211,4 +211,30 @@ public class ProductsDAO {
         }
         return productsList;
     }
+
+    // Get basic product info for selection dialogs
+    public ArrayList<Products> getAllProductsBasicInfo() {
+        ArrayList<Products> products = new ArrayList<>();
+        // Only select necessary fields to minimize data transfer and improve
+        // performance
+        String query = "SELECT product_id, product_name, list_price FROM production.products ORDER BY product_name ASC";
+        try (Connection conn = DatabaseUtil.getConnection(); // Ensure connection is handled correctly
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                Products product = new Products(); // Assuming Products has a default constructor and setters
+                product.setProductID(rs.getInt("product_id"));
+                product.setProductName(rs.getString("product_name"));
+                product.setListPrice(rs.getDouble("list_price"));
+                // Do not set brand_id, category_id, model_year here as they are not in the
+                // SELECT
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching basic product info: " + e.getMessage());
+            // Optionally, rethrow as a custom exception or return null/empty list based on
+            // error handling strategy
+        }
+        return products;
+    }
 }

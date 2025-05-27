@@ -55,6 +55,18 @@ public class ProductService {
         return productDAO.getProductsByBrandId(brandId);
     }
 
+    public ArrayList<Products> getAllProductsBasicInfo() {
+        // This method should call the DAO to get a simplified list of products
+        // (e.g., ID, Name, Price) for selection dialogs.
+        try {
+            return productDAO.getAllProductsBasicInfo();
+        } catch (Exception e) {
+            // Handle or log the exception appropriately
+            System.err.println("Error in ProductService.getAllProductsBasicInfo: " + e.getMessage());
+            return new ArrayList<>(); // Return empty list on error
+        }
+    }
+
     public ArrayList<Products> searchProducts(String searchTerm) throws Exception {
 
         ArrayList<Products> allProducts = productDAO.searchProductsByName(searchTerm);

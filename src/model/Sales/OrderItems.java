@@ -12,7 +12,7 @@ public class OrderItems {
     private int orderID;
     private int itemID;
     private int productID;
-    private int quantity; 
+    private int quantity;
     private double listPrice;
     private double discount = 0;
 
@@ -22,10 +22,18 @@ public class OrderItems {
     private String categoryName;
     private int modelYear;
 
-    public OrderItems(int productID, int quantity, double listPrice) {
+    // Default constructor (ensuring it exists)
+    public OrderItems() {
+    }
+
+    // Constructor with all direct fields from sales.order_items
+    public OrderItems(int orderID, int itemID, int productID, int quantity, double listPrice, double discount) {
+        this.orderID = orderID;
+        this.itemID = itemID;
         this.productID = productID;
         this.quantity = quantity;
         this.listPrice = listPrice;
+        this.discount = discount;
     }
 
     public int getOrderID() {
@@ -75,7 +83,7 @@ public class OrderItems {
     public void setDiscount(double discount) {
         this.discount = discount;
     }
-    
+
     public String getProductName() {
         return productName;
     }
@@ -107,7 +115,7 @@ public class OrderItems {
     public void setModelYear(int modelYear) {
         this.modelYear = modelYear;
     }
-    
+
     // Calculate item total (quantity * price * (1 - discount))
     public double getItemTotal() {
         return quantity * listPrice * (1 - discount);
