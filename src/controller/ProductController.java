@@ -41,6 +41,16 @@ public class ProductController {
         }
     }
 
+    public void loadProductsByBrand(int brandId) {
+        try {
+            ArrayList<Products> products = productService.getProductsByBrand(brandId);
+            view.displayProducts(products);
+        } catch (Exception e) {
+            view.showError("Error loading products by brand: " + e.getMessage());
+            System.err.println("Error in loadProductsByBrand: " + e.getMessage());
+        }
+    }
+
     public void searchProducts(String searchTerm) {
         try {
             ArrayList<Products> products = productService.searchProducts(searchTerm);

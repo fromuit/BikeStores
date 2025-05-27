@@ -9,6 +9,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import model.Administration.User;
 import model.Production.Products;
 import utils.SessionManager;
@@ -38,6 +39,26 @@ public class ProductManagementView extends JInternalFrame {
         }
     }
 
+    // Helper class to store Brand ID and Name for ComboBox
+    private static class BrandItem {
+        private int id;
+        private String name;
+
+        public BrandItem(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return name; // This is what will be displayed in the JComboBox
+        }
+    }
+
     private final ProductController controller;
     private JTable productTable;
     private DefaultTableModel tableModel;
@@ -45,6 +66,7 @@ public class ProductManagementView extends JInternalFrame {
     private JTextField txtSearch;
     private JButton btnSearch, btnClearSearch;
     private JComboBox<CategoryItem> cmbCategoryFilter;
+    private JComboBox<BrandItem> cmbBrandFilter;
     private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnClear;
     private int selectedProductId = -1;
 
@@ -64,7 +86,8 @@ public class ProductManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "ID", "Name", "Brand ID", "Category ID", "Model Year", "List Price", "Category" };
+        String[] columnNames = { "ID", "Name", "Brand ID", "Category ID", "Model Year", "List Price", "Category",
+                "Brand" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -73,6 +96,7 @@ public class ProductManagementView extends JInternalFrame {
         };
         productTable = new JTable(tableModel);
         productTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        productTable.setAutoCreateRowSorter(true);
 
         // Input fields
         txtProductName = new JTextField(15);
@@ -93,6 +117,9 @@ public class ProductManagementView extends JInternalFrame {
 
         cmbCategoryFilter = new JComboBox<>();
         populateCategoryFilter();
+
+        cmbBrandFilter = new JComboBox<>();
+        populateBrandFilter();
     }
 
     private void populateCategoryFilter() {
@@ -109,6 +136,21 @@ public class ProductManagementView extends JInternalFrame {
         cmbCategoryFilter.addItem(new CategoryItem(7, "Road Bikes"));
     }
 
+    private void populateBrandFilter() {
+        cmbBrandFilter.removeAllItems();
+        cmbBrandFilter.addItem(new BrandItem(0, "All Brands"));
+        // TODO: Replace with actual data loading from a BrandService or similar
+        cmbBrandFilter.addItem(new BrandItem(1, "Electra"));
+        cmbBrandFilter.addItem(new BrandItem(2, "Haro"));
+        cmbBrandFilter.addItem(new BrandItem(3, "Heller"));
+        cmbBrandFilter.addItem(new BrandItem(4, "Pure Cycles"));
+        cmbBrandFilter.addItem(new BrandItem(5, "Ritchey"));
+        cmbBrandFilter.addItem(new BrandItem(6, "Sun Bicycles"));
+        cmbBrandFilter.addItem(new BrandItem(7, "Surly"));
+        cmbBrandFilter.addItem(new BrandItem(8, "Strider"));
+        cmbBrandFilter.addItem(new BrandItem(9, "Trek"));
+    }
+
     private void setupLayout() {
         setLayout(new BorderLayout());
 
@@ -121,6 +163,9 @@ public class ProductManagementView extends JInternalFrame {
         searchPanel.add(Box.createHorizontalStrut(20));
         searchPanel.add(new JLabel("Filter by Category:"));
         searchPanel.add(cmbCategoryFilter);
+        searchPanel.add(Box.createHorizontalStrut(10));
+        searchPanel.add(new JLabel("Filter by Brand:"));
+        searchPanel.add(cmbBrandFilter);
 
         // Table panel
         JScrollPane scrollPane = new JScrollPane(productTable);
@@ -207,6 +252,7 @@ public class ProductManagementView extends JInternalFrame {
         txtSearch.addActionListener(e -> performSearch()); // Search on Enter in text field
 
         cmbCategoryFilter.addActionListener(e -> filterByCategory());
+        cmbBrandFilter.addActionListener(e -> filterByBrand());
     }
 
     // Methods called by controller
@@ -221,7 +267,8 @@ public class ProductManagementView extends JInternalFrame {
                         product.getCategoryID(),
                         product.getModelYear(),
                         product.getListPrice(),
-                        product.getCategory()
+                        product.getCategory(),
+                        product.getBrand()
                 };
                 tableModel.addRow(row);
             }
@@ -304,6 +351,9 @@ public class ProductManagementView extends JInternalFrame {
         if (cmbCategoryFilter.getItemCount() > 0) {
             cmbCategoryFilter.setSelectedIndex(0);
         }
+        if (cmbBrandFilter.getItemCount() > 0) {
+            cmbBrandFilter.setSelectedIndex(0);
+        }
         loadProducts();
     }
 
@@ -322,6 +372,24 @@ public class ProductManagementView extends JInternalFrame {
                 showError("Category filter is not populated.");
             }
             loadProducts();
+        }
+    }
+
+    private void filterByBrand() {
+        Object selectedItem = cmbBrandFilter.getSelectedItem();
+        if (selectedItem instanceof BrandItem) {
+            BrandItem brandItem = (BrandItem) selectedItem;
+            int brandId = brandItem.getId();
+            if (brandId == 0) { // ID 0 for "All Brands"
+                loadProducts();
+            } else {
+                controller.loadProductsByBrand(brandId);
+            }
+        } else {
+            if (cmbBrandFilter.getItemCount() == 0) {
+                showError("Brand filter is not populated.");
+            }
+            loadProducts(); // Fallback to load all products
         }
     }
 

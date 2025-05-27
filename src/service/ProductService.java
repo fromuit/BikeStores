@@ -10,6 +10,7 @@ import model.Administration.User;
 import model.Production.Products;
 import utils.SessionManager;
 import utils.ValidationException;
+
 /**
  *
  * @author duyng
@@ -40,6 +41,18 @@ public class ProductService {
             return productDAO.getAllProducts();
         }
         return productDAO.getProductsByCategoryId(categoryId);
+    }
+
+    public ArrayList<Products> getProductsByBrand(int brandId) throws Exception {
+        if (brandId <= 0) {
+            // If brandId is invalid or 0 (representing "All Brands"), return all products.
+            // This matches the behavior of getProductsByCategory.
+            System.out.println(
+                    "ProductService: Invalid or 'All Brands' Brand ID received: " + brandId
+                            + ". Returning all products.");
+            return productDAO.getAllProducts();
+        }
+        return productDAO.getProductsByBrandId(brandId);
     }
 
     public ArrayList<Products> searchProducts(String searchTerm) throws Exception {
