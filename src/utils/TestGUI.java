@@ -4,7 +4,7 @@
  */
 package utils;
 import javax.swing.*;
-import view.MainFrame;
+import view.LoginView;
 /**
  *
  * @author duyng
@@ -23,8 +23,8 @@ public class TestGUI {
         
         SwingUtilities.invokeLater(() -> {
             try {
-                MainFrame mainFrame = new MainFrame();
-                mainFrame.setVisible(true);
+                LoginView newLogin = new LoginView();
+                newLogin.setVisible(true);
                 System.out.println("✓ Main application started successfully!");
             } catch (Exception e) {
                 System.out.println("✗ Main frame test failed: " + e.getMessage());

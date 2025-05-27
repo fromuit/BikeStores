@@ -15,6 +15,7 @@ public class Products {
     private int categoryID; 
     private int modelYear;
     private double listPrice;
+    private String category = null;
 
     public Products() {}
     public Products(int productID, String productName, int brandID, int categoryID, int modelYear, double listPrice) {
@@ -25,7 +26,24 @@ public class Products {
         this.modelYear = modelYear;
         this.listPrice = listPrice;
     }
-
+    public Products(int productID, String productName, int brandID, int categoryID, int modelYear, double listPrice, String category) {
+        this.productID = productID;
+        this.productName = productName;
+        this.brandID = brandID;
+        this.categoryID = categoryID;
+        this.modelYear = modelYear;
+        this.listPrice = listPrice;
+        this.category = category;
+    }
+    
+    public String getCategory(){
+        return category;
+    }
+    
+    public void setCategory(String category){
+        this.category = category;
+    }
+    
     public int getProductID() {
         return productID;
     }
