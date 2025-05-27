@@ -7,8 +7,10 @@ package view;
 import controller.CustomerController;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import model.Administration.User;
 import model.Sales.Customers;
 import utils.SessionManager;
@@ -55,8 +57,11 @@ public class CustomerManagementView extends JInternalFrame {
             }
         };
         customerTable = new JTable(tableModel);
-        customerTable.setAutoCreateRowSorter(true);
         customerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(8, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        customerTable.setRowSorter(sorter);
 
         // Input fields
         txtFirstName = new JTextField(15);
@@ -361,15 +366,16 @@ public class CustomerManagementView extends JInternalFrame {
     }
 
     private void loadSelectedCustomer(int row) {
-        selectedCustomerId = (int) tableModel.getValueAt(row, 0);
-        txtFirstName.setText((String) tableModel.getValueAt(row, 1));
-        txtLastName.setText((String) tableModel.getValueAt(row, 2));
-        txtEmail.setText((String) tableModel.getValueAt(row, 3));
-        txtPhone.setText((String) tableModel.getValueAt(row, 4));
-        txtStreet.setText((String) tableModel.getValueAt(row, 5));
-        txtCity.setText((String) tableModel.getValueAt(row, 6));
-        txtState.setText((String) tableModel.getValueAt(row, 7));
-        txtZipCode.setText((String) tableModel.getValueAt(row, 8));
+        int modelRow = customerTable.convertRowIndexToModel(row);
+        selectedCustomerId = (int) tableModel.getValueAt(modelRow, 0);
+        txtFirstName.setText((String) tableModel.getValueAt(modelRow, 1));
+        txtLastName.setText((String) tableModel.getValueAt(modelRow, 2));
+        txtEmail.setText((String) tableModel.getValueAt(modelRow, 3));
+        txtPhone.setText((String) tableModel.getValueAt(modelRow, 4));
+        txtStreet.setText((String) tableModel.getValueAt(modelRow, 5));
+        txtCity.setText((String) tableModel.getValueAt(modelRow, 6));
+        txtState.setText((String) tableModel.getValueAt(modelRow, 7));
+        txtZipCode.setText((String) tableModel.getValueAt(modelRow, 8));
     }
 
     private void clearForm() {

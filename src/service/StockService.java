@@ -94,7 +94,7 @@ public class StockService {
                 throw new SecurityException("Could not determine the store for the current user.");
             }
 
-            if (staffStoreId.intValue() != storeId) {
+            if (staffStoreId != storeId) {
                 throw new SecurityException("You do not have permission to update stock for store ID: " + storeId +
                         ". You can only update stock for store ID: " + staffStoreId);
             }

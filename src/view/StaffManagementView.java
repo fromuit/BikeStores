@@ -5,12 +5,14 @@
 package view;
 
 import controller.StaffController;
-import model.Sales.Staffs;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import model.Administration.User;
+import model.Sales.Staffs;
 import utils.SessionManager;
 
 /**
@@ -57,6 +59,11 @@ public class StaffManagementView extends JInternalFrame {
         };
         staffTable = new JTable(tableModel);
         staffTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(6, Comparator.comparingInt(o -> Integer.valueOf(o.toString())));
+        sorter.setComparator(7, Comparator.comparingInt(o -> Integer.valueOf(o.toString())));
+        staffTable.setRowSorter(sorter);
 
         // Input fields
         txtFirstName = new JTextField(15);
@@ -272,18 +279,19 @@ public class StaffManagementView extends JInternalFrame {
     }
 
     private void loadSelectedStaff(int row) {
-        selectedStaffId = (int) tableModel.getValueAt(row, 0);
-        txtFirstName.setText((String) tableModel.getValueAt(row, 1));
-        txtLastName.setText((String) tableModel.getValueAt(row, 2));
-        txtEmail.setText((String) tableModel.getValueAt(row, 3));
-        txtPhone.setText((String) tableModel.getValueAt(row, 4));
+        int modelRow = staffTable.convertRowIndexToModel(row);
+        selectedStaffId = (int) tableModel.getValueAt(modelRow, 0);
+        txtFirstName.setText((String) tableModel.getValueAt(modelRow, 1));
+        txtLastName.setText((String) tableModel.getValueAt(modelRow, 2));
+        txtEmail.setText((String) tableModel.getValueAt(modelRow, 3));
+        txtPhone.setText((String) tableModel.getValueAt(modelRow, 4));
 
-        String activeStatus = (String) tableModel.getValueAt(row, 5);
+        String activeStatus = (String) tableModel.getValueAt(modelRow, 5);
         cmbActive.setSelectedIndex(activeStatus.equals("Active") ? 0 : 1);
 
-        txtStoreID.setText(String.valueOf(tableModel.getValueAt(row, 6)));
+        txtStoreID.setText(String.valueOf(tableModel.getValueAt(modelRow, 6)));
 
-        Object managerIdObj = tableModel.getValueAt(row, 7);
+        Object managerIdObj = tableModel.getValueAt(modelRow, 7);
         txtManagerID.setText(managerIdObj != null && !managerIdObj.toString().isEmpty() ? managerIdObj.toString() : "");
     }
 

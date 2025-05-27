@@ -12,15 +12,17 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import model.Administration.User;
+import model.Production.Products;
 import model.Sales.Customers;
 import model.Sales.OrderItems;
 import model.Sales.Orders;
 import model.Sales.Staffs;
-import model.Production.Products;
 import utils.SessionManager;
 
 /**
@@ -71,8 +73,11 @@ public class OrderManagementView extends JInternalFrame {
             }
         };
         orderTable = new JTable(tableModel);
-        orderTable.setAutoCreateRowSorter(true);
         orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(6, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        orderTable.setRowSorter(sorter);
 
         // Set preferred table size to show fewer rows
         orderTable.setPreferredScrollableViewportSize(new Dimension(1200, 200)); // Reduced height
@@ -555,10 +560,10 @@ public class OrderManagementView extends JInternalFrame {
     }
 
     private void loadSelectedOrder(int row) {
-        selectedOrderId = (int) tableModel.getValueAt(row, 0);
-
+        int modelRow = orderTable.convertRowIndexToModel(row);
+        selectedOrderId = (int) tableModel.getValueAt(modelRow, 0);
         // Find and select customer
-        String customerName = (String) tableModel.getValueAt(row, 1);
+        String customerName = (String) tableModel.getValueAt(modelRow, 1);
         for (int i = 0; i < cmbCustomer.getItemCount(); i++) {
             if (cmbCustomer.getItemAt(i).contains(customerName)) {
                 cmbCustomer.setSelectedIndex(i);

@@ -7,8 +7,10 @@ package view;
 import controller.BrandController;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import model.Production.Brands;
 /**
  *
@@ -43,6 +45,11 @@ public class BrandManagementView extends JInternalFrame {
         };
         brandTable = new JTable(tableModel);
         brandTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        brandTable.setRowSorter(sorter);
+        
+        
         
         // Input fields
         txtBrandName = new JTextField(20);
@@ -161,8 +168,9 @@ public class BrandManagementView extends JInternalFrame {
     }
     
     private void loadSelectedBrand(int row) {
-        selectedBrandId = (int) tableModel.getValueAt(row, 0);
-        txtBrandName.setText((String) tableModel.getValueAt(row, 1));
+        int modelRow = brandTable.convertRowIndexToModel(row);
+        selectedBrandId = (int) tableModel.getValueAt(modelRow, 0);
+        txtBrandName.setText((String) tableModel.getValueAt(modelRow, 1));
     }
     
     private void clearForm() {

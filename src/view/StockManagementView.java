@@ -1,17 +1,17 @@
 package view;
 
 import controller.StockController;
-import model.Production.Stocks;
-import model.Production.Products; // For product selection if needed
-import model.Sales.Stores;
-import model.Administration.User;
-import service.StoreService; // To get list of stores for dropdown
-import utils.SessionManager;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.ArrayList; // For product selection if needed
+import java.util.Comparator;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel; // To get list of stores for dropdown
+import javax.swing.table.TableRowSorter;
+import model.Administration.User;
+import model.Production.Stocks;
+import model.Sales.Stores;
+import service.StoreService;
+import utils.SessionManager;
 
 public class StockManagementView extends JInternalFrame {
     private final StockController controller;
@@ -30,8 +30,8 @@ public class StockManagementView extends JInternalFrame {
 
     // Helper class for JComboBox store items
     private static class StoreItem {
-        private int id;
-        private String name;
+        private final int id;
+        private final String name;
 
         public StoreItem(int id, String name) {
             this.id = id;
@@ -131,7 +131,13 @@ public class StockManagementView extends JInternalFrame {
         };
         stockTable = new JTable(tableModel);
         stockTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        stockTable.setAutoCreateRowSorter(true);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(2, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(3, Comparator.comparingDouble(o -> Double.valueOf(o.toString())));
+        stockTable.setRowSorter(sorter);
+        
+        
         JScrollPane scrollPane = new JScrollPane(stockTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -209,13 +215,14 @@ public class StockManagementView extends JInternalFrame {
     private void loadSelectedStockItemToForm() {
         int selectedRow = stockTable.getSelectedRow();
         if (selectedRow != -1) {
-            selectedProductIdForUpdate = (Integer) tableModel.getValueAt(selectedRow, 0);
-            String productName = (String) tableModel.getValueAt(selectedRow, 1);
+            int modelRow = stockTable.convertRowIndexToModel(selectedRow);
+            selectedProductIdForUpdate = (Integer) tableModel.getValueAt(modelRow, 0);
+            String productName = (String) tableModel.getValueAt(modelRow, 1);
             // int currentQuantity = (Integer) tableModel.getValueAt(selectedRow, 2);
 
             txtSelectedProductId.setText(String.valueOf(selectedProductIdForUpdate));
             txtSelectedProductName.setText(productName);
-            txtNewQuantity.setText(tableModel.getValueAt(selectedRow, 2).toString()); // Set current quantity as
+            txtNewQuantity.setText(tableModel.getValueAt(modelRow, 2).toString()); // Set current quantity as
                                                                                       // starting point
             txtNewQuantity.requestFocus();
             btnUpdateQuantity.setEnabled(true && txtNewQuantity.isEditable()); // Enable if form is editable
@@ -259,7 +266,7 @@ public class StockManagementView extends JInternalFrame {
                         stockItem.getProductID(),
                         stockItem.getProduct() != null ? stockItem.getProduct().getProductName() : "N/A",
                         stockItem.getQuantity(),
-                        stockItem.getProduct() != null ? String.format("$%.2f", stockItem.getProduct().getListPrice())
+                        stockItem.getProduct() != null ? String.format("%.2f", stockItem.getProduct().getListPrice())
                                 : "N/A"
                 };
                 tableModel.addRow(row);

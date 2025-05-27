@@ -7,6 +7,7 @@ package view;
 import controller.ProductController;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -96,7 +97,14 @@ public class ProductManagementView extends JInternalFrame {
         };
         productTable = new JTable(tableModel);
         productTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        productTable.setAutoCreateRowSorter(true);
+        // productTable.setAutoCreateRowSorter(true);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(2, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(3, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(4, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
+        sorter.setComparator(5, Comparator.comparingDouble(o -> Double.valueOf(o.toString()))); 
+        productTable.setRowSorter(sorter);
 
         // Input fields
         txtProductName = new JTextField(15);
@@ -323,12 +331,13 @@ public class ProductManagementView extends JInternalFrame {
     }
 
     private void loadSelectedProduct(int selectedRow) {
-        selectedProductId = (int) tableModel.getValueAt(selectedRow, 0);
-        txtProductName.setText((String) tableModel.getValueAt(selectedRow, 1));
-        txtBrandID.setText(String.valueOf(tableModel.getValueAt(selectedRow, 2)));
-        txtCategoryID.setText(String.valueOf(tableModel.getValueAt(selectedRow, 3)));
-        txtModelYear.setText(String.valueOf(tableModel.getValueAt(selectedRow, 4)));
-        txtListPrice.setText(String.valueOf(tableModel.getValueAt(selectedRow, 5)));
+        int modelRow = productTable.convertRowIndexToModel(selectedRow);    
+        selectedProductId = (int) tableModel.getValueAt(modelRow, 0);
+        txtProductName.setText((String) tableModel.getValueAt(modelRow, 1));
+        txtBrandID.setText(String.valueOf(tableModel.getValueAt(modelRow, 2)));
+        txtCategoryID.setText(String.valueOf(tableModel.getValueAt(modelRow, 3)));
+        txtModelYear.setText(String.valueOf(tableModel.getValueAt(modelRow, 4)));
+        txtListPrice.setText(String.valueOf(tableModel.getValueAt(modelRow, 5)));
     }
 
     private void clearForm() {
