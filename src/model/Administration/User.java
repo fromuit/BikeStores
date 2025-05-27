@@ -4,6 +4,8 @@
  */
 package model.Administration;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author duyng
@@ -14,6 +16,10 @@ public class User {
     private String password;
     private UserRole role;
     private Integer staffID; // Link to existing staff if applicable
+    private boolean active = true;
+    private Timestamp createdAt;
+    private Timestamp lastLogin;
+    private Timestamp passwordChangedAt;
     
     public enum UserRole {
         CHIEF_MANAGER(3),
@@ -83,5 +89,37 @@ public class User {
 
     public void setStaffID(Integer staffID) {
         this.staffID = staffID;
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+    
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+    
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public Timestamp getLastLogin() {
+        return lastLogin;
+    }
+    
+    public void setLastLogin(Timestamp lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+    
+    public Timestamp getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+    
+    public void setPasswordChangedAt(Timestamp passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
     }
 }

@@ -22,6 +22,9 @@ public class StaffManagementView extends JInternalFrame {
     private DefaultTableModel tableModel;
     private JTextField txtFirstName, txtLastName, txtEmail, txtPhone;
     private JTextField txtStoreID, txtManagerID;
+    private JTextField txtSearch;
+    private JButton btnSearch, btnClearSearch;
+    private JComboBox<String> cmbStoreFilter;
     private JComboBox<String> cmbActive;
     private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnClear;
     private int selectedStaffId = -1;
@@ -40,37 +43,7 @@ public class StaffManagementView extends JInternalFrame {
         
         applyRoleBasedPermissions();
     }
-    
-    private void applyRoleBasedPermissions() {
-        User currentUser = sessionManager.getCurrentUser();
-        
-        switch (currentUser.getRole()) {
-            case EMPLOYEE -> {
-                // Employees can only view
-                btnAdd.setEnabled(false);
-                btnUpdate.setEnabled(false);
-                btnDelete.setEnabled(false);
-            }
-                
-            case STORE_MANAGER -> {
-                // Store Managers can manage their store's staff
-                btnAdd.setEnabled(true);
-                btnUpdate.setEnabled(true);
-                btnDelete.setEnabled(true);
-                // Disable manager ID field for store managers
-                txtManagerID.setEnabled(false);
-            }
-                
-            case CHIEF_MANAGER -> {
-                // Chief Managers have full access
-                btnAdd.setEnabled(true);
-                btnUpdate.setEnabled(true);
-                btnDelete.setEnabled(true);
-                txtManagerID.setEnabled(true);
-            }
-        }
-    }    
-    
+     
     
     private void initializeComponents() {
         // Table setup
@@ -91,6 +64,7 @@ public class StaffManagementView extends JInternalFrame {
         txtPhone = new JTextField(15);
         txtStoreID = new JTextField(10);
         txtManagerID = new JTextField(10);
+        txtSearch = new JTextField(20);
         
         // Active dropdown
         cmbActive = new JComboBox<>(new String[]{"1 - Active", "0 - Inactive"});
@@ -101,15 +75,47 @@ public class StaffManagementView extends JInternalFrame {
         btnDelete = new JButton("Delete");
         btnRefresh = new JButton("Refresh");
         btnClear = new JButton("Clear");
+        btnSearch = new JButton("Search");
+        btnClearSearch = new JButton("Clear search result");
+        
+        
+          cmbStoreFilter = new JComboBox<>();
+          populateStoreFilter();
+    }
+    
+    private void populateStoreFilter() {
+        cmbStoreFilter.removeAllItems();
+        cmbStoreFilter.addItem("All Stores");
+
+        ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+        for (Integer storeId : accessibleStores) {
+            cmbStoreFilter.addItem("Store " + storeId);
+        }
     }
     
     private void setupLayout() {
         setLayout(new BorderLayout());
+        //Search panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(txtSearch);
+        searchPanel.add(btnSearch);
+        searchPanel.add(btnClearSearch);
+        searchPanel.add(Box.createHorizontalStrut(20));
+        searchPanel.add(new JLabel("Filter by Store:"));
+        searchPanel.add(cmbStoreFilter);
         
         // Table panel
         JScrollPane scrollPane = new JScrollPane(staffTable);
-        add(scrollPane, BorderLayout.CENTER);
+//        add(scrollPane, BorderLayout.CENTER);
         
+        // Combine search and table
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(searchPanel, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        add(centerPanel, BorderLayout.CENTER);
+
         // Form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -177,20 +183,25 @@ public class StaffManagementView extends JInternalFrame {
                 }
             }
         });
-        
+        //Search listeners
+        btnSearch.addActionListener(e -> performSearch());
+        btnClearSearch.addActionListener(e -> clearSearch());
+        txtSearch.addActionListener(e -> performSearch()); // Search on Enter
         // Button listeners
         btnAdd.addActionListener(e -> addStaff());
         btnUpdate.addActionListener(e -> updateStaff());
         btnDelete.addActionListener(e -> deleteStaff());
         btnRefresh.addActionListener(e -> loadStaffs());
         btnClear.addActionListener(e -> clearForm());
+        
+        //Store filter listener
+        cmbStoreFilter.addActionListener(e -> filterByStore());
     }
     
     // Methods called by controller
     public void displayStaffs(ArrayList<Staffs> staffs) {
         tableModel.setRowCount(0);
-        User currentUser = sessionManager.getCurrentUser();
-        
+
         for (Staffs staff : staffs) {
             
             Object[] row = {
@@ -279,6 +290,78 @@ public class StaffManagementView extends JInternalFrame {
         txtManagerID.setText("");
         cmbActive.setSelectedIndex(0);
         staffTable.clearSelection();
+    }
+    
+    private void performSearch() {
+        String searchTerm = txtSearch.getText().trim();
+        if (!searchTerm.isEmpty()) {
+            controller.searchStaffs(searchTerm);
+        } else {
+            loadStaffs();
+        }
+    }
+
+    private void clearSearch() {
+        txtSearch.setText("");
+        cmbStoreFilter.setSelectedIndex(0);
+        loadStaffs();
+    }
+
+    private void filterByStore() {
+        int selectedIndex = cmbStoreFilter.getSelectedIndex();
+        if (selectedIndex == 0) {
+            // All stores
+            loadStaffs();
+        } else {
+            // Specific store - you'd need to implement this in controller
+            String storeText = (String) cmbStoreFilter.getSelectedItem();
+            int storeId = Integer.parseInt(storeText.replace("Store ", ""));
+            controller.loadStaffsByStore(storeId);
+        }
+    }
+    
+    
+    private void applyRoleBasedPermissions() {
+        User currentUser = sessionManager.getCurrentUser();
+
+        switch (currentUser.getRole()) {
+            case EMPLOYEE -> {
+                btnAdd.setEnabled(false);
+                btnUpdate.setEnabled(false);
+                btnDelete.setEnabled(false);
+                // Make all form fields read-only
+                setFormFieldsEnabled(false);
+            }
+            case STORE_MANAGER -> {
+                btnAdd.setEnabled(true);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
+                txtManagerID.setEnabled(false);
+
+                // Restrict store ID to their own store
+                ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+                if (!accessibleStores.isEmpty()) {
+                    txtStoreID.setText(String.valueOf(accessibleStores.get(0)));
+                    txtStoreID.setEnabled(false);
+                }
+            }
+            case CHIEF_MANAGER -> {
+                btnAdd.setEnabled(true);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
+                setFormFieldsEnabled(true);
+            }
+        }
+    }
+
+    private void setFormFieldsEnabled(boolean enabled) {
+        txtFirstName.setEnabled(enabled);
+        txtLastName.setEnabled(enabled);
+        txtEmail.setEnabled(enabled);
+        txtPhone.setEnabled(enabled);
+        txtStoreID.setEnabled(enabled);
+        txtManagerID.setEnabled(enabled);
+        cmbActive.setEnabled(enabled);
     }
     
     private boolean validateInput() {

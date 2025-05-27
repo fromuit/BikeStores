@@ -4,7 +4,10 @@
  */
 package utils;
 
+import dao.StaffsDAO;
+import java.util.ArrayList;
 import model.Administration.User;
+import model.Sales.Staffs;
 /**
  *
  * @author duyng
@@ -61,7 +64,53 @@ public class SessionManager {
     }
     
     private int getStaffStoreId(Integer staffID) {
-        // Implementation to get store ID from staff record
-        return 0; // Placeholder
+        if (staffID == null) return -1;
+    
+        try {
+            // Get store ID from staff record using DAO
+            StaffsDAO staffDAO = new StaffsDAO();
+            Staffs staff = staffDAO.getStaffById(staffID);
+            return staff != null ? staff.getStoreID() : -1;
+        } catch (Exception e) {
+            System.err.println("Error getting staff store ID: " + e.getMessage());
+            return -1;
+        }    
+    }
+
+    public boolean canManageStaff(Staffs staff) {
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> canAccessStore(staff.getStoreID());
+            case EMPLOYEE -> false;
+            default -> false;
+        }; // Can only manage staff in their own store
+    }    
+    
+    public ArrayList<Integer> getAccessibleStoreIds() {
+        ArrayList<Integer> storeIds = new ArrayList<>();
+        if (currentUser == null) return storeIds;
+
+        switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> {
+                // Chief managers can access all stores
+                // You might want to fetch this from database
+                for (int i = 1; i <= 5; i++) { 
+                    storeIds.add(i);
+                }
+            }
+            case STORE_MANAGER -> {
+                // Store managers can only access their own store
+                int storeId = getStaffStoreId(currentUser.getStaffID());
+                if (storeId > 0) {
+                    storeIds.add(storeId);
+                }
+            }
+            case EMPLOYEE -> {
+            }
+        }
+        // Employees typically don't manage staff
+        return storeIds;
     }
 }
