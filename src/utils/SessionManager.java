@@ -42,9 +42,10 @@ public class SessionManager {
                 action.equals("MANAGE_STAFF") ||
                 action.equals("MANAGE_INVENTORY") ||
                 action.equals("MANAGE_ORDERS") ||
-                action.equals("MANAGE_CUSTOMERS"); // Add this line
+                action.equals("MANAGE_CUSTOMERS"); 
             case EMPLOYEE -> action.startsWith("VIEW_") ||
-                action.equals("MANAGE_ORDERS");
+                action.equals("MANAGE_ORDERS") ||
+                action.equals("MANAGE_CUSTOMERS");
             default -> false;
         };
     }
