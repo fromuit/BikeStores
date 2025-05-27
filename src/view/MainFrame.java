@@ -67,7 +67,7 @@ public class MainFrame extends JFrame {
         categoriesItem.addActionListener(e -> openCategoryManagement());
 //        storesItem.addActionListener(e -> openStoreManagement());
         staffsItem.addActionListener(e -> openStaffManagement());
-//        ordersItem.addActionListener(e -> openOrderManagement());
+        ordersItem.addActionListener(e -> openOrderManagement());
 //        stocksItem.addActionListener(e -> openStockManagement());
 
         setJMenuBar(menuBar);
@@ -99,33 +99,43 @@ public class MainFrame extends JFrame {
     }
     
     private void openBrandManagement() {
-    BrandManagementView brandView = new BrandManagementView();
-    desktopPane.add(brandView);
-    brandView.setVisible(true);
-    try {
-        brandView.setSelected(true);
-    } catch (PropertyVetoException e) {
+        BrandManagementView brandView = new BrandManagementView();
+        desktopPane.add(brandView);
+        brandView.setVisible(true);
+        try {
+            brandView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
     }
-}
     private void openCategoryManagement() {
-    CategoryManagementView categoryView = new CategoryManagementView();
-    desktopPane.add(categoryView);
-    categoryView.setVisible(true);
-    try {
-        categoryView.setSelected(true);
-    } catch (PropertyVetoException e) {
+        CategoryManagementView categoryView = new CategoryManagementView();
+        desktopPane.add(categoryView);
+        categoryView.setVisible(true);
+        try {
+            categoryView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
     }
-}
     private void openStaffManagement() {
-    StaffManagementView staffView = new StaffManagementView();
-    desktopPane.add(staffView);
-    staffView.setVisible(true);
-    try {
-        staffView.setSelected(true);
-    } catch (PropertyVetoException e) {
+        StaffManagementView staffView = new StaffManagementView();
+        desktopPane.add(staffView);
+        staffView.setVisible(true);
+        try {
+            staffView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
     }
-}
 
+    private void openOrderManagement() {
+        OrderManagementView orderView = new OrderManagementView();
+        desktopPane.add(orderView);
+        orderView.setVisible(true);
+        try {
+            orderView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
+    }
+    
     
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
