@@ -164,10 +164,10 @@ public class MainFrame extends JFrame {
                     JOptionPane.QUESTION_MESSAGE);
 
             if (confirmation == JOptionPane.YES_OPTION) {
-                SessionManager.getInstance().setCurrentUser(null); // Xóa phiên làm việc
-                this.dispose(); // Đóng MainFrame
+                SessionManager.getInstance().setCurrentUser(null); 
+                this.dispose(); 
 
-                // Mở lại LoginView
+  
                 SwingUtilities.invokeLater(() -> {
                     LoginView loginView = new LoginView();
                     loginView.setVisible(true);
@@ -180,7 +180,7 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
-    // Helper method để cấu hình các nút điều hướng thông thường
+
     private void configureNavButton(JButton button, Font font, Dimension size, String itemName) {
         button.setFont(font);
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -188,8 +188,8 @@ public class MainFrame extends JFrame {
         button.setMaximumSize(size);
         button.setFocusPainted(false);
         button.setMargin(new Insets(5, 15, 5, 15));
-        // Có thể thêm style chung cho các nút ở đây nếu muốn
-        // button.setBackground(new Color(230, 230, 250)); // Ví dụ màu Lavender nhạt
+
+        // button.setBackground(new Color(230, 230, 250));
         // button.setOpaque(true);
         // button.setBorderPainted(false);
         button.addActionListener(e -> handleNavigation(itemName));
@@ -236,8 +236,7 @@ public class MainFrame extends JFrame {
                 openStockManagement();
                 break;
             default:
-                // Nếu không có item nào được chọn hoặc menuItemName rỗng, hiển thị lại welcome
-                // frame
+
                 if (welcomeInternalFrame != null && !welcomeInternalFrame.isVisible()) {
                     // Đảm bảo welcome frame được thêm vào desktopPane nếu chưa có
                     if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
@@ -251,16 +250,15 @@ public class MainFrame extends JFrame {
     }
 
     private void setupLayout() {
-        // JScrollPane navigationScrollPane = new JScrollPane(navigationTree); // Thay
-        // thế dòng này
-        JScrollPane navigationScrollPane = new JScrollPane(navigationPanel); // Sử dụng panel mới
-        navigationScrollPane.setMinimumSize(new Dimension(220, 0)); // Tăng nhẹ chiều rộng tối thiểu
-        navigationScrollPane.setBorder(BorderFactory.createEmptyBorder()); // Bỏ viền của JScrollPane
+
+        JScrollPane navigationScrollPane = new JScrollPane(navigationPanel); 
+        navigationScrollPane.setMinimumSize(new Dimension(220, 0)); 
+        navigationScrollPane.setBorder(BorderFactory.createEmptyBorder()); 
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, navigationScrollPane, desktopPane);
         splitPane.setDividerLocation(250);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setBorder(null); // Bỏ viền của JSplitPane nếu muốn
+        splitPane.setBorder(null); 
 
         setLayout(new BorderLayout());
         add(splitPane, BorderLayout.CENTER);
@@ -271,9 +269,8 @@ public class MainFrame extends JFrame {
                 desktopPane.add(welcomeInternalFrame);
             }
             welcomeInternalFrame.setVisible(true);
-            // Gọi căn giữa sau khi frame đã visible và có kích thước,
-            // hoặc để componentListener tự xử lý khi frame được shown/resized.
-            // SwingUtilities.invokeLater(this::centerWelcomeFrame); // Hoặc gọi trực tiếp
+  
+            // SwingUtilities.invokeLater(this::centerWelcomeFrame); 
         }
     }
 
@@ -281,16 +278,13 @@ public class MainFrame extends JFrame {
         if (welcomeInternalFrame != null && welcomeInternalFrame.isVisible() && desktopPane.getWidth() > 0
                 && desktopPane.getHeight() > 0) {
             Dimension desktopSize = desktopPane.getSize();
-            Dimension welcomeSize = welcomeInternalFrame.getPreferredSize(); // Sử dụng getPreferredSize
-
-            // Đảm bảo welcomeInternalFrame được pack() trước khi lấy preferred size nếu nội
-            // dung động
-            // welcomeInternalFrame.pack(); // Cẩn thận nếu nội dung thay đổi
+            Dimension welcomeSize = welcomeInternalFrame.getPreferredSize(); 
+            // welcomeInternalFrame.pack(); 
 
             int x = (desktopSize.width - welcomeSize.width) / 2;
             int y = (desktopSize.height - welcomeSize.height) / 2;
-            x = Math.max(0, x); // Đảm bảo không âm
-            y = Math.max(0, y); // Đảm bảo không âm
+            x = Math.max(0, x); 
+            y = Math.max(0, y); 
             welcomeInternalFrame.setLocation(x, y);
         }
     }
@@ -366,8 +360,7 @@ public class MainFrame extends JFrame {
             }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
-            // Gọi centerWelcomeFrame sau khi frame chính đã hiển thị và có kích thước
-            // Cách tốt hơn là dựa vào component listener hoặc gọi sau khi pack() nếu có.
+
             // mainFrame.centerWelcomeFrame(); // Được xử lý bởi component listener
         });
     }
