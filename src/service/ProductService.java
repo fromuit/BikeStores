@@ -6,18 +6,21 @@ package service;
 
 import dao.ProductsDAO;
 import java.util.ArrayList;
+import model.Administration.User;
 import model.Production.Products;
-import utils.ValidationException; // Assuming you have or will create this
-
+import utils.SessionManager;
+import utils.ValidationException;
 /**
  *
  * @author duyng
  */
 public class ProductService {
     private final ProductsDAO productDAO;
+    private final SessionManager sessionManager; // Added SessionManager
 
     public ProductService() {
         this.productDAO = new ProductsDAO();
+        this.sessionManager = SessionManager.getInstance(); // Initialize SessionManager
     }
 
     public ArrayList<Products> getAllProducts() {
@@ -29,28 +32,33 @@ public class ProductService {
     }
 
     public ArrayList<Products> getProductsByCategory(int categoryId) throws Exception {
-        // TODO: Implement logic to fetch products by category from DAO
-        // This might involve specific queries in ProductsDAO (e.g.,
-        // productDAO.getProductsByCategoryId(categoryId))
-        System.out.println("ProductService: getProductsByCategory called with category ID " + categoryId
-                + ". Not implemented yet. Returning all products.");
-        // For now, returning all products as a fallback until DAO layer is implemented
-        return productDAO.getAllProducts();
+        if (categoryId <= 0) {
+            // Or throw an IllegalArgumentException, or return all products, depending on
+            // desired behavior
+            System.out.println(
+                    "ProductService: Invalid Category ID received: " + categoryId + ". Returning all products.");
+            return productDAO.getAllProducts();
+        }
+        return productDAO.getProductsByCategoryId(categoryId);
     }
 
     public ArrayList<Products> searchProducts(String searchTerm) throws Exception {
-        // TODO: Implement logic to search products in DAO (e.g., by name, description
-        // using LIKE queries)
-        // Example: return productDAO.searchProductsByName(searchTerm);
-        
-        ArrayList<Products>allProducts = productDAO.searchProductsByName(searchTerm);
-        
+
+        ArrayList<Products> allProducts = productDAO.searchProductsByName(searchTerm);
+
         // For now, returning all products as a fallback until DAO layer is implemented
         return allProducts;
     }
-    
 
-    public boolean addProduct(Products product) throws ValidationException {
+    public boolean addProduct(Products product) throws ValidationException, SecurityException {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("No user logged in. Access denied.");
+        }
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            throw new SecurityException("Employees do not have permission to add products.");
+        }
+
         validateProduct(product);
         // Add business logic validation here if needed
         if (product.getProductName() == null || product.getProductName().trim().isEmpty()) {
@@ -64,7 +72,15 @@ public class ProductService {
         return productDAO.addProduct(product);
     }
 
-    public boolean updateProduct(Products product) throws ValidationException {
+    public boolean updateProduct(Products product) throws ValidationException, SecurityException {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("No user logged in. Access denied.");
+        }
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            throw new SecurityException("Employees do not have permission to update products.");
+        }
+
         validateProduct(product);
         if (product.getProductID() <= 0) {
             throw new ValidationException("Product ID for update is invalid.");
@@ -73,7 +89,15 @@ public class ProductService {
         return productDAO.updateProduct(product);
     }
 
-    public boolean deleteProduct(int id) throws ValidationException {
+    public boolean deleteProduct(int id) throws ValidationException, SecurityException {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("No user logged in. Access denied.");
+        }
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
+            throw new SecurityException("Only Chief Managers have permission to delete products.");
+        }
+
         if (id <= 0) {
             throw new ValidationException("Product ID for delete is invalid.");
         }

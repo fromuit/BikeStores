@@ -4,19 +4,19 @@
  */
 package controller;
 
+import java.util.ArrayList;
 import model.Production.Products;
 import service.ProductService;
-import view.ProductManagementView;
-import java.util.ArrayList;
 import utils.ValidationException;
+import view.ProductManagementView;
 
 /**
  *
  * @author duyng
  */
 public class ProductController {
-    private ProductService productService;
-    private ProductManagementView view;
+    private final ProductService productService;
+    private final ProductManagementView view;
 
     public ProductController(ProductManagementView view) {
         this.view = view;
@@ -60,6 +60,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error adding product: " + e.getMessage());
             System.err.println("Error in addProduct: " + e.getMessage());
@@ -76,6 +78,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error updating product: " + e.getMessage());
             System.err.println("Error in updateProduct: " + e.getMessage());
@@ -92,6 +96,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error deleting product: " + e.getMessage());
             System.err.println("Error in deleteProduct: " + e.getMessage());
