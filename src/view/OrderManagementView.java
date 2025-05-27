@@ -17,6 +17,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import model.Administration.User;
 import model.Sales.Customers;
+import model.Sales.OrderItems;
 import model.Sales.Orders;
 import model.Sales.Staffs;
 import utils.SessionManager;
@@ -36,7 +37,9 @@ public class OrderManagementView extends JInternalFrame {
     private JComboBox<String> cmbStatusFilter, cmbStoreFilter;
     private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnClear;
     private int selectedOrderId = -1;
-    
+    private JButton btnViewDetails;
+
+
     private final SessionManager sessionManager;
     private final CustomersDAO customerDAO;
     private final StaffsDAO staffDAO;
@@ -102,6 +105,7 @@ public class OrderManagementView extends JInternalFrame {
         btnClear = new JButton("Clear");
         btnSearch = new JButton("Search");
         btnClearSearch = new JButton("Clear Search");
+        btnViewDetails = new JButton("View Details");
         
         // Populate dropdowns
         populateDropdowns();
@@ -240,6 +244,7 @@ public class OrderManagementView extends JInternalFrame {
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
+        buttonPanel.add(btnViewDetails);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnClear);
         
@@ -278,6 +283,7 @@ public class OrderManagementView extends JInternalFrame {
         btnAdd.addActionListener(e -> addOrder());
         btnUpdate.addActionListener(e -> updateOrder());
         btnDelete.addActionListener(e -> deleteOrder());
+        btnViewDetails.addActionListener(e -> viewOrderDetails());
         btnRefresh.addActionListener(e -> loadOrders());
         btnClear.addActionListener(e -> clearForm());
         
@@ -285,6 +291,7 @@ public class OrderManagementView extends JInternalFrame {
         cmbOrderStatus.addActionListener(e -> handleStatusChange());
     }
     
+        
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
         
@@ -294,6 +301,7 @@ public class OrderManagementView extends JInternalFrame {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(false);
+                btnViewDetails.setEnabled(true); // Add this line
                 setFormFieldsEnabled(true);
                 
                 // For employees, pre-select themselves as staff and disable staff selection
@@ -305,6 +313,7 @@ public class OrderManagementView extends JInternalFrame {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
+                btnViewDetails.setEnabled(true); // Add this line
                 setFormFieldsEnabled(true);
                 
                 // Limit store selection to their own store
@@ -315,6 +324,7 @@ public class OrderManagementView extends JInternalFrame {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
+                btnViewDetails.setEnabled(true); // Add this line
                 setFormFieldsEnabled(true);
             }
         }
@@ -792,5 +802,81 @@ public class OrderManagementView extends JInternalFrame {
         if (selectedStatus != 3) {
             txtShippedDate.setText("");
         }
+    }
+
+    private void viewOrderDetails() {
+        int selectedRow = orderTable.getSelectedRow();
+        if (selectedRow == -1) {
+            showError("Vui lòng chọn một đơn hàng để xem chi tiết");
+            return;
+        }
+        
+        int orderId = (int) tableModel.getValueAt(selectedRow, 0);
+        controller.showOrderDetails(orderId);
+    }
+    
+    public void showOrderDetailsDialog(int orderId, ArrayList<OrderItems> orderItems, double orderTotal, int itemCount) {
+        // Create dialog
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết đơn hàng #" + orderId, true);
+        dialog.setSize(800, 600);
+        dialog.setLocationRelativeTo(this);
+        
+        // Create main panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        
+        // Header panel with order summary
+        JPanel headerPanel = new JPanel(new GridLayout(3, 2, 10, 5));
+        headerPanel.setBorder(BorderFactory.createTitledBorder("Thông tin đơn hàng"));
+        headerPanel.add(new JLabel("Mã đơn hàng:"));
+        headerPanel.add(new JLabel(String.valueOf(orderId)));
+        headerPanel.add(new JLabel("Số lượng sản phẩm:"));
+        headerPanel.add(new JLabel(String.valueOf(itemCount)));
+        headerPanel.add(new JLabel("Tổng tiền:"));
+        headerPanel.add(new JLabel(String.format("$%.2f", orderTotal)));
+        
+        // Table for order items
+        String[] columnNames = {"Mã SP", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Năm", "Số lượng", "Đơn giá", "Giảm giá", "Thành tiền"};
+        DefaultTableModel itemTableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        JTable itemTable = new JTable(itemTableModel);
+        
+        // Populate table with order items
+        for (OrderItems item : orderItems) {
+            Object[] row = {
+                item.getProductID(),
+                item.getProductName(),
+                item.getBrandName(),
+                item.getCategoryName(),
+                item.getModelYear(),
+                item.getQuantity(),
+                String.format("$%.2f", item.getListPrice()),
+                String.format("%.1f%%", item.getDiscount() * 100),
+                String.format("$%.2f", item.getItemTotal())
+            };
+            itemTableModel.addRow(row);
+        }
+        
+        // Scroll pane for table
+        JScrollPane scrollPane = new JScrollPane(itemTable);
+        scrollPane.setPreferredSize(new Dimension(750, 300));
+        
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton closeButton = new JButton("Đóng");
+        closeButton.addActionListener(e -> dialog.dispose());
+        buttonPanel.add(closeButton);
+        
+        // Add components to main panel
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        dialog.add(mainPanel);
+        dialog.setVisible(true);
     }
 }

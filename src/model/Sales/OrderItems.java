@@ -16,6 +16,12 @@ public class OrderItems {
     private double listPrice;
     private double discount = 0;
 
+    // Additional fields for display purposes
+    private String productName;
+    private String brandName;
+    private String categoryName;
+    private int modelYear;
+
     public OrderItems(int productID, int quantity, double listPrice) {
         this.productID = productID;
         this.quantity = quantity;
@@ -70,5 +76,41 @@ public class OrderItems {
         this.discount = discount;
     }
     
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public int getModelYear() {
+        return modelYear;
+    }
+
+    public void setModelYear(int modelYear) {
+        this.modelYear = modelYear;
+    }
+    
+    // Calculate item total (quantity * price * (1 - discount))
+    public double getItemTotal() {
+        return quantity * listPrice * (1 - discount);
+    }
 
 }

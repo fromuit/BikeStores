@@ -11,6 +11,8 @@ import service.OrderService;
 import utils.ValidationException;
 import view.OrderManagementView;
 
+import dao.OrderItemsDAO;
+import model.Sales.OrderItems;
 /**
  *
  * @author duyng
@@ -18,10 +20,13 @@ import view.OrderManagementView;
 public class OrderController {
     private final OrderService orderService;
     private final OrderManagementView view;
+
+    private final OrderItemsDAO orderItemDAO;
     
     public OrderController(OrderManagementView view) {
         this.view = view;
         this.orderService = new OrderService();
+        this.orderItemDAO = new OrderItemsDAO();
     }
     
     public void loadOrders() {
@@ -146,5 +151,23 @@ public class OrderController {
     
     public String getOrderStatusName(int status) {
         return orderService.getOrderStatusName(status);
+    }
+
+    public void showOrderDetails(int orderId) {
+        try {
+            // Get order items
+            ArrayList<OrderItems> orderItems = orderItemDAO.getOrderItemsByOrderId(orderId);
+            
+            // Calculate totals
+            double orderTotal = orderItemDAO.calculateOrderTotal(orderId);
+            int itemCount = orderItemDAO.getOrderItemCount(orderId);
+            
+            // Show order details dialog
+            view.showOrderDetailsDialog(orderId, orderItems, orderTotal, itemCount);
+            
+        } catch (Exception e) {
+            view.showError("Error loading order details: " + e.getMessage());
+            System.err.println("Error in showOrderDetails: " + e.getMessage());
+        }
     }
 }
