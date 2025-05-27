@@ -3,20 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/ProductsDAO.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/service/CustomerService.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/MainFrame.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/CustomerManagementView.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/CustomerController.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestDAO.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestService.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/ProductManagementView.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/TestGUI.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/ProductController.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/BrandsDAO.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/controller/CategoryController.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/CategoryManagementView.java</file>
-            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/CategoriesDAO.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/model/Administration/User.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/dao/UserDAO.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/service/AuthenticationService.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/PasswordUtil.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/view/LoginView.java</file>
+            <file>file:/C:/Users/duyng/Documents/NetBeansProjects/BikeStores/src/utils/UserSetupUtil.java</file>
         </group>
     </open-files>
 </project-private>
