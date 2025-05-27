@@ -28,9 +28,9 @@ public class CustomerManagementView extends JInternalFrame {
     private JComboBox<String> cmbStateFilter, cmbCityFilter;
     private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnClear;
     private int selectedCustomerId = -1;
-    
+
     private final SessionManager sessionManager;
-    
+
     public CustomerManagementView() {
         super("Customer Management", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
@@ -40,13 +40,14 @@ public class CustomerManagementView extends JInternalFrame {
         setupEventListeners();
         loadCustomers();
         setSize(1400, 700);
-        
+
         applyRoleBasedPermissions();
     }
-    
+
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = {"ID", "First Name", "Last Name", "Email", "Phone", "Street", "City", "State", "Zip Code"};
+        String[] columnNames = { "ID", "First Name", "Last Name", "Email", "Phone", "Street", "City", "State",
+                "Zip Code" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -54,8 +55,9 @@ public class CustomerManagementView extends JInternalFrame {
             }
         };
         customerTable = new JTable(tableModel);
+        customerTable.setAutoCreateRowSorter(true);
         customerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
         // Input fields
         txtFirstName = new JTextField(15);
         txtLastName = new JTextField(15);
@@ -66,7 +68,7 @@ public class CustomerManagementView extends JInternalFrame {
         txtState = new JTextField(15);
         txtZipCode = new JTextField(15);
         txtSearch = new JTextField(20);
-        
+
         // Buttons
         btnAdd = new JButton("Add");
         btnUpdate = new JButton("Update");
@@ -75,17 +77,16 @@ public class CustomerManagementView extends JInternalFrame {
         btnClear = new JButton("Clear");
         btnSearch = new JButton("Search");
         btnClearSearch = new JButton("Clear Search");
-        
+
         // Filter dropdowns
         cmbStateFilter = new JComboBox<>();
         cmbCityFilter = new JComboBox<>();
         populateFilters();
     }
-    
-    
+
     private void setupLayout() {
         setLayout(new BorderLayout());
-        
+
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.add(new JLabel("Search:"));
@@ -98,86 +99,103 @@ public class CustomerManagementView extends JInternalFrame {
         searchPanel.add(Box.createHorizontalStrut(10));
         searchPanel.add(new JLabel("Filter by City:"));
         searchPanel.add(cmbCityFilter);
-        
+
         // Table panel
         JScrollPane scrollPane = new JScrollPane(customerTable);
-        
+
         // Combine search and table
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(searchPanel, BorderLayout.NORTH);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         add(centerPanel, BorderLayout.CENTER);
-        
+
         // Form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
-        
+
         // Personal Information Section Header
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         JLabel personalInfoLabel = new JLabel("Personal Information");
         personalInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         personalInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(personalInfoLabel, gbc);
-        
+
         // Address Information Section Header
-        gbc.gridx = 2; gbc.gridy = 0; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         JLabel addressInfoLabel = new JLabel("Address Information");
         addressInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         addressInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(addressInfoLabel, gbc);
-        
+
         // Reset gridwidth for form fields
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        
+
         // Personal Information Fields
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         formPanel.add(new JLabel("First Name:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtFirstName, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 2;
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         formPanel.add(new JLabel("Last Name:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtLastName, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 3;
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         formPanel.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtEmail, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 4;
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         formPanel.add(new JLabel("Phone:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtPhone, gbc);
-        
+
         // Address Information Fields
-        gbc.gridx = 2; gbc.gridy = 1;
+        gbc.gridx = 2;
+        gbc.gridy = 1;
         formPanel.add(new JLabel("Street:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtStreet, gbc);
-        
-        gbc.gridx = 2; gbc.gridy = 2;
+
+        gbc.gridx = 2;
+        gbc.gridy = 2;
         formPanel.add(new JLabel("City:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtCity, gbc);
-        
-        gbc.gridx = 2; gbc.gridy = 3;
+
+        gbc.gridx = 2;
+        gbc.gridy = 3;
         formPanel.add(new JLabel("State:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtState, gbc);
-        
-        gbc.gridx = 2; gbc.gridy = 4;
+
+        gbc.gridx = 2;
+        gbc.gridy = 4;
         formPanel.add(new JLabel("Zip Code:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtZipCode, gbc);
-        
+
         // Add some spacing between sections
-        gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth = 1; gbc.gridheight = 5;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 5;
         formPanel.add(Box.createHorizontalStrut(30), gbc);
-        
+
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(btnAdd);
@@ -185,15 +203,15 @@ public class CustomerManagementView extends JInternalFrame {
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnClear);
-        
+
         // Combine form and button panels
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(formPanel, BorderLayout.CENTER);
         southPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
+
         add(southPanel, BorderLayout.SOUTH);
     }
-    
+
     private void setupEventListeners() {
         // Table selection listener
         customerTable.getSelectionModel().addListSelectionListener(e -> {
@@ -204,23 +222,23 @@ public class CustomerManagementView extends JInternalFrame {
                 }
             }
         });
-        
+
         // Search listeners
         btnSearch.addActionListener(e -> performSearch());
         btnClearSearch.addActionListener(e -> clearSearch());
         txtSearch.addActionListener(e -> performSearch()); // Search on Enter
-        
+
         // Filter listeners
         cmbStateFilter.addActionListener(e -> filterByState());
         cmbCityFilter.addActionListener(e -> filterByCity());
-        
+
         // Button listeners
         btnAdd.addActionListener(e -> addCustomer());
         btnUpdate.addActionListener(e -> updateCustomer());
         btnDelete.addActionListener(e -> deleteCustomer());
         btnRefresh.addActionListener(e -> loadCustomers());
         btnClear.addActionListener(e -> clearForm());
-        
+
         // Clear status when typing
         txtFirstName.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -228,10 +246,10 @@ public class CustomerManagementView extends JInternalFrame {
             }
         });
     }
-    
+
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
-        
+
         switch (currentUser.getRole()) {
             case EMPLOYEE -> {
                 // Employees can only view customers
@@ -249,7 +267,7 @@ public class CustomerManagementView extends JInternalFrame {
             }
         }
     }
-    
+
     private void setFormFieldsEnabled(boolean enabled) {
         txtFirstName.setEnabled(enabled);
         txtLastName.setEnabled(enabled);
@@ -260,39 +278,39 @@ public class CustomerManagementView extends JInternalFrame {
         txtState.setEnabled(enabled);
         txtZipCode.setEnabled(enabled);
     }
-    
+
     // Methods called by controller
     public void displayCustomers(ArrayList<Customers> customers) {
         tableModel.setRowCount(0);
         for (Customers customer : customers) {
             Object[] row = {
-                customer.getPersonID(),
-                customer.getFirstName(),
-                customer.getLastName(),
-                customer.getEmail(),
-                customer.getPhone(),
-                customer.getStreet(),
-                customer.getCity(),
-                customer.getState(),
-                customer.getZipCode()
+                    customer.getPersonID(),
+                    customer.getFirstName(),
+                    customer.getLastName(),
+                    customer.getEmail(),
+                    customer.getPhone(),
+                    customer.getStreet(),
+                    customer.getCity(),
+                    customer.getState(),
+                    customer.getZipCode()
             };
             tableModel.addRow(row);
         }
     }
-    
+
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
-    
+
     public void showError(String error) {
         JOptionPane.showMessageDialog(this, error, "Error", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     // Private helper methods
     private void loadCustomers() {
         controller.loadCustomers();
     }
-    
+
     private void performSearch() {
         String searchTerm = txtSearch.getText().trim();
         if (!searchTerm.isEmpty()) {
@@ -301,22 +319,21 @@ public class CustomerManagementView extends JInternalFrame {
             loadCustomers();
         }
     }
-    
+
     private void clearSearch() {
         txtSearch.setText("");
         cmbStateFilter.setSelectedIndex(0);
         cmbCityFilter.setSelectedIndex(0);
         loadCustomers();
     }
-    
-    
+
     private void addCustomer() {
         if (validateInput()) {
             Customers customer = createCustomerFromForm();
             controller.addCustomer(customer);
         }
     }
-    
+
     private void updateCustomer() {
         if (selectedCustomerId == -1) {
             showError("Please select a customer to update");
@@ -328,21 +345,21 @@ public class CustomerManagementView extends JInternalFrame {
             controller.updateCustomer(customer);
         }
     }
-    
+
     private void deleteCustomer() {
         if (selectedCustomerId == -1) {
             showError("Please select a customer to delete");
             return;
         }
-        int result = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to delete this customer?", 
-            "Confirm Delete", 
-            JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete this customer?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             controller.deleteCustomer(selectedCustomerId);
         }
     }
-    
+
     private void loadSelectedCustomer(int row) {
         selectedCustomerId = (int) tableModel.getValueAt(row, 0);
         txtFirstName.setText((String) tableModel.getValueAt(row, 1));
@@ -354,7 +371,7 @@ public class CustomerManagementView extends JInternalFrame {
         txtState.setText((String) tableModel.getValueAt(row, 7));
         txtZipCode.setText((String) tableModel.getValueAt(row, 8));
     }
-    
+
     private void clearForm() {
         selectedCustomerId = -1;
         txtFirstName.setText("");
@@ -367,7 +384,7 @@ public class CustomerManagementView extends JInternalFrame {
         txtZipCode.setText("");
         customerTable.clearSelection();
     }
-    
+
     private boolean validateInput() {
         if (txtFirstName.getText().trim().isEmpty()) {
             showError("First name is required");
@@ -384,14 +401,14 @@ public class CustomerManagementView extends JInternalFrame {
             txtEmail.requestFocus();
             return false;
         }
-        
+
         // Basic email validation
         if (!txtEmail.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             showError("Please enter a valid email address");
             txtEmail.requestFocus();
             return false;
         }
-        
+
         // Phone validation (if provided)
         if (!txtPhone.getText().trim().isEmpty()) {
             String phone = txtPhone.getText().replaceAll("[^\\d]", "");
@@ -401,14 +418,14 @@ public class CustomerManagementView extends JInternalFrame {
                 return false;
             }
         }
-        
+
         // State validation (if provided)
         if (!txtState.getText().trim().isEmpty() && txtState.getText().trim().length() != 2) {
             showError("Please enter a valid 2-letter state code (e.g., CA, NY, TX)");
             txtState.requestFocus();
             return false;
         }
-        
+
         // Zip code validation (if provided)
         if (!txtZipCode.getText().trim().isEmpty()) {
             if (!txtZipCode.getText().matches("^\\d{5}(-\\d{4})?$")) {
@@ -417,33 +434,32 @@ public class CustomerManagementView extends JInternalFrame {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     private Customers createCustomerFromForm() {
         return new Customers(
-            0, // ID will be auto-generated
-            txtFirstName.getText().trim(),
-            txtLastName.getText().trim(),
-            txtEmail.getText().trim(),
-            txtPhone.getText().trim(),
-            txtStreet.getText().trim(),
-            txtCity.getText().trim(),
-            txtState.getText().trim().toUpperCase(),
-            txtZipCode.getText().trim()
-        );
+                0, // ID will be auto-generated
+                txtFirstName.getText().trim(),
+                txtLastName.getText().trim(),
+                txtEmail.getText().trim(),
+                txtPhone.getText().trim(),
+                txtStreet.getText().trim(),
+                txtCity.getText().trim(),
+                txtState.getText().trim().toUpperCase(),
+                txtZipCode.getText().trim());
     }
 
     private void populateFilters() {
         populateStateFilter();
         populateCityFilter();
     }
-    
+
     private void populateStateFilter() {
         cmbStateFilter.removeAllItems();
         cmbStateFilter.addItem("All States");
-        
+
         // Get actual states from database
         try {
             ArrayList<String> states = controller.getDistinctStates();
@@ -453,17 +469,20 @@ public class CustomerManagementView extends JInternalFrame {
         } catch (Exception e) {
             System.err.println("Error loading states: " + e.getMessage());
             // Fallback to hardcoded states if database fails
-            String[] fallbackStates = {"AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"};
+            String[] fallbackStates = { "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL",
+                    "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
+                    "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+                    "VA", "WA", "WV", "WI", "WY" };
             for (String state : fallbackStates) {
                 cmbStateFilter.addItem(state);
             }
         }
     }
-    
+
     private void populateCityFilter() {
         cmbCityFilter.removeAllItems();
         cmbCityFilter.addItem("All Cities");
-        
+
         // Get actual cities from database
         try {
             ArrayList<String> cities = controller.getDistinctCities();
@@ -489,7 +508,7 @@ public class CustomerManagementView extends JInternalFrame {
             populateCitiesForState(state);
         }
     }
-    
+
     private void filterByCity() {
         int selectedIndex = cmbCityFilter.getSelectedIndex();
         if (selectedIndex == 0) {
@@ -506,11 +525,11 @@ public class CustomerManagementView extends JInternalFrame {
             controller.loadCustomersByCity(city);
         }
     }
-    
+
     private void populateCitiesForState(String state) {
         cmbCityFilter.removeAllItems();
         cmbCityFilter.addItem("All Cities");
-        
+
         try {
             ArrayList<String> cities = controller.getCitiesForState(state);
             for (String city : cities) {

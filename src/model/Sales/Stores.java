@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package model.Sales;
+
 import java.util.ArrayList;
 import model.Production.Stocks;
 
@@ -19,15 +20,32 @@ public class Stores {
     private String city;
     private String state;
     private String zipCode;
-    
-    //Danh sach nhan vien lam viec tai mot cua hang
+
+    // Danh sach nhan vien lam viec tai mot cua hang
     private ArrayList<Staffs> StoreStaffs = new ArrayList<>();
-    
-    //Danh sach cac san pham ton kho tai mot cua hang 
+
+    // Danh sach cac san pham ton kho tai mot cua hang
     private ArrayList<Stocks> StoreStocks = new ArrayList<>();
-    
-    //Danh sach cac don hang cua mot cua hang
+
+    // Danh sach cac don hang cua mot cua hang
     private ArrayList<Orders> StoreOrders = new ArrayList<>();
+
+    // Default constructor
+    public Stores() {
+    }
+
+    // Constructor with all fields
+    public Stores(int storeID, String storeName, String phone, String email, String street, String city, String state,
+            String zipCode) {
+        this.storeID = storeID;
+        this.storeName = storeName;
+        this.phone = phone;
+        this.email = email;
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+    }
 
     public int getStoreID() {
         return storeID;
@@ -116,6 +134,18 @@ public class Stores {
     public void setStoreOrders(ArrayList<Orders> StoreOrders) {
         this.StoreOrders = StoreOrders;
     }
-    
 
+    @Override
+    public String toString() {
+        return "Stores{" +
+                "storeID=" + storeID +
+                ", storeName='" + storeName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipCode='" + zipCode + '\'' +
+                '}';
+    }
 }

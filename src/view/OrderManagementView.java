@@ -71,6 +71,7 @@ public class OrderManagementView extends JInternalFrame {
             }
         };
         orderTable = new JTable(tableModel);
+        orderTable.setAutoCreateRowSorter(true);
         orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // Set preferred table size to show fewer rows

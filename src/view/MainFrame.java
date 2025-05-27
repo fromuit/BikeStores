@@ -65,10 +65,10 @@ public class MainFrame extends JFrame {
         productsItem.addActionListener(e -> openProductManagement());
         brandsItem.addActionListener(e -> openBrandManagement());
         categoriesItem.addActionListener(e -> openCategoryManagement());
-//        storesItem.addActionListener(e -> openStoreManagement());
+        storesItem.addActionListener(e -> openStoreManagement());
         staffsItem.addActionListener(e -> openStaffManagement());
         ordersItem.addActionListener(e -> openOrderManagement());
-//        stocksItem.addActionListener(e -> openStockManagement());
+        stocksItem.addActionListener(e -> openStockManagement());
 
         setJMenuBar(menuBar);
     }
@@ -94,6 +94,26 @@ public class MainFrame extends JFrame {
         productView.setVisible(true);
         try {
             productView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
+    }
+    
+    private void openStoreManagement() {
+        StoreManagementView storeView = new StoreManagementView();
+        desktopPane.add(storeView);
+        storeView.setVisible(true);
+        try {
+            storeView.setSelected(true);
+        } catch (PropertyVetoException e) {
+        }
+    }
+    
+    private void openStockManagement() {
+        StockManagementView stockView = new StockManagementView();
+        desktopPane.add(stockView);
+        stockView.setVisible(true);
+        try {
+            stockView.setSelected(true);
         } catch (PropertyVetoException e) {
         }
     }
