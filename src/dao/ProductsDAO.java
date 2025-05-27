@@ -90,4 +90,7 @@ public class ProductsDAO {
         return null;
     }
     
+    public Products searchProducts(String searchName){
+        String query = " SELECT * FROM production.products WHERE"
+    }
 }
