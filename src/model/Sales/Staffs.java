@@ -13,8 +13,8 @@ public class Staffs extends Person {
     private int storeID; 
     private Object managerID = null;
     
-    public Staffs(int personID, String firstName, String lastName, String email, int active, int store_id , int managerID) {
-        super(personID, firstName, lastName, email);
+    public Staffs(int personID, String firstName, String lastName, String email, String phone, int active, int store_id , Object managerID) {
+        super(personID, firstName, lastName, email, phone);
         this.active = active;
         this.storeID = store_id;
         this.managerID = managerID;

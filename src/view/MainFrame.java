@@ -6,6 +6,8 @@ package view;
 import java.awt.*;
 import java.beans.PropertyVetoException;
 import javax.swing.*;
+import model.Administration.User;
+import utils.SessionManager;
 
 /**
  *
@@ -16,6 +18,7 @@ public class MainFrame extends JFrame {
     private JMenuBar menuBar;
     
     public MainFrame() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
         initializeComponents();
         setupMenu();
         setupLayout();
@@ -63,7 +66,7 @@ public class MainFrame extends JFrame {
         brandsItem.addActionListener(e -> openBrandManagement());
         categoriesItem.addActionListener(e -> openCategoryManagement());
 //        storesItem.addActionListener(e -> openStoreManagement());
-//        staffsItem.addActionListener(e -> openStaffManagement());
+        staffsItem.addActionListener(e -> openStaffManagement());
 //        ordersItem.addActionListener(e -> openOrderManagement());
 //        stocksItem.addActionListener(e -> openStockManagement());
 
@@ -110,6 +113,15 @@ public class MainFrame extends JFrame {
     categoryView.setVisible(true);
     try {
         categoryView.setSelected(true);
+    } catch (PropertyVetoException e) {
+    }
+}
+    private void openStaffManagement() {
+    StaffManagementView staffView = new StaffManagementView();
+    desktopPane.add(staffView);
+    staffView.setVisible(true);
+    try {
+        staffView.setSelected(true);
     } catch (PropertyVetoException e) {
     }
 }

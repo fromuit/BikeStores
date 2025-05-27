@@ -4,8 +4,8 @@
  */
 package service;
 import dao.ProductsDAO;
-import model.Production.Products;
 import java.util.ArrayList;
+import model.Production.Products;
 
 
 /**
@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * @author duyng
  */
 public class ProductService {
-    private ProductsDAO productDAO;
+    private final ProductsDAO productDAO;
     
     public ProductService() {
         this.productDAO = new ProductsDAO();
