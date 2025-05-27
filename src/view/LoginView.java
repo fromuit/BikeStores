@@ -110,7 +110,7 @@ public class LoginView extends JFrame {
 
         // Footer
         JPanel footerPanel = new JPanel();
-        footerPanel.add(new JLabel("© 2025 BikeStores Management System"));
+        footerPanel.add(new JLabel("© 2024 BikeStores Management System"));
         add(footerPanel, BorderLayout.SOUTH);
     }
 

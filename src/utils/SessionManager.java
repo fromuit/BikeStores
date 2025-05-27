@@ -41,13 +41,13 @@ public class SessionManager {
             case STORE_MANAGER -> action.startsWith("VIEW_") ||
                 action.equals("MANAGE_STAFF") ||
                 action.equals("MANAGE_INVENTORY") ||
-                action.equals("MANAGE_ORDERS") ||
-                action.equals("MANAGE_CUSTOMERS"); 
+                action.equals("MANAGE_ORDERS");
             case EMPLOYEE -> action.startsWith("VIEW_") ||
-                action.equals("MANAGE_ORDERS") ||
-                action.equals("MANAGE_CUSTOMERS");
+                action.equals("MANAGE_ORDERS");
             default -> false;
-        };
+        }; // Chief Manager has all permissions
+        // Store Managers can manage their own store's data
+        // Employees have limited permissions
     }
     
     public boolean canAccessStore(int storeId) {

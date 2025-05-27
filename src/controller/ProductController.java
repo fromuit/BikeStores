@@ -60,6 +60,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error adding product: " + e.getMessage());
             System.err.println("Error in addProduct: " + e.getMessage());
@@ -76,6 +78,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error updating product: " + e.getMessage());
             System.err.println("Error in updateProduct: " + e.getMessage());
@@ -92,6 +96,8 @@ public class ProductController {
             }
         } catch (ValidationException e) {
             view.showError("Validation Error: " + e.getMessage());
+        } catch (SecurityException e) {
+            view.showError("Permission Denied: " + e.getMessage());
         } catch (Exception e) {
             view.showError("Error deleting product: " + e.getMessage());
             System.err.println("Error in deleteProduct: " + e.getMessage());

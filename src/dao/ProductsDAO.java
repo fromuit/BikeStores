@@ -20,7 +20,7 @@ public class ProductsDAO {
                 + "product_name, brand_id, production.products.category_id, "
                 + "model_year, list_price, category_name FROM production.products, "
                 + "production.categories "
-                + "WHERE production.products.brand_id =  production.categories. category_id";
+                + "WHERE production.products.category_id =  production.categories. category_id";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -79,7 +79,11 @@ public class ProductsDAO {
     }
 
     public Products getProductById(int productId) {
-        String query = "SELECT * FROM production.products WHERE product_id = ?";
+        String query = "SELECT product_id, "
+                + "product_name, brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name FROM production.products, "
+                + "production.categories "
+                + "WHERE production.products.category_id =  production.categories. category_id AND product_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, productId);
             ResultSet rs = pstmt.executeQuery();
@@ -90,7 +94,8 @@ public class ProductsDAO {
                         rs.getInt("brand_id"),
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
-                        rs.getDouble("list_price"));
+                        rs.getDouble("list_price"),
+                        rs.getString("category_id"));
             }
         } catch (SQLException e) {
             // Consider logging the exception e.g.,
@@ -106,7 +111,11 @@ public class ProductsDAO {
         // collation
         // For standard SQL, you can use LOWER() or UPPER() on both sides for
         // case-insensitivity
-        String query = "SELECT * FROM production.products WHERE LOWER(product_name) LIKE LOWER(?)";
+        String query = "SELECT product_id, "
+                + "product_name, brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name FROM production.products, "
+                + "production.categories "
+                + "WHERE production.products.category_id =  production.categories. category_id AND LOWER(product_name) LIKE LOWER(?)";
 
         try (Connection conn = DatabaseUtil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -121,7 +130,8 @@ public class ProductsDAO {
                         rs.getInt("brand_id"),
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
-                        rs.getDouble("list_price"));
+                        rs.getDouble("list_price"),
+                        rs.getString("category_name"));
                 productsList.add(product);
             }
         } catch (SQLException e) {
@@ -131,6 +141,36 @@ public class ProductsDAO {
         }
         return productsList;
     }
-    
 
+    public ArrayList<Products> getProductsByCategoryId(int categoryId) {
+        ArrayList<Products> productsList = new ArrayList<>();
+        String query = "SELECT product_id, "
+                + "product_name, brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name FROM production.products, "
+                + "production.categories "
+                + "WHERE production.products.category_id =  production.categories.category_id AND production.categories.category_id = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, categoryId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Products product = new Products(
+                        rs.getInt("product_id"),
+                        rs.getString("product_name"),
+                        rs.getInt("brand_id"),
+                        rs.getInt("category_id"),
+                        rs.getInt("model_year"),
+                        rs.getDouble("list_price"),
+                        rs.getString("category_name"));
+                productsList.add(product);
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception in getProductsByCategoryId: " + e.getMessage());
+            // Consider logging the exception properly
+        }
+        return productsList;
+    }
 }
