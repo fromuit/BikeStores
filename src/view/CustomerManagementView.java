@@ -235,10 +235,10 @@ public class CustomerManagementView extends JInternalFrame {
         switch (currentUser.getRole()) {
             case EMPLOYEE -> {
                 // Employees can only view customers
-                btnAdd.setEnabled(false);
-                btnUpdate.setEnabled(false);
+                btnAdd.setEnabled(true);
+                btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(false);
-                setFormFieldsEnabled(false);
+                setFormFieldsEnabled(true);
             }
             case STORE_MANAGER, CHIEF_MANAGER -> {
                 // Managers can manage customers
