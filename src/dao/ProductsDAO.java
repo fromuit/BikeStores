@@ -16,11 +16,11 @@ import utils.DatabaseUtil;
 public class ProductsDAO {
     public ArrayList<Products> getAllProducts() {
         ArrayList<Products> products = new ArrayList<>();
-        String query = "SELECT product_id, "
-                + "product_name, brand_id, production.products.category_id, "
-                + "model_year, list_price, category_name FROM production.products, "
-                + "production.categories "
-                + "WHERE production.products.category_id =  production.categories. category_id";
+        String query = "SELECT product_id, product_name, production.products.brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name, brand_name FROM production.products, "
+                + "production.categories, production.brands  "
+                + "WHERE production.products.category_id =  production.categories. category_id "
+                + "AND production.products.brand_id = production.brands.brand_id";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -30,7 +30,8 @@ public class ProductsDAO {
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
                         rs.getDouble("list_price"),
-                        rs.getString("category_name"));
+                        rs.getString("category_name"),
+                        rs.getString("brand_name"));
                 products.add(product);
             }
         } catch (SQLException e) {
@@ -79,11 +80,11 @@ public class ProductsDAO {
     }
 
     public Products getProductById(int productId) {
-        String query = "SELECT product_id, "
-                + "product_name, brand_id, production.products.category_id, "
-                + "model_year, list_price, category_name FROM production.products, "
-                + "production.categories "
-                + "WHERE production.products.category_id =  production.categories. category_id AND product_id = ?";
+        String query = "SELECT product_id, product_name, production.products.brand_id, "
+                + "production.products.category_id, model_year, list_price, category_name, "
+                + "brand_name FROM production.products, production.categories, production.brands  "
+                + "WHERE production.products.category_id =  production.categories. category_id "
+                + "AND production.products.brand_id = production.brands.brand_id AND product_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, productId);
             ResultSet rs = pstmt.executeQuery();
@@ -95,7 +96,8 @@ public class ProductsDAO {
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
                         rs.getDouble("list_price"),
-                        rs.getString("category_id"));
+                        rs.getString("category_id"),
+                        rs.getString("brand_name"));
             }
         } catch (SQLException e) {
             // Consider logging the exception e.g.,
@@ -111,11 +113,11 @@ public class ProductsDAO {
         // collation
         // For standard SQL, you can use LOWER() or UPPER() on both sides for
         // case-insensitivity
-        String query = "SELECT product_id, "
-                + "product_name, brand_id, production.products.category_id, "
-                + "model_year, list_price, category_name FROM production.products, "
-                + "production.categories "
-                + "WHERE production.products.category_id =  production.categories. category_id AND LOWER(product_name) LIKE LOWER(?)";
+        String query = "SELECT product_id, product_name, production.products.brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name, brand_name "
+                + "FROM production.products, production.categories, production.brands  "
+                + "WHERE production.products.category_id =  production.categories. category_id "
+                + "AND production.products.brand_id = production.brands.brand_id AND LOWER(product_name) LIKE LOWER(?)";
 
         try (Connection conn = DatabaseUtil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -131,7 +133,8 @@ public class ProductsDAO {
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
                         rs.getDouble("list_price"),
-                        rs.getString("category_name"));
+                        rs.getString("category_name"),
+                        rs.getString("brand_name"));
                 productsList.add(product);
             }
         } catch (SQLException e) {
@@ -144,11 +147,11 @@ public class ProductsDAO {
 
     public ArrayList<Products> getProductsByCategoryId(int categoryId) {
         ArrayList<Products> productsList = new ArrayList<>();
-        String query = "SELECT product_id, "
-                + "product_name, brand_id, production.products.category_id, "
-                + "model_year, list_price, category_name FROM production.products, "
-                + "production.categories "
-                + "WHERE production.products.category_id =  production.categories.category_id AND production.categories.category_id = ?";
+        String query = "SELECT product_id, product_name, production.products.brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name, brand_name "
+                + "FROM production.products, production.categories, production.brands  "
+                + "WHERE production.products.category_id =  production.categories. category_id "
+                + "AND production.products.brand_id = production.brands.brand_id AND production.categories.category_id = ?";
 
         try (Connection conn = DatabaseUtil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -164,11 +167,46 @@ public class ProductsDAO {
                         rs.getInt("category_id"),
                         rs.getInt("model_year"),
                         rs.getDouble("list_price"),
-                        rs.getString("category_name"));
+                        rs.getString("category_name"),
+                        rs.getString("brand_name"));
                 productsList.add(product);
             }
         } catch (SQLException e) {
             System.err.println("SQL Exception in getProductsByCategoryId: " + e.getMessage());
+            // Consider logging the exception properly
+        }
+        return productsList;
+    }
+
+    public ArrayList<Products> getProductsByBrandId(int brandId) {
+        ArrayList<Products> productsList = new ArrayList<>();
+        String query = "SELECT product_id, product_name, production.products.brand_id, production.products.category_id, "
+                + "model_year, list_price, category_name, brand_name "
+                + "FROM production.products "
+                + "JOIN production.categories ON production.products.category_id = production.categories.category_id "
+                + "JOIN production.brands ON production.products.brand_id = production.brands.brand_id "
+                + "WHERE production.products.brand_id = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, brandId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Products product = new Products(
+                        rs.getInt("product_id"),
+                        rs.getString("product_name"),
+                        rs.getInt("brand_id"),
+                        rs.getInt("category_id"),
+                        rs.getInt("model_year"),
+                        rs.getDouble("list_price"),
+                        rs.getString("category_name"),
+                        rs.getString("brand_name"));
+                productsList.add(product);
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception in getProductsByBrandId: " + e.getMessage());
             // Consider logging the exception properly
         }
         return productsList;
