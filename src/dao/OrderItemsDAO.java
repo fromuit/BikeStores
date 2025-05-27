@@ -4,10 +4,83 @@
  */
 package dao;
 
+import java.sql.*;
+import java.util.ArrayList;
+import model.Sales.OrderItems;
+import utils.DatabaseUtil;
 /**
  *
  * @author duyng
  */
 public class OrderItemsDAO {
     
+    // Get all order items for a specific order with product details
+    public ArrayList<OrderItems> getOrderItemsByOrderId(int orderId) {
+        ArrayList<OrderItems> orderItems = new ArrayList<>();
+        String query = "SELECT oi.*, p.product_name, p.model_year, b.brand_name, c.category_name " +
+                       "FROM sales.order_items oi " +
+                       "JOIN production.products p ON oi.product_id = p.product_id " +
+                       "JOIN production.brands b ON p.brand_id = b.brand_id " +
+                       "JOIN production.categories c ON p.category_id = c.category_id " +
+                       "WHERE oi.order_id = ? " +
+                       "ORDER BY oi.item_id";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
+            pstmt.setInt(1, orderId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                OrderItems orderItem = mapResultSetToOrderItem(rs);
+                // Store additional product info in a way we can access it
+                orderItem.setProductName(rs.getString("product_name"));
+                orderItem.setBrandName(rs.getString("brand_name"));
+                orderItem.setCategoryName(rs.getString("category_name"));
+                orderItem.setModelYear(rs.getInt("model_year"));
+                orderItems.add(orderItem);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting order items: " + e.getMessage());
+        }
+        return orderItems;
+    }
+    
+    // Calculate order total
+    public double calculateOrderTotal(int orderId) {
+        String query = "SELECT SUM(quantity * list_price * (1 - discount)) as total FROM sales.order_items WHERE order_id = ?";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
+            pstmt.setInt(1, orderId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error calculating order total: " + e.getMessage());
+        }
+        return 0.0;
+    }
+    
+    // Get order item count
+    public int getOrderItemCount(int orderId) {
+        String query = "SELECT COUNT(*) FROM sales.order_items WHERE order_id = ?";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
+            pstmt.setInt(1, orderId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting order item count: " + e.getMessage());
+        }
+        return 0;
+    }
+    
+    private OrderItems mapResultSetToOrderItem(ResultSet rs) throws SQLException {
+        OrderItems orderItem = new OrderItems(
+            rs.getInt("product_id"),
+            rs.getInt("quantity"),
+            rs.getDouble("list_price")
+        );
+        orderItem.setOrderID(rs.getInt("order_id"));
+        orderItem.setItemID(rs.getInt("item_id"));
+        orderItem.setDiscount(rs.getDouble("discount"));
+        return orderItem;
+    }
 }
