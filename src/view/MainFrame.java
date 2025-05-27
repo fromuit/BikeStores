@@ -9,8 +9,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.*;
-// Bỏ import cho JTree nếu không dùng nữa, nhưng handleNavigation vẫn dùng DefaultMutableTreeNode nên có thể vẫn cần giữ lại cho tương lai
-// import javax.swing.tree.DefaultMutableTreeNode; // Giữ lại nếu handleNavigation cần
+// import javax.swing.tree.DefaultMutableTreeNode; 
 // import javax.swing.tree.DefaultTreeCellRenderer;
 // import javax.swing.tree.TreePath;
 // import javax.swing.tree.TreeSelectionModel;
@@ -25,8 +24,7 @@ public class MainFrame extends JFrame {
     private JDesktopPane desktopPane;
     private JInternalFrame welcomeInternalFrame;
     private JSplitPane splitPane;
-    // private JTree navigationTree; // Thay thế bằng JPanel
-    private JPanel navigationPanel; // Panel mới cho các nút bấm
+    private JPanel navigationPanel; 
 
     public MainFrame() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
