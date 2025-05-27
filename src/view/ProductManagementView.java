@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import model.Administration.User;
 import utils.SessionManager;
 import dao.CategoriesDAO;
-import java.lang.reflect.Array;
 import model.Production.Categories;
 
 /**

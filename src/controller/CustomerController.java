@@ -17,12 +17,10 @@ import view.CustomerManagementView;
 public class CustomerController {
     private final CustomerService customerService;
     private final CustomerManagementView view;
-    private final SessionManager sessionManager;
     
     public CustomerController(CustomerManagementView view) {
         this.view = view;
         this.customerService = new CustomerService();
-        this.sessionManager = SessionManager.getInstance();
     }
     
     public void loadCustomers() {
