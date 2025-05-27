@@ -25,7 +25,7 @@ public class CategoryManagementView extends JInternalFrame {
     private int selectedCategoryId = -1;
     
     public CategoryManagementView() {
-        super("Category Management", true, true, true, true);
+        super("Quản lý danh mục", true, true, true, true);
         controller = new CategoryController(this);
         initializeComponents();
         setupLayout();
@@ -36,7 +36,7 @@ public class CategoryManagementView extends JInternalFrame {
     
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = {"ID", "Category Name"};
+        String[] columnNames = {"ID Danh mục", "Tên danh mục"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -54,11 +54,11 @@ public class CategoryManagementView extends JInternalFrame {
         txtCategoryName = new JTextField(20);
         
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
     }
     
     private void setupLayout() {
@@ -70,7 +70,7 @@ public class CategoryManagementView extends JInternalFrame {
         
         // Form panel
         JPanel formPanel = new JPanel(new FlowLayout());
-        formPanel.add(new JLabel("Category Name:"));
+        formPanel.add(new JLabel("Tên danh mục:"));
         formPanel.add(txtCategoryName);
         
         // Button panel
@@ -142,7 +142,7 @@ public class CategoryManagementView extends JInternalFrame {
     
     private void updateCategory() {
         if (selectedCategoryId == -1) {
-            showError("Please select a category to update");
+            showError("Hãy chọn một danh mục để cập nhật");
             return;
         }
         if (validateInput()) {
@@ -154,12 +154,12 @@ public class CategoryManagementView extends JInternalFrame {
     
     private void deleteCategory() {
         if (selectedCategoryId == -1) {
-            showError("Please select a category to delete");
+            showError("Hãy chọn một danh mục để xoá");
             return;
         }
         int result = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to delete this category?", 
-            "Confirm Delete", 
+            "Bạn có chắc muốn xoá danh mục này?", 
+            "Xác nhận xoá", 
             JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             controller.deleteCategory(selectedCategoryId);
@@ -180,7 +180,7 @@ public class CategoryManagementView extends JInternalFrame {
     
     private boolean validateInput() {
         if (txtCategoryName.getText().trim().isEmpty()) {
-            showError("Category name is required");
+            showError("Phải có tên danh mục!");
             return false;
         }
         return true;

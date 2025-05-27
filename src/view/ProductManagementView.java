@@ -22,8 +22,8 @@ import utils.SessionManager;
 public class ProductManagementView extends JInternalFrame {
     // Helper class to store Category ID and Name for ComboBox
     private static class CategoryItem {
-        private int id;
-        private String name;
+        private final int id;
+        private final String name;
 
         public CategoryItem(int id, String name) {
             this.id = id;
@@ -42,8 +42,8 @@ public class ProductManagementView extends JInternalFrame {
 
     // Helper class to store Brand ID and Name for ComboBox
     private static class BrandItem {
-        private int id;
-        private String name;
+        private final int id;
+        private final String name;
 
         public BrandItem(int id, String name) {
             this.id = id;
@@ -74,7 +74,7 @@ public class ProductManagementView extends JInternalFrame {
     private final SessionManager sessionManager;
 
     public ProductManagementView() {
-        super("Product Management", true, true, true, true);
+        super("Quản lý sản phẩm", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         this.controller = new ProductController(this);
         initializeComponents();
@@ -87,8 +87,8 @@ public class ProductManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "ID", "Name", "Brand ID", "Category ID", "Model Year", "List Price", "Category",
-                "Brand" };
+        String[] columnNames = { "Mã SP", "Tên", "Mã nhãn hàng", "Mã danh mục", "Năm sản xuất", "Giá niêm yết", "Danh mục",
+                "" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -115,13 +115,14 @@ public class ProductManagementView extends JInternalFrame {
         txtSearch = new JTextField(20);
 
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
-        btnSearch = new JButton("Search");
-        btnClearSearch = new JButton("Clear Search");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
+        
+        btnSearch = new JButton("Tìm");
+        btnClearSearch = new JButton("Xoá");
 
         cmbCategoryFilter = new JComboBox<>();
         populateCategoryFilter();
@@ -132,7 +133,7 @@ public class ProductManagementView extends JInternalFrame {
 
     private void populateCategoryFilter() {
         cmbCategoryFilter.removeAllItems();
-        cmbCategoryFilter.addItem(new CategoryItem(0, "All Categories"));
+        cmbCategoryFilter.addItem(new CategoryItem(0, "Tất cả"));
 
         // TODO: Replace with actual data loading from a CategoryService
         cmbCategoryFilter.addItem(new CategoryItem(1, "Children Bicycles"));
@@ -164,15 +165,15 @@ public class ProductManagementView extends JInternalFrame {
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Search by Name:"));
+        searchPanel.add(new JLabel("Tìm theo tên:"));
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnClearSearch);
         searchPanel.add(Box.createHorizontalStrut(20));
-        searchPanel.add(new JLabel("Filter by Category:"));
+        searchPanel.add(new JLabel("Lọc theo Danh mục:"));
         searchPanel.add(cmbCategoryFilter);
         searchPanel.add(Box.createHorizontalStrut(10));
-        searchPanel.add(new JLabel("Filter by Brand:"));
+        searchPanel.add(new JLabel("Lọc theo Nhãn hàng:"));
         searchPanel.add(cmbBrandFilter);
 
         // Table panel
@@ -455,13 +456,13 @@ public class ProductManagementView extends JInternalFrame {
             return false;
         }
         try {
-            Integer.parseInt(txtBrandID.getText().trim());
+            Integer.valueOf(txtBrandID.getText().trim());
         } catch (NumberFormatException e) {
             showError("Brand ID must be a valid number.");
             return false;
         }
         try {
-            Integer.parseInt(txtCategoryID.getText().trim());
+            Integer.valueOf(txtCategoryID.getText().trim());
         } catch (NumberFormatException e) {
             showError("Category ID must be a valid number.");
             return false;

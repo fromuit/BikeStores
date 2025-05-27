@@ -9,10 +9,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.*;
-// import javax.swing.tree.DefaultMutableTreeNode; 
-// import javax.swing.tree.DefaultTreeCellRenderer;
-// import javax.swing.tree.TreePath;
-// import javax.swing.tree.TreeSelectionModel;
 import model.Administration.User;
 import utils.SessionManager;
 
@@ -33,7 +29,7 @@ public class MainFrame extends JFrame {
         setupLayout();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setTitle("BikeStores Management System");
+        setTitle("Phần mềm quản lý chuỗi cửa hàng Xe đạp");
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -66,7 +62,7 @@ public class MainFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel titleLabel = new JLabel("BikeStores Management System", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Quản lý chuỗi cửa hàng Xe đạp", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
 
         JLabel projectLabel = new JLabel("IE303 - Công nghệ Java", SwingConstants.CENTER);
@@ -112,7 +108,7 @@ public class MainFrame extends JFrame {
         salesLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
         panel.add(salesLabel);
 
-        String[] salesItems = { "Manage Customers", "Manage Orders", "Manage Staffs", "Manage Stores" };
+        String[] salesItems = { "Quản lý khách hàng", "Quản lý đơn hàng", "Quản lý nhân viên", "Quản lý cửa hàng" };
         for (String itemName : salesItems) {
             JButton button = new JButton(itemName);
             configureNavButton(button, itemFont, buttonSize, itemName);
@@ -129,7 +125,7 @@ public class MainFrame extends JFrame {
         productionLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
         panel.add(productionLabel);
 
-        String[] productionItems = { "Manage Products", "Manage Categories", "Manage Brands", "Manage Stocks" };
+        String[] productionItems = { "Quản lý sản phẩm", "Quản lý danh mục", "Quản lý nhãn hàng", "Quản lý kho" };
         for (String itemName : productionItems) {
             JButton button = new JButton(itemName);
             configureNavButton(button, itemFont, buttonSize, itemName);
@@ -149,15 +145,17 @@ public class MainFrame extends JFrame {
         logoutButton.setFocusPainted(false);
         logoutButton.setMargin(new Insets(8, 15, 8, 15));
 
-        logoutButton.setBackground(new Color(255, 200, 200));
-        logoutButton.setOpaque(true);
-        logoutButton.setBorderPainted(false);
+        logoutButton.setBackground(new Color(220, 53, 69)); 
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setOpaque(true); 
+        logoutButton.setBorderPainted(false); 
+
 
         logoutButton.addActionListener(e -> {
             int confirmation = JOptionPane.showConfirmDialog(
                     this,
                     "Bạn có muốn đăng xuất không?",
-                    "Xác nhận đăng xuất",
+                    "Đăng xuất",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
 
@@ -209,28 +207,28 @@ public class MainFrame extends JFrame {
         }
 
         switch (menuItemName) {
-            case "Manage Customers":
+            case "Quản lý khách hàng":
                 openCustomerManagement();
                 break;
-            case "Manage Orders":
+            case "Quản lý đơn hàng":
                 openOrderManagement();
                 break;
-            case "Manage Staffs":
+            case "Quản lý nhân viên":
                 openStaffManagement();
                 break;
-            case "Manage Stores":
+            case "Quản lý cửa hàng":
                 openStoreManagement();
                 break;
-            case "Manage Products":
+            case "Quản lý sản phẩm":
                 openProductManagement();
                 break;
-            case "Manage Categories":
+            case "Quản lý danh mục":
                 openCategoryManagement();
                 break;
-            case "Manage Brands":
+            case "Quản lý nhãn hàng":
                 openBrandManagement();
                 break;
-            case "Manage Stocks":
+            case "Quản lý kho":
                 openStockManagement();
                 break;
             default:
@@ -352,13 +350,13 @@ public class MainFrame extends JFrame {
                     | UnsupportedLookAndFeelException e) {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception ex) {
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
                     // ex.printStackTrace();
                 }
             }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
-
+            
             // mainFrame.centerWelcomeFrame(); // Được xử lý bởi component listener
         });
     }

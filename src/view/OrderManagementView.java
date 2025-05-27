@@ -7,6 +7,7 @@ package view;
 import controller.OrderController;
 import dao.CustomersDAO;
 import dao.StaffsDAO;
+import dao.StoresDAO;
 import java.awt.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -23,6 +24,7 @@ import model.Sales.Customers;
 import model.Sales.OrderItems;
 import model.Sales.Orders;
 import model.Sales.Staffs;
+import model.Sales.Stores;
 import utils.SessionManager;
 
 /**
@@ -48,7 +50,7 @@ public class OrderManagementView extends JInternalFrame {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public OrderManagementView() {
-        super("Order Management", true, true, true, true);
+        super("Quản lý đơn hàng", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         this.customerDAO = new CustomersDAO();
         this.staffDAO = new StaffsDAO();
@@ -64,8 +66,8 @@ public class OrderManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "Order ID", "Customer", "Status", "Order Date", "Required Date", "Shipped Date",
-                "Store ID", "Staff" };
+        String[] columnNames = { "Mã đơn hàng", "Khách hàng", "Tình trạng", "Ngày đặt hàng",
+            "Ngày dự tính", "Ngày giao hàng", "Mã cửa hàng", "Nhân viên phụ trách" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -97,32 +99,31 @@ public class OrderManagementView extends JInternalFrame {
         cmbCustomer = new JComboBox<>();
         cmbStaff = new JComboBox<>();
         cmbStore = new JComboBox<>();
-        cmbOrderStatus = new JComboBox<>(new String[] { "Pending", "Processing", "Rejected", "Completed" });
+        cmbOrderStatus = new JComboBox<>(new String[] { "Đang chờ xử lý", "Đang xử lý", "Huỷ", "Đã hoàn tất" });
 
         // Filter combo boxes
         cmbStatusFilter = new JComboBox<>(
-                new String[] { "All Statuses", "Pending", "Processing", "Rejected", "Completed" });
+                new String[] { "Tất cả", "Đang chờ xử lý", "Đang xử lý", "Huỷ", "Đã hoàn tất"});
         cmbStoreFilter = new JComboBox<>();
 
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
-        btnSearch = new JButton("Search");
-        btnClearSearch = new JButton("Clear Search");
-        btnViewDetails = new JButton("View Details");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
+        btnViewDetails = new JButton("Chi tiết đơn hàng");
+        
+        btnSearch = new JButton("Tìm");
+        btnClearSearch = new JButton("Xoá");
+
 
         // Populate dropdowns
         populateDropdowns();
 
         // Set current date as default
         txtOrderDate.setText(dateFormat.format(new Date()));
-        txtRequiredDate.setText(dateFormat.format(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000))); // 7
-                                                                                                                    // days
-                                                                                                                    // from
-                                                                                                                    // now
+        txtRequiredDate.setText(dateFormat.format(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000))); 
     }
 
     // Add helper method to set current date/time in fields
@@ -135,15 +136,15 @@ public class OrderManagementView extends JInternalFrame {
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(new JLabel("Tìm kiếm:"));
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnClearSearch);
         searchPanel.add(Box.createHorizontalStrut(20));
-        searchPanel.add(new JLabel("Filter by Status:"));
+        searchPanel.add(new JLabel("Lọc theo tình trạng đơn hàng:"));
         searchPanel.add(cmbStatusFilter);
         searchPanel.add(Box.createHorizontalStrut(10));
-        searchPanel.add(new JLabel("Filter by Store:"));
+        searchPanel.add(new JLabel("Lọc theo cửa hàng:"));
         searchPanel.add(cmbStoreFilter);
 
         // Table panel with limited height
@@ -167,7 +168,7 @@ public class OrderManagementView extends JInternalFrame {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JLabel orderInfoLabel = new JLabel("Order Information");
+        JLabel orderInfoLabel = new JLabel("Thông tin đơn hàng");
         orderInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         orderInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(orderInfoLabel, gbc);
@@ -177,7 +178,7 @@ public class OrderManagementView extends JInternalFrame {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JLabel assignmentInfoLabel = new JLabel("Assignment Information");
+        JLabel assignmentInfoLabel = new JLabel("Phụ trách đơn hàng");
         assignmentInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         assignmentInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(assignmentInfoLabel, gbc);
@@ -189,20 +190,20 @@ public class OrderManagementView extends JInternalFrame {
         // Order Information Fields
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Customer:"), gbc);
+        formPanel.add(new JLabel("Khách hàng:"), gbc);
         gbc.gridx = 1;
         formPanel.add(cmbCustomer, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("Order Status:"), gbc);
+        formPanel.add(new JLabel("Tình trạng:"), gbc);
         gbc.gridx = 1;
         formPanel.add(cmbOrderStatus, gbc);
 
         // Order Date with helper button
         gbc.gridx = 0;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("Order Date:"), gbc);
+        formPanel.add(new JLabel("Ngày đặt hàng:"), gbc);
         gbc.gridx = 1;
         JPanel orderDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         orderDatePanel.add(txtOrderDate);
@@ -215,7 +216,7 @@ public class OrderManagementView extends JInternalFrame {
         // Required Date with helper button
         gbc.gridx = 0;
         gbc.gridy = 4;
-        formPanel.add(new JLabel("Required Date:"), gbc);
+        formPanel.add(new JLabel("Ngày dự tính:"), gbc);
         gbc.gridx = 1;
         JPanel requiredDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         requiredDatePanel.add(txtRequiredDate);
@@ -228,7 +229,7 @@ public class OrderManagementView extends JInternalFrame {
         // Shipped Date with helper button
         gbc.gridx = 0;
         gbc.gridy = 5;
-        formPanel.add(new JLabel("Shipped Date:"), gbc);
+        formPanel.add(new JLabel("Ngày giao hàng:"), gbc);
         gbc.gridx = 1;
         JPanel shippedDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         shippedDatePanel.add(txtShippedDate);
@@ -241,13 +242,13 @@ public class OrderManagementView extends JInternalFrame {
         // Assignment Information Fields
         gbc.gridx = 2;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Store:"), gbc);
+        formPanel.add(new JLabel("Cửa hàng:"), gbc);
         gbc.gridx = 3;
         formPanel.add(cmbStore, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("Staff:"), gbc);
+        formPanel.add(new JLabel("Nhân viên:"), gbc);
         gbc.gridx = 3;
         formPanel.add(cmbStaff, gbc);
 
@@ -263,7 +264,7 @@ public class OrderManagementView extends JInternalFrame {
         gbc.gridy = 6;
         gbc.gridwidth = 4;
         gbc.anchor = GridBagConstraints.CENTER;
-        JLabel dateHintLabel = new JLabel("Date format: yyyy-MM-dd HH:mm:ss");
+        JLabel dateHintLabel = new JLabel("Định dạng ngày: yyyy-MM-dd HH:mm:ss");
         dateHintLabel.setFont(new Font("Arial", Font.ITALIC, 11)); // Smaller font
         dateHintLabel.setForeground(Color.GRAY);
         formPanel.add(dateHintLabel, gbc);
@@ -468,7 +469,7 @@ public class OrderManagementView extends JInternalFrame {
 
     private void updateOrder() {
         if (selectedOrderId == -1) {
-            showError("Please select an order to update");
+            showError("Hãy chọn một đơn hàng để cập nhật");
             return;
         }
 
@@ -502,8 +503,8 @@ public class OrderManagementView extends JInternalFrame {
             return;
         }
         int result = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete this order?",
-                "Confirm Delete",
+                "Bạn có chắc muốn xoá đơn hàng này?",
+                "Xác nhận xoá",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             controller.deleteOrder(selectedOrderId);
@@ -572,25 +573,60 @@ public class OrderManagementView extends JInternalFrame {
         }
 
         // Set status
-        String status = (String) tableModel.getValueAt(row, 2);
-        cmbOrderStatus.setSelectedItem(status);
+        Object statusObj = tableModel.getValueAt(modelRow, 2);
+        if (statusObj instanceof String) {
+            String statusStringFromTable = ((String) statusObj).trim();
+            int statusIndexToSelect = -1;
+
+            // Map English status names (expected from controller/table) to JComboBox indices
+            if (statusStringFromTable.equalsIgnoreCase("Pending")) {
+                statusIndexToSelect = 0; // "Đang chờ xử lý"
+            } else if (statusStringFromTable.equalsIgnoreCase("Processing")) {
+                statusIndexToSelect = 1; // "Đang xử lý"
+            } else if (statusStringFromTable.equalsIgnoreCase("Rejected") || statusStringFromTable.equalsIgnoreCase("Cancelled")) {
+                statusIndexToSelect = 2; // "Huỷ"
+            } else if (statusStringFromTable.equalsIgnoreCase("Completed")) {
+                statusIndexToSelect = 3; // "Đã hoàn tất"
+            } else {
+                // Fallback: If the table string is already Vietnamese or an unexpected value,
+                // try to find a direct match in the JComboBox items.
+                for (int i = 0; i < cmbOrderStatus.getItemCount(); i++) {
+                    if (cmbOrderStatus.getItemAt(i).equalsIgnoreCase(statusStringFromTable)) {
+                        statusIndexToSelect = i;
+                        break;
+                    }
+                }
+            }
+
+            if (statusIndexToSelect != -1) {
+                cmbOrderStatus.setSelectedIndex(statusIndexToSelect);
+            } else {
+                // If no mapping or direct match is found, print a warning and clear selection or set a default.
+                System.err.println("OrderManagementView: Status '" + statusStringFromTable + "' from table could not be mapped to cmbOrderStatus. Clearing selection.");
+                cmbOrderStatus.setSelectedIndex(-1); // Clears selection, or you could set a default like 0.
+            }
+        } else {
+            // If status from table is not a String or is null
+            System.err.println("OrderManagementView: Status from table is not a String or is null. Clearing selection.");
+            cmbOrderStatus.setSelectedIndex(-1); 
+        }
 
         // Set dates
-        Object orderDateObj = tableModel.getValueAt(row, 3);
+        Object orderDateObj = tableModel.getValueAt(modelRow, 3);
         if (orderDateObj instanceof Timestamp) {
             txtOrderDate.setText(dateFormat.format((Timestamp) orderDateObj));
         } else if (orderDateObj != null) {
             txtOrderDate.setText(orderDateObj.toString());
         }
 
-        Object requiredDateObj = tableModel.getValueAt(row, 4);
+        Object requiredDateObj = tableModel.getValueAt(modelRow, 4);
         if (requiredDateObj instanceof Timestamp) {
             txtRequiredDate.setText(dateFormat.format((Timestamp) requiredDateObj));
         } else if (requiredDateObj != null) {
             txtRequiredDate.setText(requiredDateObj.toString());
         }
 
-        Object shippedDateObj = tableModel.getValueAt(row, 5);
+        Object shippedDateObj = tableModel.getValueAt(modelRow, 5);
         if (shippedDateObj instanceof Timestamp) {
             txtShippedDate.setText(dateFormat.format((Timestamp) shippedDateObj));
         } else if (shippedDateObj != null) {
@@ -600,7 +636,7 @@ public class OrderManagementView extends JInternalFrame {
         }
 
         // Set store
-        int storeId = (int) tableModel.getValueAt(row, 6);
+        int storeId = (int) tableModel.getValueAt(modelRow, 6);
         for (int i = 0; i < cmbStore.getItemCount(); i++) {
             if (cmbStore.getItemAt(i).contains("ID: " + storeId)) {
                 cmbStore.setSelectedIndex(i);
@@ -609,7 +645,7 @@ public class OrderManagementView extends JInternalFrame {
         }
 
         // Find and select staff
-        String staffName = (String) tableModel.getValueAt(row, 7);
+        String staffName = (String) tableModel.getValueAt(modelRow, 7);
         for (int i = 0; i < cmbStaff.getItemCount(); i++) {
             if (cmbStaff.getItemAt(i).contains(staffName)) {
                 cmbStaff.setSelectedIndex(i);
@@ -632,31 +668,31 @@ public class OrderManagementView extends JInternalFrame {
 
     private boolean validateInput() {
         if (cmbCustomer.getSelectedIndex() == 0) {
-            showError("Please select a customer");
+            showError("Hãy chọn một khách hàng từ CSDL");
             cmbCustomer.requestFocus();
             return false;
         }
 
         if (cmbStaff.getSelectedIndex() == 0) {
-            showError("Please select a staff member");
+            showError("Hãy chọn một nhân viên phụ trách đơn hàng");
             cmbStaff.requestFocus();
             return false;
         }
 
         if (cmbStore.getSelectedIndex() == 0) {
-            showError("Please select a store");
+            showError("Hãy chọn một cửa hàng phụ trách");
             cmbStore.requestFocus();
             return false;
         }
 
         if (txtOrderDate.getText().trim().isEmpty()) {
-            showError("Order date is required");
+            showError("Phải có ngày đặt hàng");
             txtOrderDate.requestFocus();
             return false;
         }
 
         if (txtRequiredDate.getText().trim().isEmpty()) {
-            showError("Required date is required");
+            showError("Phải có ngày dự tính");
             txtRequiredDate.requestFocus();
             return false;
         }
@@ -690,7 +726,7 @@ public class OrderManagementView extends JInternalFrame {
 
             // If shipped date is provided, status should be completed
             if (cmbOrderStatus.getSelectedIndex() != 3) { // 3 = Completed (0-based index)
-                showError("Order status must be 'Completed' when shipped date is provided");
+                showError("Đơn hàng đã được giao phải có tình trạng là Hoàn thành!! ");
                 cmbOrderStatus.requestFocus();
                 return false;
             }
@@ -788,22 +824,26 @@ public class OrderManagementView extends JInternalFrame {
         cmbStore.removeAllItems();
         cmbStore.addItem("Select Store");
 
-        // Since StoresDAO is empty, we'll add some placeholder stores
-        // You should implement StoresDAO.getAllStores() method
-        cmbStore.addItem("ID: 1 - Main Store");
-        cmbStore.addItem("ID: 2 - Downtown Store");
-        cmbStore.addItem("ID: 3 - Mall Store");
+        StoresDAO storesDAO = new StoresDAO();
+        ArrayList<Stores> stores = storesDAO.getAllStores();
+        if (stores != null) {
+            for (Stores store : stores) {
+                cmbStore.addItem("ID: " + store.getStoreID() + " - " + store.getStoreName());
+            }
+        }
     }
 
     private void populateStoreFilter() {
         cmbStoreFilter.removeAllItems();
-        cmbStoreFilter.addItem("All Stores");
+        cmbStoreFilter.addItem("Tất cả");
 
-        // Since StoresDAO is empty, we'll add some placeholder stores
-        // You should implement StoresDAO.getAllStores() method
-        cmbStoreFilter.addItem("ID: 1 - Main Store");
-        cmbStoreFilter.addItem("ID: 2 - Downtown Store");
-        cmbStoreFilter.addItem("ID: 3 - Mall Store");
+        StoresDAO storesDAO = new StoresDAO();
+        ArrayList<Stores> stores = storesDAO.getAllStores();
+        if (stores != null) {
+            for (Stores store : stores) {
+                cmbStoreFilter.addItem("ID: " + store.getStoreID() + " - " + store.getStoreName());
+            }
+        }
     }
 
     private String getCustomerName(int customerId) {
@@ -868,7 +908,7 @@ public class OrderManagementView extends JInternalFrame {
 
         // Header panel with order summary
         JPanel headerPanel = new JPanel(new GridLayout(3, 2, 10, 5));
-        headerPanel.setBorder(BorderFactory.createTitledBorder("Thông tin đơn hàng"));
+        headerPanel.setBorder(BorderFactory.createTitledBorder("THÔNG TIN ĐƠN HÀNG:"));
         headerPanel.add(new JLabel("Mã đơn hàng:"));
         headerPanel.add(new JLabel(String.valueOf(orderId)));
         headerPanel.add(new JLabel("Số lượng sản phẩm:"));
@@ -877,7 +917,7 @@ public class OrderManagementView extends JInternalFrame {
         headerPanel.add(new JLabel(String.format("$%.2f", orderTotal)));
 
         // Table for order items
-        String[] columnNames = { "Mã SP", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Năm", "Số lượng", "Đơn giá",
+        String[] columnNames = { "Mã SP", "Tên sản phẩm", "Nhãn hàng", "Danh mục", "Năm", "Số lượng", "Đơn giá",
                 "Giảm giá", "Thành tiền" };
         DefaultTableModel itemTableModel = new DefaultTableModel(columnNames, 0) {
             @Override

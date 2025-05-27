@@ -34,7 +34,7 @@ public class CustomerManagementView extends JInternalFrame {
     private final SessionManager sessionManager;
 
     public CustomerManagementView() {
-        super("Customer Management", true, true, true, true);
+        super("Quản lý khách hàng", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         controller = new CustomerController(this);
         initializeComponents();
@@ -48,8 +48,8 @@ public class CustomerManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "ID", "First Name", "Last Name", "Email", "Phone", "Street", "City", "State",
-                "Zip Code" };
+        String[] columnNames = { "ID", "Tên", "Họ", "Email", "SĐT", "Đường", "TP", "Bang",
+                "Mã ZIP" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -75,13 +75,13 @@ public class CustomerManagementView extends JInternalFrame {
         txtSearch = new JTextField(20);
 
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
-        btnSearch = new JButton("Search");
-        btnClearSearch = new JButton("Clear Search");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
+        btnSearch = new JButton("Tìm");
+        btnClearSearch = new JButton("Xoá");
 
         // Filter dropdowns
         cmbStateFilter = new JComboBox<>();
@@ -94,15 +94,15 @@ public class CustomerManagementView extends JInternalFrame {
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(new JLabel("Tìm kiếm:"));
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnClearSearch);
         searchPanel.add(Box.createHorizontalStrut(20));
-        searchPanel.add(new JLabel("Filter by State:"));
+        searchPanel.add(new JLabel("Lọc theo Bang:"));
         searchPanel.add(cmbStateFilter);
         searchPanel.add(Box.createHorizontalStrut(10));
-        searchPanel.add(new JLabel("Filter by City:"));
+        searchPanel.add(new JLabel("Lọc theo Thành phố:"));
         searchPanel.add(cmbCityFilter);
 
         // Table panel
@@ -125,7 +125,7 @@ public class CustomerManagementView extends JInternalFrame {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JLabel personalInfoLabel = new JLabel("Personal Information");
+        JLabel personalInfoLabel = new JLabel("Thông tin cá nhân");
         personalInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         personalInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(personalInfoLabel, gbc);
@@ -135,7 +135,7 @@ public class CustomerManagementView extends JInternalFrame {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JLabel addressInfoLabel = new JLabel("Address Information");
+        JLabel addressInfoLabel = new JLabel("Địa chỉ");
         addressInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         addressInfoLabel.setForeground(new Color(0, 102, 204));
         formPanel.add(addressInfoLabel, gbc);
@@ -147,13 +147,13 @@ public class CustomerManagementView extends JInternalFrame {
         // Personal Information Fields
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("First Name:"), gbc);
+        formPanel.add(new JLabel("Tên:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtFirstName, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("Last Name:"), gbc);
+        formPanel.add(new JLabel("Họ:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtLastName, gbc);
 
@@ -165,32 +165,32 @@ public class CustomerManagementView extends JInternalFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 4;
-        formPanel.add(new JLabel("Phone:"), gbc);
+        formPanel.add(new JLabel("SĐT:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtPhone, gbc);
 
         // Address Information Fields
         gbc.gridx = 2;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Street:"), gbc);
+        formPanel.add(new JLabel("Đường:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtStreet, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("City:"), gbc);
+        formPanel.add(new JLabel("Thành phố:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtCity, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("State:"), gbc);
+        formPanel.add(new JLabel("Bang:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtState, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 4;
-        formPanel.add(new JLabel("Zip Code:"), gbc);
+        formPanel.add(new JLabel("Mã ZIP:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtZipCode, gbc);
 
@@ -246,6 +246,7 @@ public class CustomerManagementView extends JInternalFrame {
 
         // Clear status when typing
         txtFirstName.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 // Clear any previous error highlighting
             }
@@ -393,24 +394,24 @@ public class CustomerManagementView extends JInternalFrame {
 
     private boolean validateInput() {
         if (txtFirstName.getText().trim().isEmpty()) {
-            showError("First name is required");
+            showError("Phải cung cấp tên");
             txtFirstName.requestFocus();
             return false;
         }
         if (txtLastName.getText().trim().isEmpty()) {
-            showError("Last name is required");
+            showError("Phải cung cấp họ");
             txtLastName.requestFocus();
             return false;
         }
         if (txtEmail.getText().trim().isEmpty()) {
-            showError("Email is required");
+            showError("Phải có email khách hàng");
             txtEmail.requestFocus();
             return false;
         }
 
         // Basic email validation
         if (!txtEmail.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            showError("Please enter a valid email address");
+            showError("Địa chỉ email không hợp lệ!");
             txtEmail.requestFocus();
             return false;
         }
@@ -419,7 +420,7 @@ public class CustomerManagementView extends JInternalFrame {
         if (!txtPhone.getText().trim().isEmpty()) {
             String phone = txtPhone.getText().replaceAll("[^\\d]", "");
             if (phone.length() < 10) {
-                showError("Please enter a valid phone number (at least 10 digits)");
+                showError("SĐT không hợp lệ! (ít nhất 10 chữ số)");
                 txtPhone.requestFocus();
                 return false;
             }
@@ -427,7 +428,7 @@ public class CustomerManagementView extends JInternalFrame {
 
         // State validation (if provided)
         if (!txtState.getText().trim().isEmpty() && txtState.getText().trim().length() != 2) {
-            showError("Please enter a valid 2-letter state code (e.g., CA, NY, TX)");
+            showError("Mã bang không hợp lệ! (Mã 2 kí tự như CA, NY, TX)");
             txtState.requestFocus();
             return false;
         }
@@ -435,7 +436,7 @@ public class CustomerManagementView extends JInternalFrame {
         // Zip code validation (if provided)
         if (!txtZipCode.getText().trim().isEmpty()) {
             if (!txtZipCode.getText().matches("^\\d{5}(-\\d{4})?$")) {
-                showError("Please enter a valid zip code (12345 or 12345-6789)");
+                showError("Mã ZIP không hợp lệ! (12345 hay 12345-6789)");
                 txtZipCode.requestFocus();
                 return false;
             }
@@ -464,7 +465,7 @@ public class CustomerManagementView extends JInternalFrame {
 
     private void populateStateFilter() {
         cmbStateFilter.removeAllItems();
-        cmbStateFilter.addItem("All States");
+        cmbStateFilter.addItem("Tất cả");
 
         // Get actual states from database
         try {
@@ -473,7 +474,7 @@ public class CustomerManagementView extends JInternalFrame {
                 cmbStateFilter.addItem(state);
             }
         } catch (Exception e) {
-            System.err.println("Error loading states: " + e.getMessage());
+            System.err.println("Lỗi khi tải dữ liệu mã Bang: " + e.getMessage());
             // Fallback to hardcoded states if database fails
             String[] fallbackStates = { "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL",
                     "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
@@ -487,7 +488,7 @@ public class CustomerManagementView extends JInternalFrame {
 
     private void populateCityFilter() {
         cmbCityFilter.removeAllItems();
-        cmbCityFilter.addItem("All Cities");
+        cmbCityFilter.addItem("Tất cả");
 
         // Get actual cities from database
         try {
@@ -496,7 +497,7 @@ public class CustomerManagementView extends JInternalFrame {
                 cmbCityFilter.addItem(city);
             }
         } catch (Exception e) {
-            System.err.println("Error loading cities: " + e.getMessage());
+            System.err.println("Lỗi khi tải dữ liệu thành phố: " + e.getMessage());
         }
     }
 
@@ -534,7 +535,7 @@ public class CustomerManagementView extends JInternalFrame {
 
     private void populateCitiesForState(String state) {
         cmbCityFilter.removeAllItems();
-        cmbCityFilter.addItem("All Cities");
+        cmbCityFilter.addItem("Tất cả");
 
         try {
             ArrayList<String> cities = controller.getCitiesForState(state);
@@ -542,7 +543,7 @@ public class CustomerManagementView extends JInternalFrame {
                 cmbCityFilter.addItem(city);
             }
         } catch (Exception e) {
-            System.err.println("Error loading cities for state: " + e.getMessage());
+            System.err.println("Lỗi khi tải dữ liệu thành phố cho bang: " + e.getMessage());
         }
     }
 

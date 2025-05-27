@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.concurrent.ExecutionException;
 import model.Administration.User;
 import service.AuthenticationService;
 import utils.SessionManager;
@@ -30,9 +31,9 @@ public class LoginView extends JFrame {
     private void initializeComponents() {
         txtUsername = new JTextField(20);
         txtPassword = new JPasswordField(20);
-        btnLogin = new JButton("Login");
-        btnExit = new JButton("Exit");
-        chkRememberMe = new JCheckBox("Remember me");
+        btnLogin = new JButton("Đăng nhập");
+        btnExit = new JButton("Thoát");
+        chkRememberMe = new JCheckBox("Nhớ tài khoản");
         lblStatus = new JLabel(" ");
         progressBar = new JProgressBar();
 
@@ -62,7 +63,7 @@ public class LoginView extends JFrame {
         // Title panel
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(new Color(0, 123, 255));
-        JLabel titleLabel = new JLabel("BikeStores Management System");
+        JLabel titleLabel = new JLabel("Phần mềm quản lý chuỗi cửa hàng Xe Đạp");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -76,13 +77,13 @@ public class LoginView extends JFrame {
 
         // Username
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
-        formPanel.add(new JLabel("Username:"), gbc);
+        formPanel.add(new JLabel("Tên tài khoản:"), gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(txtUsername, gbc);
 
         // Password
         gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
-        formPanel.add(new JLabel("Password:"), gbc);
+        formPanel.add(new JLabel("Mật khẩu:"), gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(txtPassword, gbc);
 
@@ -110,7 +111,7 @@ public class LoginView extends JFrame {
 
         // Footer
         JPanel footerPanel = new JPanel();
-        footerPanel.add(new JLabel("© 2025 BikeStores Management System"));
+        footerPanel.add(new JLabel("© 2025 IE303.P21 - Công nghệ Java"));
         add(footerPanel, BorderLayout.SOUTH);
     }
 
@@ -156,7 +157,7 @@ public class LoginView extends JFrame {
     }
 
     private void setupWindow() {
-        setTitle("Login - BikeStores Management System");
+        setTitle("Đăng nhập - Phần mềm quản lý chuỗi cửa hàng Xe đạp");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         pack();
@@ -171,7 +172,7 @@ public class LoginView extends JFrame {
         String password = new String(txtPassword.getPassword());
 
         if (username.isEmpty() || password.isEmpty()) {
-            showError("Please enter both username and password");
+            showError("Phải nhập đầy đủ tên tài khoản và mật khẩu!");
             return;
         }
 
@@ -191,12 +192,12 @@ public class LoginView extends JFrame {
                 try {
                     User user = get();
                     onLoginSuccess(user);
-                } catch (Exception e) {
+                } catch (InterruptedException | ExecutionException e) {
                     Throwable cause = e.getCause();
                     if (cause instanceof ValidationException) {
                         showError(cause.getMessage());
                     } else {
-                        showError("Login failed. Please try again.");
+                        showError("Đăng nhập thất bại. Xin vui lòng thử lại");
                     }
                     txtPassword.setText("");
                     txtPassword.requestFocus();

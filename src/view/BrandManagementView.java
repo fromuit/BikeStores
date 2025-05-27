@@ -25,7 +25,7 @@ public class BrandManagementView extends JInternalFrame {
     private int selectedBrandId = -1;
     
     public BrandManagementView() {
-        super("Brand Management", true, true, true, true);
+        super("Quản lý nhãn hàng", true, true, true, true);
         controller = new BrandController(this);
         initializeComponents();
         setupLayout();
@@ -36,7 +36,7 @@ public class BrandManagementView extends JInternalFrame {
     
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = {"ID", "Brand Name"};
+        String[] columnNames = {"ID Nhãn hàng", "Tên nhãn hàng"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -55,11 +55,11 @@ public class BrandManagementView extends JInternalFrame {
         txtBrandName = new JTextField(20);
         
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
     }
     
     private void setupLayout() {
@@ -71,7 +71,7 @@ public class BrandManagementView extends JInternalFrame {
         
         // Form panel
         JPanel formPanel = new JPanel(new FlowLayout());
-        formPanel.add(new JLabel("Brand Name:"));
+        formPanel.add(new JLabel("Tên nhãn hàng:"));
         formPanel.add(txtBrandName);
         
         // Button panel
@@ -143,7 +143,7 @@ public class BrandManagementView extends JInternalFrame {
     
     private void updateBrand() {
         if (selectedBrandId == -1) {
-            showError("Please select a brand to update");
+            showError("Hãy chọn một nhãn hàng để tiến hành cập nhật");
             return;
         }
         if (validateInput()) {
@@ -155,12 +155,12 @@ public class BrandManagementView extends JInternalFrame {
     
     private void deleteBrand() {
         if (selectedBrandId == -1) {
-            showError("Please select a brand to delete");
+            showError("Hãy chọn một nhãn hàng để xoá");
             return;
         }
         int result = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to delete this brand?", 
-            "Confirm Delete", 
+            "Bạn có chắc muốn xoá nhãn hàng này?", 
+            "Xác nhận xoá", 
             JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             controller.deleteBrand(selectedBrandId);
@@ -181,7 +181,7 @@ public class BrandManagementView extends JInternalFrame {
     
     private boolean validateInput() {
         if (txtBrandName.getText().trim().isEmpty()) {
-            showError("Brand name is required");
+            showError("Phải có tên nhãn hàng!");
             return false;
         }
         return true;
