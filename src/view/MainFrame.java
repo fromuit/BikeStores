@@ -3,11 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view;
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.*;
+// Bỏ import cho JTree nếu không dùng nữa, nhưng handleNavigation vẫn dùng DefaultMutableTreeNode nên có thể vẫn cần giữ lại cho tương lai
+// import javax.swing.tree.DefaultMutableTreeNode; // Giữ lại nếu handleNavigation cần
+// import javax.swing.tree.DefaultTreeCellRenderer;
+// import javax.swing.tree.TreePath;
+// import javax.swing.tree.TreeSelectionModel;
 import model.Administration.User;
 import utils.SessionManager;
 
@@ -17,19 +23,20 @@ import utils.SessionManager;
  */
 public class MainFrame extends JFrame {
     private JDesktopPane desktopPane;
-    private JMenuBar menuBar;
     private JInternalFrame welcomeInternalFrame;
-    
+    private JSplitPane splitPane;
+    // private JTree navigationTree; // Thay thế bằng JPanel
+    private JPanel navigationPanel; // Panel mới cho các nút bấm
+
     public MainFrame() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         initializeComponents();
-        setupMenu();
+        // setupMenu(); // Đã bỏ
         setupLayout();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setTitle("BikeStores Management System");
 
-        // Add a component listener to center the welcomeInternalFrame when the frame is resized
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -42,14 +49,15 @@ public class MainFrame extends JFrame {
             }
         });
     }
-    
+
     private void initializeComponents() {
         desktopPane = new JDesktopPane();
         desktopPane.setBackground(Color.LIGHT_GRAY);
-        menuBar = new JMenuBar();
         welcomeInternalFrame = createWelcomeInternalFrame();
+        // navigationTree = createNavigationTree(); // Thay thế dòng này
+        navigationPanel = createButtonNavigationPanel(); // Gọi phương thức mới
     }
-    
+
     private JInternalFrame createWelcomeInternalFrame() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(new Color(240, 240, 240));
@@ -68,7 +76,7 @@ public class MainFrame extends JFrame {
 
         JLabel authorLabel = new JLabel("Tác giả: Nguyễn Hoàng Duy - Nguyễn Minh Trí", SwingConstants.CENTER);
         authorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        
+
         JLabel versionLabel = new JLabel("Version: 1.0.0", SwingConstants.CENTER);
         versionLabel.setFont(new Font("Segoe UI Light", Font.ITALIC, 16));
 
@@ -81,178 +89,286 @@ public class MainFrame extends JFrame {
         internalFrame.setContentPane(panel);
         internalFrame.pack();
         internalFrame.setBorder(BorderFactory.createRaisedBevelBorder());
-        
-        internalFrame.setFocusable(false);
-        ((javax.swing.plaf.basic.BasicInternalFrameUI)internalFrame.getUI()).setNorthPane(null);
 
+        internalFrame.setFocusable(false);
+        if (internalFrame.getUI() instanceof javax.swing.plaf.basic.BasicInternalFrameUI) {
+            ((javax.swing.plaf.basic.BasicInternalFrameUI) internalFrame.getUI()).setNorthPane(null);
+        }
         return internalFrame;
     }
-    
-    private void setupMenu() {
-        // Sales Menu
-        JMenu salesMenu = new JMenu("Sales");
-        JMenuItem customersItem = new JMenuItem("Manage Customers");
-        JMenuItem ordersItem = new JMenuItem("Manage Orders");
-        JMenuItem staffsItem = new JMenuItem("Manage Staffs");
-        JMenuItem storesItem = new JMenuItem("Manage Stores");
-        
-        salesMenu.add(customersItem);
-        salesMenu.add(ordersItem);
-        salesMenu.add(staffsItem);
-        salesMenu.add(storesItem);
-        
-        // Production Menu
-        JMenu productionMenu = new JMenu("Production");
-        JMenuItem productsItem = new JMenuItem("Manage Products");
-        JMenuItem categoriesItem = new JMenuItem("Manage Categories");
-        JMenuItem brandsItem = new JMenuItem("Manage Brands");
-        JMenuItem stocksItem = new JMenuItem("Manage Stocks");
-        
-        productionMenu.add(productsItem);
-        productionMenu.add(categoriesItem);
-        productionMenu.add(brandsItem);
-        productionMenu.add(stocksItem);
-        
-        menuBar.add(salesMenu);
-        menuBar.add(productionMenu);
-        
-        // Add action listeners
-        customersItem.addActionListener(e -> openCustomerManagement());
-        productsItem.addActionListener(e -> openProductManagement());
-        brandsItem.addActionListener(e -> openBrandManagement());
-        categoriesItem.addActionListener(e -> openCategoryManagement());
-        storesItem.addActionListener(e -> openStoreManagement());
-        staffsItem.addActionListener(e -> openStaffManagement());
-        ordersItem.addActionListener(e -> openOrderManagement());
-        stocksItem.addActionListener(e -> openStockManagement());
 
-        setJMenuBar(menuBar);
+    private JPanel createButtonNavigationPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(new Color(220, 220, 220));
+
+        Font categoryFont = new Font("Segoe UI", Font.BOLD, 16);
+        Font itemFont = new Font("Segoe UI", Font.PLAIN, 14);
+        Dimension buttonSize = new Dimension(Integer.MAX_VALUE, 35);
+
+        // Sales Category
+        JLabel salesLabel = new JLabel("Sales");
+        salesLabel.setFont(categoryFont);
+        salesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        salesLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
+        panel.add(salesLabel);
+
+        String[] salesItems = { "Manage Customers", "Manage Orders", "Manage Staffs", "Manage Stores" };
+        for (String itemName : salesItems) {
+            JButton button = new JButton(itemName);
+            configureNavButton(button, itemFont, buttonSize, itemName);
+            panel.add(button);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        }
+
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Production Category
+        JLabel productionLabel = new JLabel("Production");
+        productionLabel.setFont(categoryFont);
+        productionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        productionLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
+        panel.add(productionLabel);
+
+        String[] productionItems = { "Manage Products", "Manage Categories", "Manage Brands", "Manage Stocks" };
+        for (String itemName : productionItems) {
+            JButton button = new JButton(itemName);
+            configureNavButton(button, itemFont, buttonSize, itemName);
+            panel.add(button);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        }
+
+        // Thêm một empty component để đẩy các button chức năng lên trên
+        panel.add(Box.createVerticalGlue());
+
+        // Log Out Button
+        JButton logoutButton = new JButton("Đăng xuất");
+        logoutButton.setFont(itemFont);
+        logoutButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        logoutButton.setHorizontalAlignment(SwingConstants.LEFT);
+        logoutButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        logoutButton.setFocusPainted(false);
+        logoutButton.setMargin(new Insets(8, 15, 8, 15));
+
+        logoutButton.setBackground(new Color(255, 200, 200));
+        logoutButton.setOpaque(true);
+        logoutButton.setBorderPainted(false);
+
+        logoutButton.addActionListener(e -> {
+            int confirmation = JOptionPane.showConfirmDialog(
+                    this,
+                    "Bạn có muốn đăng xuất không?",
+                    "Xác nhận đăng xuất",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (confirmation == JOptionPane.YES_OPTION) {
+                SessionManager.getInstance().setCurrentUser(null); // Xóa phiên làm việc
+                this.dispose(); // Đóng MainFrame
+
+                // Mở lại LoginView
+                SwingUtilities.invokeLater(() -> {
+                    LoginView loginView = new LoginView();
+                    loginView.setVisible(true);
+                });
+            }
+        });
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(logoutButton);
+
+        return panel;
     }
-    
-    private void setupLayout() {
-        setLayout(new BorderLayout());
-        add(desktopPane, BorderLayout.CENTER);
 
-        if (welcomeInternalFrame != null) {
-            desktopPane.add(welcomeInternalFrame);
-            welcomeInternalFrame.setVisible(true);
+    // Helper method để cấu hình các nút điều hướng thông thường
+    private void configureNavButton(JButton button, Font font, Dimension size, String itemName) {
+        button.setFont(font);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(size);
+        button.setFocusPainted(false);
+        button.setMargin(new Insets(5, 15, 5, 15));
+        // Có thể thêm style chung cho các nút ở đây nếu muốn
+        // button.setBackground(new Color(230, 230, 250)); // Ví dụ màu Lavender nhạt
+        // button.setOpaque(true);
+        // button.setBorderPainted(false);
+        button.addActionListener(e -> handleNavigation(itemName));
+    }
+
+    private void handleNavigation(String menuItemName) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            if (frame != welcomeInternalFrame) { // Không đóng welcome frame
+                try {
+                    frame.setClosed(true);
+                } catch (PropertyVetoException ex) {
+                    // ex.printStackTrace();
+                }
+            }
+        }
+        // Ẩn welcome frame khi một cửa sổ quản lý được mở
+        if (welcomeInternalFrame != null && welcomeInternalFrame.isVisible() && !menuItemName.isEmpty()) {
+            welcomeInternalFrame.setVisible(false);
+        }
+
+        switch (menuItemName) {
+            case "Manage Customers":
+                openCustomerManagement();
+                break;
+            case "Manage Orders":
+                openOrderManagement();
+                break;
+            case "Manage Staffs":
+                openStaffManagement();
+                break;
+            case "Manage Stores":
+                openStoreManagement();
+                break;
+            case "Manage Products":
+                openProductManagement();
+                break;
+            case "Manage Categories":
+                openCategoryManagement();
+                break;
+            case "Manage Brands":
+                openBrandManagement();
+                break;
+            case "Manage Stocks":
+                openStockManagement();
+                break;
+            default:
+                // Nếu không có item nào được chọn hoặc menuItemName rỗng, hiển thị lại welcome
+                // frame
+                if (welcomeInternalFrame != null && !welcomeInternalFrame.isVisible()) {
+                    // Đảm bảo welcome frame được thêm vào desktopPane nếu chưa có
+                    if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
+                        desktopPane.add(welcomeInternalFrame);
+                    }
+                    welcomeInternalFrame.setVisible(true);
+                    centerWelcomeFrame();
+                }
+                break;
         }
     }
-    
+
+    private void setupLayout() {
+        // JScrollPane navigationScrollPane = new JScrollPane(navigationTree); // Thay
+        // thế dòng này
+        JScrollPane navigationScrollPane = new JScrollPane(navigationPanel); // Sử dụng panel mới
+        navigationScrollPane.setMinimumSize(new Dimension(220, 0)); // Tăng nhẹ chiều rộng tối thiểu
+        navigationScrollPane.setBorder(BorderFactory.createEmptyBorder()); // Bỏ viền của JScrollPane
+
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, navigationScrollPane, desktopPane);
+        splitPane.setDividerLocation(250);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setBorder(null); // Bỏ viền của JSplitPane nếu muốn
+
+        setLayout(new BorderLayout());
+        add(splitPane, BorderLayout.CENTER);
+
+        if (welcomeInternalFrame != null) {
+            // Kiểm tra xem welcomeInternalFrame đã được thêm vào desktopPane chưa
+            if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
+                desktopPane.add(welcomeInternalFrame);
+            }
+            welcomeInternalFrame.setVisible(true);
+            // Gọi căn giữa sau khi frame đã visible và có kích thước,
+            // hoặc để componentListener tự xử lý khi frame được shown/resized.
+            // SwingUtilities.invokeLater(this::centerWelcomeFrame); // Hoặc gọi trực tiếp
+        }
+    }
+
     private void centerWelcomeFrame() {
-        if (welcomeInternalFrame != null && welcomeInternalFrame.isVisible()) {
+        if (welcomeInternalFrame != null && welcomeInternalFrame.isVisible() && desktopPane.getWidth() > 0
+                && desktopPane.getHeight() > 0) {
             Dimension desktopSize = desktopPane.getSize();
-            Dimension welcomeSize = welcomeInternalFrame.getSize();
+            Dimension welcomeSize = welcomeInternalFrame.getPreferredSize(); // Sử dụng getPreferredSize
+
+            // Đảm bảo welcomeInternalFrame được pack() trước khi lấy preferred size nếu nội
+            // dung động
+            // welcomeInternalFrame.pack(); // Cẩn thận nếu nội dung thay đổi
+
             int x = (desktopSize.width - welcomeSize.width) / 2;
             int y = (desktopSize.height - welcomeSize.height) / 2;
-            x = Math.max(0, x);
-            y = Math.max(0, y);
+            x = Math.max(0, x); // Đảm bảo không âm
+            y = Math.max(0, y); // Đảm bảo không âm
             welcomeInternalFrame.setLocation(x, y);
         }
     }
-    
+
     private void openCustomerManagement() {
         CustomerManagementView customerView = new CustomerManagementView();
-        desktopPane.add(customerView);
-        customerView.setVisible(true);
-        try {
-            customerView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(customerView);
     }
-    
+
     private void openProductManagement() {
         ProductManagementView productView = new ProductManagementView();
-        desktopPane.add(productView);
-        productView.setVisible(true);
-        try {
-            productView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(productView);
     }
-    
+
     private void openStoreManagement() {
         StoreManagementView storeView = new StoreManagementView();
-        desktopPane.add(storeView);
-        storeView.setVisible(true);
-        try {
-            storeView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(storeView);
     }
-    
+
     private void openStockManagement() {
         StockManagementView stockView = new StockManagementView();
-        desktopPane.add(stockView);
-        stockView.setVisible(true);
-        try {
-            stockView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(stockView);
     }
-    
+
     private void openBrandManagement() {
         BrandManagementView brandView = new BrandManagementView();
-        desktopPane.add(brandView);
-        brandView.setVisible(true);
-        try {
-            brandView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(brandView);
     }
+
     private void openCategoryManagement() {
         CategoryManagementView categoryView = new CategoryManagementView();
-        desktopPane.add(categoryView);
-        categoryView.setVisible(true);
-        try {
-            categoryView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(categoryView);
     }
+
     private void openStaffManagement() {
         StaffManagementView staffView = new StaffManagementView();
-        desktopPane.add(staffView);
-        staffView.setVisible(true);
-        try {
-            staffView.setSelected(true);
-        } catch (PropertyVetoException e) {
-        }
+        addAndMaximizeInternalFrame(staffView);
     }
 
     private void openOrderManagement() {
         OrderManagementView orderView = new OrderManagementView();
-        desktopPane.add(orderView);
-        orderView.setVisible(true);
+        addAndMaximizeInternalFrame(orderView);
+    }
+
+    // Phương thức tiện ích để thêm và phóng to JInternalFrame
+    private void addAndMaximizeInternalFrame(JInternalFrame frame) {
+        desktopPane.add(frame);
+        frame.setVisible(true);
         try {
-            orderView.setSelected(true);
+            frame.setMaximum(true);
+            frame.setSelected(true);
         } catch (PropertyVetoException e) {
+            // e.printStackTrace();
         }
     }
-    
-    
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                // Use a modern look and feel if available
                 for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus".equals(info.getName())) {
                         UIManager.setLookAndFeel(info.getClassName());
                         break;
                     }
                 }
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-                // Fallback to system L&F if Nimbus is not available or fails
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
+                    | UnsupportedLookAndFeelException e) {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (Exception ex) {
-                    // e.printStackTrace(); // Log inner exception
+                    // ex.printStackTrace();
                 }
             }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
-            // Initial centering after frame is visible and has its size.
-            // The component listener will handle subsequent resizes.
-            // mainFrame.centerWelcomeFrame(); // This will be called by componentShown
+            // Gọi centerWelcomeFrame sau khi frame chính đã hiển thị và có kích thước
+            // Cách tốt hơn là dựa vào component listener hoặc gọi sau khi pack() nếu có.
+            // mainFrame.centerWelcomeFrame(); // Được xử lý bởi component listener
         });
     }
 }
