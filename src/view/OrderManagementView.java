@@ -290,14 +290,28 @@ public class OrderManagementView extends JInternalFrame {
         
         switch (currentUser.getRole()) {
             case EMPLOYEE -> {
-                // Employees can add and update orders but not delete
+                // Employees can add and update their own orders but not delete
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(false);
                 setFormFieldsEnabled(true);
+                
+                // For employees, pre-select themselves as staff and disable staff selection
+                preselectCurrentUserAsStaff();
+                cmbStaff.setEnabled(false);
             }
-            case STORE_MANAGER, CHIEF_MANAGER -> {
-                // Managers can manage all orders
+            case STORE_MANAGER -> {
+                // Store managers can manage orders in their store
+                btnAdd.setEnabled(true);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
+                setFormFieldsEnabled(true);
+                
+                // Limit store selection to their own store
+                limitStoreSelectionToUserStore();
+            }
+            case CHIEF_MANAGER -> {
+                // Chief managers can manage all orders
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
@@ -408,6 +422,22 @@ public class OrderManagementView extends JInternalFrame {
             showError("Please select an order to update");
             return;
         }
+        
+        // Additional check for employees - they can only update their own orders
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            // Get the selected order to check staff assignment
+            int selectedRow = orderTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                String staffName = (String) tableModel.getValueAt(selectedRow, 7);
+                String currentUserName = getCurrentUserName();
+                if (!staffName.contains(currentUserName)) {
+                    showError("You can only update orders assigned to you");
+                    return;
+                }
+            }
+        }
+        
         if (validateInput()) {
             Orders order = createOrderFromForm();
             order.setOrderID(selectedOrderId);
@@ -429,6 +459,55 @@ public class OrderManagementView extends JInternalFrame {
         }
     }
     
+    // Method to pre-select current user as staff for employees
+    private void preselectCurrentUserAsStaff() {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getStaffID() != null) {
+            for (int i = 0; i < cmbStaff.getItemCount(); i++) {
+                String item = cmbStaff.getItemAt(i);
+                if (item.contains("ID: " + currentUser.getStaffID())) {
+                    cmbStaff.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Method to limit store selection for store managers
+    private void limitStoreSelectionToUserStore() {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+            ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+            if (!accessibleStores.isEmpty()) {
+                int userStoreId = accessibleStores.get(0);
+                for (int i = 0; i < cmbStore.getItemCount(); i++) {
+                    String item = cmbStore.getItemAt(i);
+                    if (item.contains("ID: " + userStoreId)) {
+                        cmbStore.setSelectedIndex(i);
+                        cmbStore.setEnabled(false); // Disable store selection
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Helper method to get current user's name
+    private String getCurrentUserName() {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getStaffID() != null) {
+            try {
+                Staffs staff = staffDAO.getStaffById(currentUser.getStaffID());
+                if (staff != null) {
+                    return staff.getFirstName() + " " + staff.getLastName();
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting current user name: " + e.getMessage());
+            }
+        }
+        return "";
+    }
     private void loadSelectedOrder(int row) {
         selectedOrderId = (int) tableModel.getValueAt(row, 0);
         

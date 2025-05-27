@@ -7,6 +7,7 @@ package utils;
 import dao.StaffsDAO;
 import java.util.ArrayList;
 import model.Administration.User;
+import model.Sales.Orders;
 import model.Sales.Staffs;
 /**
  *
@@ -61,6 +62,54 @@ public class SessionManager {
         }
         
         return false;
+    }
+    
+    // New method: Check if user can add orders
+    public boolean canAddOrder(Orders order) {
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> canAccessStore(order.getStoreID());
+            case EMPLOYEE -> true; // Employees can add orders
+            default -> false;
+        };
+    }
+    
+    // New method: Check if user can update specific order
+    public boolean canUpdateOrder(Orders order) {
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> canAccessStore(order.getStoreID());
+            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); // Only their own orders
+            default -> false;
+        };
+    }
+    
+    // New method: Check if user can delete specific order
+    public boolean canDeleteOrder(Orders order) {
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> canAccessStore(order.getStoreID());
+            case EMPLOYEE -> false; // Employees cannot delete orders
+            default -> false;
+        };
+    }
+    
+    // New method: Check if user can view specific order
+    public boolean canViewOrder(Orders order) {
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> canAccessStore(order.getStoreID());
+            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); // Only their own orders
+            default -> false;
+        };
     }
     
     private int getStaffStoreId(Integer staffID) {

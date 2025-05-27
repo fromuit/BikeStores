@@ -10,6 +10,7 @@ import dao.StaffsDAO;
 import dao.StoresDAO;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import model.Administration.User;
 import model.Sales.Orders;
 import utils.SessionManager;
 import utils.ValidationException;
@@ -33,44 +34,131 @@ public class OrderService {
     }
     
     public ArrayList<Orders> getAllOrders() {
-        return orderDAO.getAllOrders();
+        ArrayList<Orders> allOrders = orderDAO.getAllOrders();
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public Orders getOrderById(int id) {
-        return orderDAO.getOrderById(id);
+        Orders order = orderDAO.getOrderById(id);
+        if (order != null && sessionManager.canViewOrder(order)) {
+            return order;
+        }
+        return null; // Return null if user doesn't have permission to view this order
     }
 
     public ArrayList<Orders> searchOrders(String searchTerm) {
-        return orderDAO.searchOrders(searchTerm);
+        ArrayList<Orders> allOrders = orderDAO.searchOrders(searchTerm);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter search results based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public ArrayList<Orders> getOrdersByStatus(int status) {
-        return orderDAO.getOrdersByStatus(status);
+        ArrayList<Orders> allOrders = orderDAO.getOrdersByStatus(status);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public ArrayList<Orders> getOrdersByCustomer(int customerId) {
-        return orderDAO.getOrdersByCustomer(customerId);
+        ArrayList<Orders> allOrders = orderDAO.getOrdersByCustomer(customerId);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public ArrayList<Orders> getOrdersByStore(int storeId) {
-        return orderDAO.getOrdersByStore(storeId);
+        // Check if user can access this store
+        if (!sessionManager.canAccessStore(storeId)) {
+            return new ArrayList<>(); // Return empty list if no access
+        }
+        
+        ArrayList<Orders> allOrders = orderDAO.getOrdersByStore(storeId);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public ArrayList<Orders> getOrdersByStaff(int staffId) {
-        return orderDAO.getOrdersByStaff(staffId);
+        ArrayList<Orders> allOrders = orderDAO.getOrdersByStaff(staffId);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public ArrayList<Orders> getOrdersByDateRange(Timestamp startDate, Timestamp endDate) {
-        return orderDAO.getOrdersByDateRange(startDate, endDate);
+        ArrayList<Orders> allOrders = orderDAO.getOrdersByDateRange(startDate, endDate);
+        ArrayList<Orders> accessibleOrders = new ArrayList<>();
+        
+        // Filter orders based on user permissions
+        for (Orders order : allOrders) {
+            if (sessionManager.canViewOrder(order)) {
+                accessibleOrders.add(order);
+            }
+        }
+        
+        return accessibleOrders;
     }
     
     public boolean addOrder(Orders order) throws ValidationException {
         validateOrder(order);
         validateBusinessRules(order);
         
-        // Check permissions
-        if (!sessionManager.hasPermission("MANAGE_ORDERS")) {
-            throw new SecurityException("You don't have permission to add orders");
+        // Check if user can add orders
+        if (!sessionManager.canAddOrder(order)) {
+            throw new SecurityException("You don't have permission to add orders to this store");
+        }
+        
+        // For employees, ensure they can only create orders assigned to themselves
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            if (order.getStaffID() != currentUser.getStaffID()) {
+                throw new SecurityException("Employees can only create orders assigned to themselves");
+            }
         }
         
         return orderDAO.addOrder(order);
@@ -80,20 +168,28 @@ public class OrderService {
         validateOrder(order);
         validateBusinessRules(order);
         
-        // Check permissions
-        if (!sessionManager.hasPermission("MANAGE_ORDERS")) {
-            throw new SecurityException("You don't have permission to update orders");
-        }
-        
         // Get existing order to check permissions
         Orders existingOrder = orderDAO.getOrderById(order.getOrderID());
         if (existingOrder == null) {
             throw new ValidationException("Order not found");
         }
         
+        // Check if user can update this specific order
+        if (!sessionManager.canUpdateOrder(existingOrder)) {
+            throw new SecurityException("You don't have permission to update this order");
+        }
+        
         // Business rule: Cannot modify completed orders
         if (existingOrder.getOrderStatus() == 4) {
             throw new ValidationException("Cannot modify completed orders");
+        }
+        
+        // For employees, ensure they can only update orders assigned to themselves
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            if (order.getStaffID() != currentUser.getStaffID()) {
+                throw new SecurityException("Employees can only update orders assigned to themselves");
+            }
         }
         
         return orderDAO.updateOrder(order);
@@ -105,9 +201,9 @@ public class OrderService {
             throw new ValidationException("Order not found");
         }
         
-        // Check permissions
-        if (!sessionManager.hasPermission("MANAGE_ORDERS")) {
-            throw new SecurityException("You don't have permission to delete orders");
+        // Check if user can delete this specific order
+        if (!sessionManager.canDeleteOrder(order)) {
+            throw new SecurityException("You don't have permission to delete this order");
         }
         
         // Check if order has items
