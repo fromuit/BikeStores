@@ -21,6 +21,7 @@ public class MainFrame extends JFrame {
     private JInternalFrame welcomeInternalFrame;
     private JSplitPane splitPane;
     private JPanel navigationPanel;
+    private JPanel userInfoPanel;
 
     public MainFrame() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -50,6 +51,7 @@ public class MainFrame extends JFrame {
         welcomeInternalFrame = createWelcomeInternalFrame();
         // navigationTree = createNavigationTree(); // Thay thế dòng này
         navigationPanel = createButtonNavigationPanel(); // Gọi phương thức mới
+        userInfoPanel = createUserInfoPanel(); // Thêm panel thông tin user
     }
 
     private JInternalFrame createWelcomeInternalFrame() {
@@ -173,6 +175,104 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
+    private JPanel createUserInfoPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(52, 73, 94)); // Dark blue background
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        panel.setPreferredSize(new Dimension(0, 60));
+
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        
+        // Left side - User info
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        leftPanel.setOpaque(false);
+        
+        JLabel userIcon = new JLabel("👤");
+        userIcon.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        userIcon.setForeground(Color.WHITE);
+        userIcon.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+        
+        JPanel userTextPanel = new JPanel();
+        userTextPanel.setLayout(new BoxLayout(userTextPanel, BoxLayout.Y_AXIS));
+        userTextPanel.setOpaque(false);
+        
+        String username = currentUser != null ? currentUser.getUsername() : "Unknown User";
+        String role = currentUser != null ? getRoleDisplayName(currentUser.getRole()) : "Unknown Role";
+        
+        JLabel usernameLabel = new JLabel("Xin chào, " + username);
+        usernameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        usernameLabel.setForeground(Color.WHITE);
+        usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel roleLabel = new JLabel("Vai trò: " + role);
+        roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        roleLabel.setForeground(new Color(189, 195, 199)); // Light gray
+        roleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        userTextPanel.add(usernameLabel);
+        userTextPanel.add(roleLabel);
+        
+        // Add store info for employees and store managers
+        if (currentUser != null && currentUser.getStaffID() != null && 
+            (currentUser.getRole() == User.UserRole.EMPLOYEE || currentUser.getRole() == User.UserRole.STORE_MANAGER)) {
+            String storeInfo = getStoreInfo(currentUser);
+            if (!storeInfo.isEmpty()) {
+                JLabel storeLabel = new JLabel(storeInfo);
+                storeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                storeLabel.setForeground(new Color(149, 165, 166)); // Lighter gray
+                storeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                userTextPanel.add(storeLabel);
+            }
+        }
+        
+        leftPanel.add(userIcon);
+        leftPanel.add(userTextPanel);
+        
+        // Right side - System info
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        rightPanel.setOpaque(false);
+        
+        JLabel systemLabel = new JLabel("BikeStores Management System");
+        systemLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        systemLabel.setForeground(new Color(52, 152, 219)); // Blue
+        
+        rightPanel.add(systemLabel);
+        
+        panel.add(leftPanel, BorderLayout.WEST);
+        panel.add(rightPanel, BorderLayout.EAST);
+        
+        return panel;
+    }
+    
+    private String getRoleDisplayName(User.UserRole role) {
+        if (role == null) return "Không xác định";
+        
+        switch (role) {
+            case EMPLOYEE:
+                return "Nhân viên";
+            case STORE_MANAGER:
+                return "Quản lý cửa hàng";
+            case CHIEF_MANAGER:
+                return "Quản lý tổng";
+            default:
+                return "Không xác định";
+        }
+    }
+    
+    private String getStoreInfo(User user) {
+        try {
+            if (user != null && user.getStaffID() != null) {
+                java.util.ArrayList<Integer> accessibleStores = SessionManager.getInstance().getAccessibleStoreIds();
+                if (!accessibleStores.isEmpty()) {
+                    return "Cửa hàng: " + accessibleStores.get(0);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting store info: " + e.getMessage());
+        }
+        return "";
+    }
+
     private void configureNavButton(JButton button, Font font, Dimension size, String itemName) {
         button.setFont(font);
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -181,9 +281,6 @@ public class MainFrame extends JFrame {
         button.setFocusPainted(false);
         button.setMargin(new Insets(5, 15, 5, 15));
 
-        // button.setBackground(new Color(230, 230, 250));
-        // button.setOpaque(true);
-        // button.setBorderPainted(false);
         button.addActionListener(e -> handleNavigation(itemName));
     }
 
@@ -253,6 +350,7 @@ public class MainFrame extends JFrame {
         splitPane.setBorder(null);
 
         setLayout(new BorderLayout());
+        add(userInfoPanel, BorderLayout.NORTH); // Thêm panel thông tin user ở phía trên
         add(splitPane, BorderLayout.CENTER);
 
         if (welcomeInternalFrame != null) {
@@ -278,6 +376,20 @@ public class MainFrame extends JFrame {
             x = Math.max(0, x);
             y = Math.max(0, y);
             welcomeInternalFrame.setLocation(x, y);
+        }
+    }
+    
+    public void updateUserInfo() {
+        if (userInfoPanel != null) {
+            // Remove old panel and create new one with updated info
+            Container parent = userInfoPanel.getParent();
+            if (parent != null) {
+                parent.remove(userInfoPanel);
+                userInfoPanel = createUserInfoPanel();
+                parent.add(userInfoPanel, BorderLayout.NORTH);
+                parent.revalidate();
+                parent.repaint();
+            }
         }
     }
 
@@ -353,8 +465,6 @@ public class MainFrame extends JFrame {
             }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
-
-            // mainFrame.centerWelcomeFrame(); // Được xử lý bởi component listener
         });
     }
 }
