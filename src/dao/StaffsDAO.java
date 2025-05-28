@@ -3,15 +3,47 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
-import model.Sales.Staffs;
-import utils.DatabaseUtil;
+
+import dao.interfaces.IStaffsDAO;
 import java.sql.*;
 import java.util.ArrayList;
+import model.Sales.Staffs;
+import utils.DatabaseUtil;
+
 /**
- *
- * @author duyng
+ * Staff Data Access Object Implementation
  */
-public class StaffsDAO {
+public class StaffsDAO implements IStaffsDAO {
+    
+    @Override
+    public boolean insert(Staffs staff) {
+        return addStaff(staff);
+    }
+    
+    @Override
+    public boolean update(Staffs staff) {
+        return updateStaff(staff);
+    }
+    
+    @Override
+    public boolean delete(Integer staffId) {
+        return deleteStaff(staffId);
+    }
+    
+    @Override
+    public ArrayList<Staffs> selectAll() {
+        return getAllStaffs();
+    }
+    
+    @Override
+    public Staffs selectById(Integer staffId) {
+        return getStaffById(staffId);
+    }
+    
+    @Override
+    public ArrayList<Staffs> search(String searchTerm) {
+        return searchStaffs(searchTerm);
+    }
     
     // Create - Add new staff
     public boolean addStaff(Staffs staff) {
@@ -30,6 +62,7 @@ public class StaffsDAO {
             }
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error adding staff: " + e.getMessage());
             return false;
         }
     }
@@ -44,6 +77,7 @@ public class StaffsDAO {
                 staffs.add(mapResultSetToStaff(rs));
             }
         } catch (SQLException e) {
+            System.err.println("Error getting all staffs: " + e.getMessage());
         }
         return staffs;
     }
@@ -58,6 +92,7 @@ public class StaffsDAO {
                 return mapResultSetToStaff(rs);
             }
         } catch (SQLException e) {
+            System.err.println("Error getting staff by ID: " + e.getMessage());
         }
         return null;
     }
@@ -95,6 +130,7 @@ public class StaffsDAO {
             pstmt.setInt(8, staff.getPersonID());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error updating staff: " + e.getMessage());
             return false;
         }
     }
@@ -106,6 +142,7 @@ public class StaffsDAO {
             pstmt.setInt(1, staffId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error deleting staff: " + e.getMessage());
             return false;
         }
     }
@@ -120,11 +157,9 @@ public class StaffsDAO {
                        "phone LIKE ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             String searchPattern = "%" + searchTerm + "%";
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
-            pstmt.setString(3, searchPattern);
-            pstmt.setString(4, searchPattern);
-
+            for (int i = 1; i <= 4; i++) {
+                pstmt.setString(i, searchPattern);
+            }
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 staffs.add(mapResultSetToStaff(rs));
@@ -179,7 +214,7 @@ public class StaffsDAO {
     }
 
     public boolean hasActiveOrders(int staffId) {
-        String query = "SELECT COUNT(*) FROM sales.orders WHERE staff_id = ? AND order_status IN (1, 2)"; // Assuming 1=Pending, 2=Processing
+        String query = "SELECT COUNT(*) FROM sales.orders WHERE staff_id = ? AND order_status IN (1, 2)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, staffId);
             ResultSet rs = pstmt.executeQuery();
@@ -215,7 +250,7 @@ public class StaffsDAO {
             rs.getString("phone"),
             rs.getInt("active"),
             rs.getInt("store_id"),
-            rs.getObject("manager_id") != null ? rs.getInt("manager_id") : null
+            rs.getObject("manager_id")
         );
     }
 }

@@ -3,15 +3,59 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
-import model.Production.Categories;
-import utils.DatabaseUtil;
+
+import dao.interfaces.ICategoriesDAO;
 import java.sql.*;
 import java.util.ArrayList;
+import model.Production.Categories;
+import utils.DatabaseUtil;
+
 /**
- *
- * @author duyng
+ * Categories Data Access Object Implementation
  */
-public class CategoriesDAO {
+public class CategoriesDAO implements ICategoriesDAO {
+    
+    @Override
+    public boolean insert(Categories category) {
+        return addCategory(category);
+    }
+    
+    @Override
+    public boolean update(Categories category) {
+        return updateCategory(category);
+    }
+    
+    @Override
+    public boolean delete(Integer categoryId) {
+        return deleteCategory(categoryId);
+    }
+    
+    @Override
+    public ArrayList<Categories> selectAll() {
+        return getAllCategories();
+    }
+    
+    @Override
+    public Categories selectById(Integer categoryId) {
+        return getCategoryById(categoryId);
+    }
+    
+    @Override
+    public ArrayList<Categories> search(String searchTerm) {
+        ArrayList<Categories> categories = new ArrayList<>();
+        String query = "SELECT * FROM production.categories WHERE LOWER(category_name) LIKE LOWER(?)";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
+            String searchPattern = "%" + searchTerm + "%";
+            pstmt.setString(1, searchPattern);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                categories.add(mapResultSetToCategory(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error searching categories: " + e.getMessage());
+        }
+        return categories;
+    }
     
     public boolean addCategory(Categories category) {
         String query = "INSERT INTO production.categories (category_name) VALUES (?)";
@@ -19,6 +63,7 @@ public class CategoriesDAO {
             pstmt.setString(1, category.getCategoryName());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error adding category: " + e.getMessage());
             return false;
         }
     }
@@ -32,6 +77,7 @@ public class CategoriesDAO {
                 categories.add(mapResultSetToCategory(rs));
             }
         } catch (SQLException e) {
+            System.err.println("Error getting all categories: " + e.getMessage());
         }
         return categories;
     }
@@ -45,6 +91,7 @@ public class CategoriesDAO {
                 return mapResultSetToCategory(rs);
             }
         } catch (SQLException e) {
+            System.err.println("Error getting category by ID: " + e.getMessage());
         }
         return null;
     }
@@ -56,6 +103,7 @@ public class CategoriesDAO {
             pstmt.setInt(2, category.getCategoryID());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error updating category: " + e.getMessage());
             return false;
         }
     }
@@ -66,6 +114,7 @@ public class CategoriesDAO {
             pstmt.setInt(1, categoryId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error deleting category: " + e.getMessage());
             return false;
         }
     }

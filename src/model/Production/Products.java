@@ -27,15 +27,10 @@ public class Products {
         this.modelYear = modelYear;
         this.listPrice = listPrice;
     }
-    public Products(int productID, String productName, int brandID, int categoryID, int modelYear, double listPrice, String category, String brand) {
-        this.productID = productID;
-        this.productName = productName;
-        this.brandID = brandID;
-        this.categoryID = categoryID;
-        this.modelYear = modelYear;
-        this.listPrice = listPrice;
-        this.category = category;
-        this.brand = brand;
+    public Products(int productID, String productName, int brandID, int categoryID, int modelYear, double listPrice, String categoryName, String brandName) {
+        this(productID, productName, brandID, categoryID, modelYear, listPrice);
+        this.category = categoryName;
+        this.brand = brandName;
     }
     
     public String getBrand(){

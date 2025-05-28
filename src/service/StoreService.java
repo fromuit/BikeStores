@@ -1,6 +1,7 @@
 package service;
 
 import dao.StoresDAO;
+import dao.interfaces.IStoresDAO;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import model.Administration.User;
@@ -9,7 +10,7 @@ import utils.SessionManager;
 import utils.ValidationException;
 
 public class StoreService {
-    private final StoresDAO storesDAO;
+    private final IStoresDAO storesDAO;
     private final SessionManager sessionManager;
 
     // Basic email regex pattern
@@ -27,13 +28,19 @@ public class StoreService {
         this.sessionManager = SessionManager.getInstance();
     }
 
+    // Alternative constructor for dependency injection
+    public StoreService(IStoresDAO storesDAO) {
+        this.storesDAO = storesDAO;
+        this.sessionManager = SessionManager.getInstance();
+    }
+
     public ArrayList<Stores> getAllStores() throws SecurityException {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required to view stores.");
         }
         
-        ArrayList<Stores> allStores = storesDAO.getAllStores();
+        ArrayList<Stores> allStores = storesDAO.selectAll();
         return filterStoresByAccess(allStores);
     }
 
@@ -74,7 +81,7 @@ public class StoreService {
             throw new SecurityException("You don't have permission to view this store.");
         }
         
-        return storesDAO.getStoreById(storeId);
+        return storesDAO.selectById(storeId);
     }
 
     private boolean canAccessStore(int storeId) {
@@ -101,7 +108,7 @@ public class StoreService {
         }
         
         validateStore(store);
-        return storesDAO.addStore(store);
+        return storesDAO.insert(store);
     }
 
     public boolean updateStore(Stores store) throws ValidationException, SecurityException {
@@ -129,7 +136,7 @@ public class StoreService {
         // CHIEF_MANAGER can update any store (no additional check needed)
         
         validateStore(store);
-        return storesDAO.updateStore(store);
+        return storesDAO.update(store);
     }
 
     public boolean deleteStore(int storeId) throws ValidationException, SecurityException {
@@ -147,9 +154,7 @@ public class StoreService {
             throw new ValidationException("Store ID for delete is invalid.");
         }
         
-        // Add business logic here: e.g., check if store has associated staff/orders
-        // For example, prevent deletion if there are active orders or staff assigned to this store.
-        return storesDAO.deleteStore(storeId);
+        return storesDAO.delete(storeId);
     }
 
     public ArrayList<Stores> searchStores(String searchTerm) throws SecurityException {
@@ -158,7 +163,7 @@ public class StoreService {
             throw new SecurityException("Authentication required to search stores.");
         }
         
-        ArrayList<Stores> searchResults = storesDAO.searchStores(searchTerm);
+        ArrayList<Stores> searchResults = storesDAO.search(searchTerm);
         return filterStoresByAccess(searchResults);
     }
 
@@ -198,7 +203,5 @@ public class StoreService {
         if (store.getZipCode() != null && store.getZipCode().length() > 10) {
             throw new ValidationException("Zip code cannot exceed 10 characters.");
         }
-        // Add more specific validation as needed, e.g., zip code format for a specific
-        // country.
     }
 }
