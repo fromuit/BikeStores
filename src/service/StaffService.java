@@ -5,9 +5,9 @@
 package service;
 
 import dao.StaffsDAO;
-import model.Sales.Staffs;
 import java.util.ArrayList;
 import model.Administration.User;
+import model.Sales.Staffs;
 import utils.SessionManager;
 import utils.ValidationException;
 /**
@@ -65,7 +65,14 @@ public class StaffService {
         validateStaff(staff);
         validateBusinessRules(staff);
         
-        if (!sessionManager.canManageStaff(staff)) {
+        // Check permissions - CHIEF_MANAGER has full access
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required");
+        }
+        
+        // CHIEF_MANAGER can manage all staff, others need specific permission check
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(staff)) {
             throw new SecurityException("You don't have permission to add staff to store " + staff.getStoreID());
         }
         
@@ -87,7 +94,14 @@ public class StaffService {
             throw new ValidationException("Staff not found");
         }
         
-        if (!sessionManager.canManageStaff(existingStaff)) {
+        // Check permissions - CHIEF_MANAGER has full access
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required");
+        }
+        
+        // CHIEF_MANAGER can manage all staff, others need specific permission check
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(existingStaff)) {
             throw new SecurityException("You don't have permission to update this staff member");
         }
         
@@ -105,7 +119,14 @@ public class StaffService {
             throw new ValidationException("Staff not found");
         }
         
-        if (!sessionManager.canManageStaff(staff)) {
+        // Check permissions - CHIEF_MANAGER has full access
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required");
+        }
+        
+        // CHIEF_MANAGER can manage all staff, others need specific permission check
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(staff)) {
             throw new SecurityException("You don't have permission to delete this staff member");
         }
         
@@ -151,8 +172,13 @@ public class StaffService {
             if (manager == null) {
                 throw new ValidationException("Invalid manager ID");
             }
-            if (manager.getStoreID() != staff.getStoreID()) {
-                throw new ValidationException("Manager must be in the same store");
+            
+            // CHIEF_MANAGER can assign managers from different stores
+            User currentUser = sessionManager.getCurrentUser();
+            if (currentUser != null && currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
+                if (manager.getStoreID() != staff.getStoreID()) {
+                    throw new ValidationException("Manager must be in the same store");
+                }
             }
         }
     }

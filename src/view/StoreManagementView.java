@@ -1,14 +1,13 @@
 package view;
 
 import controller.StoreController;
-import model.Sales.Stores;
-import model.Administration.User;
-import utils.SessionManager;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import model.Administration.User;
+import model.Sales.Stores;
+import utils.SessionManager;
 
 public class StoreManagementView extends JInternalFrame {
     private final StoreController controller;
@@ -187,26 +186,28 @@ public class StoreManagementView extends JInternalFrame {
             return;
         }
 
-        // By default, most users can view. Specific add/update/delete are handled by
-        // service.
-        // However, we can disable buttons based on general roles here if needed.
-        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            btnAdd.setEnabled(false);
-            btnUpdate.setEnabled(false);
-            btnDelete.setEnabled(false);
-            // Employees might not even have access to this view in a real app, or have
-            // read-only form.
-            setFormFieldsEditable(false);
-        } else if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
-            btnAdd.setEnabled(false); 
-            btnUpdate.setEnabled(true);
-            btnDelete.setEnabled(false); // Store managers typically cannot delete stores
-            setFormFieldsEditable(true);
-        } else if (currentUser.getRole() == User.UserRole.CHIEF_MANAGER) {
-            btnAdd.setEnabled(true);
-            btnUpdate.setEnabled(true);
-            btnDelete.setEnabled(true);
-            setFormFieldsEditable(true);
+        switch (currentUser.getRole()) {
+            case EMPLOYEE -> {
+                // Employees can only view their own store
+                btnAdd.setEnabled(false);
+                btnUpdate.setEnabled(false);
+                btnDelete.setEnabled(false);
+                setFormFieldsEditable(false);
+            }
+            case STORE_MANAGER -> {
+                // Store managers can view all stores but only edit their own
+                btnAdd.setEnabled(false);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(false);
+                setFormFieldsEditable(true);
+            }
+            case CHIEF_MANAGER -> {
+                // Chief managers have full access
+                btnAdd.setEnabled(true);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
+                setFormFieldsEditable(true);
+            }
         }
     }
 
@@ -224,8 +225,26 @@ public class StoreManagementView extends JInternalFrame {
         int selectedRow = storeTable.getSelectedRow();
         if (selectedRow != -1) {
             selectedStoreId = (Integer) tableModel.getValueAt(selectedRow, 0);
-            // Fetch full store details to populate form, as table might show limited info
-            Stores store = controller.getStoreById(selectedStoreId); // Need getStoreById in controller
+            
+            User currentUser = sessionManager.getCurrentUser();
+            
+            // For store managers, check if they can edit this store
+            if (currentUser != null && currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+                ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+                boolean canEdit = accessibleStores.contains(selectedStoreId);
+                
+                // Update button state based on whether they can edit this store
+                btnUpdate.setEnabled(canEdit);
+                setFormFieldsEditable(canEdit);
+                
+                if (!canEdit) {
+                    // Show a visual indicator that this store is read-only
+                    showMessage("Bạn chỉ có thể xem thông tin cửa hàng này");
+                }
+            }
+            
+            // Fetch full store details to populate form
+            Stores store = controller.getStoreById(selectedStoreId);
             if (store != null) {
                 txtStoreName.setText(store.getStoreName());
                 txtPhone.setText(store.getPhone());
@@ -235,8 +254,8 @@ public class StoreManagementView extends JInternalFrame {
                 txtState.setText(store.getState());
                 txtZipCode.setText(store.getZipCode());
             } else {
-                clearForm(); // If store not found (e.g. deleted after table load)
-                showError("Khoảng thể lấy thông tin cửa hàng này!");
+                clearForm();
+                showError("Không thể lấy thông tin cửa hàng này!");
             }
         }
     }
@@ -253,6 +272,18 @@ public class StoreManagementView extends JInternalFrame {
             showError("Hãy chọn một cửa hàng để cập nhật");
             return;
         }
+        
+        User currentUser = sessionManager.getCurrentUser();
+        
+        // Additional client-side check for store managers
+        if (currentUser != null && currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+            ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+            if (!accessibleStores.contains(selectedStoreId)) {
+                showError("Bạn chỉ có thể sửa thông tin cửa hàng mình quản lý");
+                return;
+            }
+        }
+        
         Stores store = createStoreFromForm();
         if (store != null) {
             store.setStoreID(selectedStoreId);

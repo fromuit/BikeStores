@@ -1,10 +1,10 @@
 package controller;
 
+import java.util.ArrayList;
 import model.Sales.Stores;
 import service.StoreService;
-import utils.ValidationException;
-import view.StoreManagementView; // Assuming this view will be created
-import java.util.ArrayList;
+import utils.ValidationException; // Assuming this view will be created
+import view.StoreManagementView;
 
 public class StoreController {
     private final StoreService storeService;
@@ -93,8 +93,6 @@ public class StoreController {
                     view.showMessage("Store deleted successfully!");
                 loadStores(); // Refresh the table
             } else {
-                // This 'else' might not be reached if DAO/Service throws exception on failure
-                // or DAO returns false for other reasons (e.g. FK constraint)
                 if (view != null)
                     view.showError("Failed to delete store. It might be in use or not exist.");
             }
@@ -130,13 +128,11 @@ public class StoreController {
         try {
             return storeService.getStoreById(storeId);
         } catch (SecurityException e) {
-            if (view != null)
-                view.showError("Permission Denied: " + e.getMessage());
+            view.showError("Access denied: " + e.getMessage());
+            return null;
         } catch (Exception e) {
-            if (view != null)
-                view.showError("Error retrieving store: " + e.getMessage());
-            System.err.println("Error in StoreController.getStoreById: " + e.getMessage());
+            view.showError("Error loading store: " + e.getMessage());
+            return null;
         }
-        return null;
     }
 }

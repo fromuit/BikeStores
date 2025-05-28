@@ -55,8 +55,9 @@ public class SessionManager {
         if (currentUser == null) return false;
         if (currentUser.getRole() == User.UserRole.CHIEF_MANAGER) return true;
         
-        // For Store Managers, check if it's their store
-        if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+        // For Store Managers and Employees, check if it's their store
+        if (currentUser.getRole() == User.UserRole.STORE_MANAGER || 
+            currentUser.getRole() == User.UserRole.EMPLOYEE) {
             // Get store ID from staff record
             return getStaffStoreId(currentUser.getStaffID()) == storeId;
         }
@@ -113,15 +114,26 @@ public class SessionManager {
     }
     
     private int getStaffStoreId(Integer staffID) {
-        if (staffID == null) return -1;
-    
+        if (staffID == null) {
+            System.err.println("Staff ID is null");
+            return -1;
+        }
+
         try {
             // Get store ID from staff record using DAO
             StaffsDAO staffDAO = new StaffsDAO();
             Staffs staff = staffDAO.getStaffById(staffID);
-            return staff != null ? staff.getStoreID() : -1;
+            if (staff != null) {
+                System.out.println("Found staff: " + staff.getFirstName() + " " + staff.getLastName() + 
+                                 " in store: " + staff.getStoreID());
+                return staff.getStoreID();
+            } else {
+                System.err.println("No staff found with ID: " + staffID);
+                return -1;
+            }
         } catch (Exception e) {
             System.err.println("Error getting staff store ID: " + e.getMessage());
+            e.printStackTrace();
             return -1;
         }    
     }
@@ -134,7 +146,7 @@ public class SessionManager {
             case STORE_MANAGER -> canAccessStore(staff.getStoreID());
             case EMPLOYEE -> false;
             default -> false;
-        }; // Can only manage staff in their own store
+        }; 
     }    
     
     public ArrayList<Integer> getAccessibleStoreIds() {
@@ -149,17 +161,14 @@ public class SessionManager {
                     storeIds.add(i);
                 }
             }
-            case STORE_MANAGER -> {
-                // Store managers can only access their own store
+            case STORE_MANAGER, EMPLOYEE -> {
+                // Store managers and employees can only access their own store
                 int storeId = getStaffStoreId(currentUser.getStaffID());
                 if (storeId > 0) {
                     storeIds.add(storeId);
                 }
             }
-            case EMPLOYEE -> {
-            }
         }
-        // Employees typically don't manage staff
         return storeIds;
     }
 }

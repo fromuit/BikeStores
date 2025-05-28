@@ -51,7 +51,7 @@ public class StockManagementView extends JInternalFrame {
     public StockManagementView() {
         super("Quản lý kho", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
-        this.storeService = new StoreService(); // Initialize StoreService
+        this.storeService = new StoreService();
         controller = new StockController(this);
         initializeUI();
         populateStoreDropdown();
@@ -142,13 +142,18 @@ public class StockManagementView extends JInternalFrame {
         // --- Event Listeners ---
         cmbStoreSelector.addActionListener(e -> {
             StoreItem selectedStore = (StoreItem) cmbStoreSelector.getSelectedItem();
-            if (selectedStore != null && selectedStore.getId() != 0) {
+            if (selectedStore != null && selectedStore.getId() > 0) {
                 selectedStoreIdForTable = selectedStore.getId();
-                // controller.loadStocksByStore(selectedStoreIdForTable); // Load on selection
-                // or via button
+                
+                // Clear the table and form when store changes
+                tableModel.setRowCount(0);
+                clearUpdateForm();
+                
+                // Update button permissions when store changes
+                updateButtonStateBasedOnPermissions();
             } else {
                 selectedStoreIdForTable = -1;
-                tableModel.setRowCount(0); // Clear table if "Select Store" is chosen
+                tableModel.setRowCount(0);
                 clearUpdateForm();
             }
         });
@@ -172,19 +177,50 @@ public class StockManagementView extends JInternalFrame {
 
     private void populateStoreDropdown() {
         cmbStoreSelector.removeAllItems();
-        cmbStoreSelector.addItem(new StoreItem(0, "Chọn một cửa hàng")); 
+        
         try {
-            ArrayList<Stores> stores = storeService.getAllStores();
-            if (stores != null) {
-                for (Stores store : stores) {
-                    cmbStoreSelector.addItem(new StoreItem(store.getStoreID(), store.getStoreName()));
+            // Use StockService to get accessible stores instead of StoreService
+            ArrayList<Stores> stores = controller.getAccessibleStoresForStockView();
+            
+            User currentUser = sessionManager.getCurrentUser();
+            
+            if (stores != null && !stores.isEmpty()) {
+                if (currentUser != null && currentUser.getRole() == User.UserRole.EMPLOYEE) {
+                    // For employees, don't add "Select store" option if they only have one store
+                    if (stores.size() == 1) {
+                        // Only add their store, no "Select" option
+                        Stores store = stores.get(0);
+                        cmbStoreSelector.addItem(new StoreItem(store.getStoreID(), store.getStoreName()));
+                        selectedStoreIdForTable = store.getStoreID(); // Auto-select
+                    } else {
+                        // Multiple stores (shouldn't happen for employees, but just in case)
+                        cmbStoreSelector.addItem(new StoreItem(0, "Chọn một cửa hàng"));
+                        for (Stores store : stores) {
+                            cmbStoreSelector.addItem(new StoreItem(store.getStoreID(), store.getStoreName()));
+                        }
+                    }
+                } else {
+                    // For managers and chief managers, add "Select store" option
+                    cmbStoreSelector.addItem(new StoreItem(0, "Chọn một cửa hàng"));
+                    for (Stores store : stores) {
+                        cmbStoreSelector.addItem(new StoreItem(store.getStoreID(), store.getStoreName()));
+                    }
                 }
+            } else {
+                // No accessible stores
+                cmbStoreSelector.addItem(new StoreItem(0, "Không có cửa hàng khả dụng"));
+                cmbStoreSelector.setEnabled(false);
             }
+            
         } catch (SecurityException e) {
             showError("Permission Denied: Could not load stores. " + e.getMessage());
+            cmbStoreSelector.addItem(new StoreItem(0, "Lỗi quyền truy cập"));
+            cmbStoreSelector.setEnabled(false);
         } catch (Exception e) {
             showError("Error loading stores: " + e.getMessage());
             System.err.println("Error populating store dropdown: " + e.getMessage());
+            cmbStoreSelector.addItem(new StoreItem(0, "Lỗi tải dữ liệu"));
+            cmbStoreSelector.setEnabled(false);
         }
     }
 
@@ -199,14 +235,30 @@ public class StockManagementView extends JInternalFrame {
             return;
         }
 
-        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            btnUpdateQuantity.setEnabled(false);
-            txtNewQuantity.setEditable(false);
-            // Employees might only view stock, not update it.
-        } else {
-            // Managers can update
-            // btnUpdateQuantity is enabled/disabled based on table selection too
-            txtNewQuantity.setEditable(true);
+        switch (currentUser.getRole()) {
+            case EMPLOYEE -> {
+                // Employees can select their own store and update stock for it
+                cmbStoreSelector.setEnabled(true);
+                btnRefreshStocks.setEnabled(true);
+                txtNewQuantity.setEditable(true);
+                
+                // If store is already auto-selected, enable update permissions
+                if (selectedStoreIdForTable > 0) {
+                    updateButtonStateBasedOnPermissions();
+                }
+            }
+            case STORE_MANAGER -> {
+                // Store managers can view all stores but only update their own
+                cmbStoreSelector.setEnabled(true);
+                btnRefreshStocks.setEnabled(true);
+                txtNewQuantity.setEditable(true);
+            }
+            case CHIEF_MANAGER -> {
+                // Chief managers have full access
+                cmbStoreSelector.setEnabled(true);
+                btnRefreshStocks.setEnabled(true);
+                txtNewQuantity.setEditable(true);
+            }
         }
     }
 
@@ -216,16 +268,66 @@ public class StockManagementView extends JInternalFrame {
             int modelRow = stockTable.convertRowIndexToModel(selectedRow);
             selectedProductIdForUpdate = (Integer) tableModel.getValueAt(modelRow, 0);
             String productName = (String) tableModel.getValueAt(modelRow, 1);
-            // int currentQuantity = (Integer) tableModel.getValueAt(selectedRow, 2);
 
             txtSelectedProductId.setText(String.valueOf(selectedProductIdForUpdate));
             txtSelectedProductName.setText(productName);
-            txtNewQuantity.setText(tableModel.getValueAt(modelRow, 2).toString()); // Set current quantity as
-                                                                                      // starting point
+            txtNewQuantity.setText(tableModel.getValueAt(modelRow, 2).toString());
             txtNewQuantity.requestFocus();
-            btnUpdateQuantity.setEnabled(true && txtNewQuantity.isEditable()); // Enable if form is editable
+            
+            // Check if user can update stock for the currently selected store
+            updateButtonStateBasedOnPermissions();
         } else {
             clearUpdateForm();
+        }
+    }
+
+    private void updateButtonStateBasedOnPermissions() {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null || selectedStoreIdForTable <= 0) {
+            btnUpdateQuantity.setEnabled(false);
+            return;
+        }
+
+        boolean canUpdate = false;
+        boolean canView = true;
+        
+        switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> {
+                canUpdate = true; // Can update any store
+                canView = true;
+            }
+            case STORE_MANAGER -> {
+                canView = true; // Can view all stores
+                // Can only update their own store
+                ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+                canUpdate = accessibleStores.contains(selectedStoreIdForTable);
+            }
+            case EMPLOYEE -> {
+                // Can view and update their own store
+                ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+                canView = accessibleStores.contains(selectedStoreIdForTable);
+                canUpdate = accessibleStores.contains(selectedStoreIdForTable);
+            }
+        }
+
+        // Enable/disable update button based on permissions and selection
+        btnUpdateQuantity.setEnabled(canUpdate && selectedProductIdForUpdate > 0);
+        
+        // Set visual feedback for form fields
+        if (canUpdate) {
+            txtNewQuantity.setEditable(true);
+            txtNewQuantity.setBackground(Color.WHITE);
+            txtNewQuantity.setToolTipText(null);
+        } else if (canView) {
+            // Can view but not update (for store managers viewing other stores)
+            txtNewQuantity.setEditable(false);
+            txtNewQuantity.setBackground(Color.LIGHT_GRAY);
+            txtNewQuantity.setToolTipText("Bạn chỉ có thể xem thông tin kho của cửa hàng này");
+        } else {
+            // Should not happen if permissions are correctly implemented
+            txtNewQuantity.setEditable(false);
+            txtNewQuantity.setBackground(Color.LIGHT_GRAY);
+            txtNewQuantity.setToolTipText("Không có quyền truy cập cửa hàng này");
         }
     }
 
@@ -240,9 +342,32 @@ public class StockManagementView extends JInternalFrame {
 
     private void updateStockQuantity() {
         if (selectedStoreIdForTable <= 0 || selectedProductIdForUpdate <= 0) {
-            showError("Please select a store and a product from the table.");
+            showError("Vui lòng chọn cửa hàng và sản phẩm từ bảng.");
             return;
         }
+
+        // Additional client-side permission check
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser != null) {
+            boolean canUpdate = false;
+            
+            switch (currentUser.getRole()) {
+                case CHIEF_MANAGER -> canUpdate = true;
+                case STORE_MANAGER, EMPLOYEE -> {
+                    ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+                    canUpdate = accessibleStores.contains(selectedStoreIdForTable);
+                }
+            }
+            
+            if (!canUpdate) {
+                String message = currentUser.getRole() == User.UserRole.STORE_MANAGER 
+                    ? "Bạn chỉ có thể cập nhật kho cho cửa hàng mình quản lý"
+                    : "Bạn chỉ có thể cập nhật kho cho cửa hàng mình làm việc";
+                showError(message);
+                return;
+            }
+        }
+
         try {
             int newQuantity = Integer.parseInt(txtNewQuantity.getText().trim());
             if (newQuantity < 0) {
@@ -250,7 +375,6 @@ public class StockManagementView extends JInternalFrame {
                 return;
             }
             controller.updateStockQuantity(selectedStoreIdForTable, selectedProductIdForUpdate, newQuantity);
-            // The controller's updateStockQuantity should trigger a refresh of the view
         } catch (NumberFormatException e) {
             showError("Số lượng không hợp lệ!");
         }
