@@ -210,7 +210,7 @@ public class LoginView extends JFrame {
 
     private void onLoginSuccess(User user) {
         SessionManager.getInstance().setCurrentUser(user);
-        showSuccess("Login successful! Welcome, " + user.getUsername());
+        showSuccess("Đăng nhập thành công, chào mừng " + user.getUsername());
 
         // Small delay to show success message
         Timer timer = new Timer(1000, e -> {

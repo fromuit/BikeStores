@@ -14,6 +14,10 @@ import javax.swing.table.TableRowSorter;
 import model.Administration.User;
 import model.Production.Products;
 import utils.SessionManager;
+import dao.BrandsDAO;
+import dao.CategoriesDAO;
+import model.Production.Categories;
+import model.Production.Brands;
 
 /**
  *
@@ -21,44 +25,8 @@ import utils.SessionManager;
  */
 public class ProductManagementView extends JInternalFrame {
     // Helper class to store Category ID and Name for ComboBox
-    private static class CategoryItem {
-        private final int id;
-        private final String name;
-
-        public CategoryItem(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String toString() {
-            return name; // This is what will be displayed in the JComboBox
-        }
-    }
 
     // Helper class to store Brand ID and Name for ComboBox
-    private static class BrandItem {
-        private final int id;
-        private final String name;
-
-        public BrandItem(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String toString() {
-            return name; // This is what will be displayed in the JComboBox
-        }
-    }
 
     private final ProductController controller;
     private JTable productTable;
@@ -66,8 +34,8 @@ public class ProductManagementView extends JInternalFrame {
     private JTextField txtProductName, txtBrandID, txtCategoryID, txtModelYear, txtListPrice;
     private JTextField txtSearch;
     private JButton btnSearch, btnClearSearch;
-    private JComboBox<CategoryItem> cmbCategoryFilter;
-    private JComboBox<BrandItem> cmbBrandFilter;
+    private JComboBox<Categories> cmbCategoryFilter;
+    private JComboBox<Brands> cmbBrandFilter;
     private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnClear;
     private int selectedProductId = -1;
 
@@ -87,7 +55,7 @@ public class ProductManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "Mã SP", "Tên", "Mã nhãn hàng", "Mã danh mục", "Năm sản xuất", "Giá niêm yết", "Danh mục",
+        String[] columnNames = { "Mã SP", "Tên sản phẩm", "Mã nhãn hàng", "Mã danh mục", "Năm sản xuất", "Giá niêm yết", "Danh mục",
                 "" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -133,31 +101,26 @@ public class ProductManagementView extends JInternalFrame {
 
     private void populateCategoryFilter() {
         cmbCategoryFilter.removeAllItems();
-        cmbCategoryFilter.addItem(new CategoryItem(0, "Tất cả"));
+        CategoriesDAO category = new CategoriesDAO();
+        ArrayList<Categories> categoriesList = category.getAllCategories();
+        cmbCategoryFilter.addItem(new Categories(-1, "Tất cả"));
+        int index = 1;
+        for (Categories ctgr : categoriesList){
+            cmbCategoryFilter.addItem(ctgr);
+        }
+        
 
-        // TODO: Replace with actual data loading from a CategoryService
-        cmbCategoryFilter.addItem(new CategoryItem(1, "Children Bicycles"));
-        cmbCategoryFilter.addItem(new CategoryItem(2, "Comfort Bicycles"));
-        cmbCategoryFilter.addItem(new CategoryItem(3, "Cruisers Bicycles"));
-        cmbCategoryFilter.addItem(new CategoryItem(4, "Cyclocross Bicycles"));
-        cmbCategoryFilter.addItem(new CategoryItem(5, "Electric Bikes"));
-        cmbCategoryFilter.addItem(new CategoryItem(6, "Mountain Bikes"));
-        cmbCategoryFilter.addItem(new CategoryItem(7, "Road Bikes"));
     }
 
     private void populateBrandFilter() {
         cmbBrandFilter.removeAllItems();
-        cmbBrandFilter.addItem(new BrandItem(0, "All Brands"));
-        // TODO: Replace with actual data loading from a BrandService or similar
-        cmbBrandFilter.addItem(new BrandItem(1, "Electra"));
-        cmbBrandFilter.addItem(new BrandItem(2, "Haro"));
-        cmbBrandFilter.addItem(new BrandItem(3, "Heller"));
-        cmbBrandFilter.addItem(new BrandItem(4, "Pure Cycles"));
-        cmbBrandFilter.addItem(new BrandItem(5, "Ritchey"));
-        cmbBrandFilter.addItem(new BrandItem(6, "Sun Bicycles"));
-        cmbBrandFilter.addItem(new BrandItem(7, "Surly"));
-        cmbBrandFilter.addItem(new BrandItem(8, "Strider"));
-        cmbBrandFilter.addItem(new BrandItem(9, "Trek"));
+        BrandsDAO brand = new BrandsDAO();
+        ArrayList<Brands> brandsList = brand.getAllBrands();
+        cmbBrandFilter.addItem(new Brands(-1, "Tất cả"));
+        int index = 1;
+        for (Brands br : brandsList){
+            cmbBrandFilter.addItem(br);
+        }
     }
 
     private void setupLayout() {
@@ -195,33 +158,33 @@ public class ProductManagementView extends JInternalFrame {
         int y = 0;
         gbc.gridx = 0;
         gbc.gridy = y;
-        formPanel.add(new JLabel("Product Name:"), gbc);
+        formPanel.add(new JLabel("Tên sản phẩm:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtProductName, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = y;
-        formPanel.add(new JLabel("Model Year:"), gbc);
+        formPanel.add(new JLabel("Năm sản xuất:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtModelYear, gbc);
         y++;
 
         gbc.gridx = 0;
         gbc.gridy = y;
-        formPanel.add(new JLabel("Brand ID:"), gbc);
+        formPanel.add(new JLabel("Mã nhãn hàng:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtBrandID, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = y;
-        formPanel.add(new JLabel("List Price:"), gbc);
+        formPanel.add(new JLabel("Giá niêm yết:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtListPrice, gbc);
         y++;
 
         gbc.gridx = 0;
         gbc.gridy = y;
-        formPanel.add(new JLabel("Category ID:"), gbc);
+        formPanel.add(new JLabel("Mã danh mục:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtCategoryID, gbc);
 
@@ -307,7 +270,7 @@ public class ProductManagementView extends JInternalFrame {
 
     private void updateProduct() {
         if (selectedProductId == -1) {
-            showError("Please select a product to update.");
+            showError("Chọn sản phẩm để cập nhật.");
             return;
         }
         if (validateInput()) {
@@ -319,12 +282,12 @@ public class ProductManagementView extends JInternalFrame {
 
     private void deleteProduct() {
         if (selectedProductId == -1) {
-            showError("Please select a product to delete.");
+            showError("Chọn sản phẩm để xoá.");
             return;
         }
         int confirmation = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete this product?",
-                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+                "Bạn có muốn xoá sản phẩm này?",
+                "Xác nhận", JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
             controller.deleteProduct(selectedProductId);
             clearForm();
@@ -369,17 +332,17 @@ public class ProductManagementView extends JInternalFrame {
 
     private void filterByCategory() {
         Object selectedItem = cmbCategoryFilter.getSelectedItem();
-        if (selectedItem instanceof CategoryItem) {
-            CategoryItem categoryItem = (CategoryItem) selectedItem;
-            int categoryId = categoryItem.getId();
-            if (categoryId == 0) { // ID 0 for "All Categories"
+        if (selectedItem instanceof Categories) {
+            Categories categoryItem = (Categories) selectedItem;
+            int categoryId = categoryItem.getCategoryID();
+            if (categoryId == -1) { // ID 0 for "All Categories"
                 loadProducts();
             } else {
                 controller.loadProductsByCategory(categoryId);
             }
         } else {
             if (cmbCategoryFilter.getItemCount() == 0) {
-                showError("Category filter is not populated.");
+                showError("Không có danh sách danh mục.");
             }
             loadProducts();
         }
@@ -387,9 +350,9 @@ public class ProductManagementView extends JInternalFrame {
 
     private void filterByBrand() {
         Object selectedItem = cmbBrandFilter.getSelectedItem();
-        if (selectedItem instanceof BrandItem) {
-            BrandItem brandItem = (BrandItem) selectedItem;
-            int brandId = brandItem.getId();
+        if (selectedItem instanceof Brands) {
+            Brands brandItem = (Brands) selectedItem;
+            int brandId = brandItem.getBrandID();
             if (brandId == 0) { // ID 0 for "All Brands"
                 loadProducts();
             } else {
@@ -397,7 +360,7 @@ public class ProductManagementView extends JInternalFrame {
             }
         } else {
             if (cmbBrandFilter.getItemCount() == 0) {
-                showError("Brand filter is not populated.");
+                showError("Không có danh sách nhãn hàng.");
             }
             loadProducts(); // Fallback to load all products
         }
@@ -406,7 +369,7 @@ public class ProductManagementView extends JInternalFrame {
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
-            showError("No user logged in. Access denied.");
+            showError("Không có tài khoản đăng nhập. Truy cập bị từ chối.");
             setFormAndButtonsEnabled(false);
             return;
         }
@@ -452,39 +415,39 @@ public class ProductManagementView extends JInternalFrame {
 
     private boolean validateInput() {
         if (txtProductName.getText().trim().isEmpty()) {
-            showError("Product name is required.");
+            showError("Tên sản phẩm là bắt buộc.");
             return false;
         }
         try {
             Integer.valueOf(txtBrandID.getText().trim());
         } catch (NumberFormatException e) {
-            showError("Brand ID must be a valid number.");
+            showError("Mã nhãn hàng phải là số hợp lệ.");
             return false;
         }
         try {
             Integer.valueOf(txtCategoryID.getText().trim());
         } catch (NumberFormatException e) {
-            showError("Category ID must be a valid number.");
+            showError("Mã danh mục phải là số hợp lệ.");
             return false;
         }
         try {
             int modelYear = Integer.parseInt(txtModelYear.getText().trim());
             if (modelYear < 1900 || modelYear > java.time.Year.now().getValue() + 5) {
-                showError("Please enter a realistic Model Year.");
+                showError("Năm sản xuất không hợp lệ.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            showError("Model Year must be a valid number.");
+            showError("Năm sản xuất phải là số hợp lệ");
             return false;
         }
         try {
             double listPrice = Double.parseDouble(txtListPrice.getText().trim());
             if (listPrice < 0) {
-                showError("List Price cannot be negative.");
+                showError("Giá sản phẩm không được âm.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            showError("List Price must be a valid number.");
+            showError("Giá sản phẩm phải là số hợp lệ.");
             return false;
         }
         return true;
