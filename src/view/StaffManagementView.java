@@ -35,7 +35,7 @@ public class StaffManagementView extends JInternalFrame {
     private final SessionManager sessionManager;
 
     public StaffManagementView() {
-        super("Staff Management", true, true, true, true);
+        super("Quản lý nhân viên", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         controller = new StaffController(this);
         initializeComponents();
@@ -49,8 +49,8 @@ public class StaffManagementView extends JInternalFrame {
 
     private void initializeComponents() {
         // Table setup
-        String[] columnNames = { "ID", "First Name", "Last Name", "Email", "Phone", "Active", "Store ID",
-                "Manager ID" };
+        String[] columnNames = { "Mã nhân viên", "Tên", "Họ", "Email", "SĐT", "Tình trạng", "Mã cửa hàng",
+                "Mã quản lý" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -78,13 +78,13 @@ public class StaffManagementView extends JInternalFrame {
         cmbActive = new JComboBox<>(new String[] { "1 - Active", "0 - Inactive" });
 
         // Buttons
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
-        btnClear = new JButton("Clear");
-        btnSearch = new JButton("Search");
-        btnClearSearch = new JButton("Clear search result");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClear = new JButton("Xoá trường");
+        btnSearch = new JButton("Tìm");
+        btnClearSearch = new JButton("Xoá");
 
         cmbStoreFilter = new JComboBox<>();
         populateStoreFilter();
@@ -92,11 +92,11 @@ public class StaffManagementView extends JInternalFrame {
 
     private void populateStoreFilter() {
         cmbStoreFilter.removeAllItems();
-        cmbStoreFilter.addItem("All Stores");
+        cmbStoreFilter.addItem("Tất cả");
 
         ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
         for (Integer storeId : accessibleStores) {
-            cmbStoreFilter.addItem("Store " + storeId);
+            cmbStoreFilter.addItem("Cửa hàng " + storeId);
         }
     }
 
@@ -104,12 +104,12 @@ public class StaffManagementView extends JInternalFrame {
         setLayout(new BorderLayout());
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(new JLabel("Tìm kiếm:"));
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnClearSearch);
         searchPanel.add(Box.createHorizontalStrut(20));
-        searchPanel.add(new JLabel("Filter by Store:"));
+        searchPanel.add(new JLabel("Lọc theo cửa hàng:"));
         searchPanel.add(cmbStoreFilter);
 
         // Table panel
@@ -131,13 +131,13 @@ public class StaffManagementView extends JInternalFrame {
         // Add form fields
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("First Name:"), gbc);
+        formPanel.add(new JLabel("Tên:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtFirstName, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Last Name:"), gbc);
+        formPanel.add(new JLabel("Họ:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtLastName, gbc);
 
@@ -149,25 +149,25 @@ public class StaffManagementView extends JInternalFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("Phone:"), gbc);
+        formPanel.add(new JLabel("SĐT:"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtPhone, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Active Status:"), gbc);
+        formPanel.add(new JLabel("Tình trạng nhân viên:"), gbc);
         gbc.gridx = 3;
         formPanel.add(cmbActive, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Store ID:"), gbc);
+        formPanel.add(new JLabel("Mã cửa hàng:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtStoreID, gbc);
 
         gbc.gridx = 2;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("Manager ID:"), gbc);
+        formPanel.add(new JLabel("Mã quản lý:"), gbc);
         gbc.gridx = 3;
         formPanel.add(txtManagerID, gbc);
 
@@ -254,7 +254,7 @@ public class StaffManagementView extends JInternalFrame {
 
     private void updateStaff() {
         if (selectedStaffId == -1) {
-            showError("Please select a staff to update");
+            showError("Hãy chọn một nhân viên để cập nhật");
             return;
         }
         if (validateInput()) {
@@ -266,12 +266,12 @@ public class StaffManagementView extends JInternalFrame {
 
     private void deleteStaff() {
         if (selectedStaffId == -1) {
-            showError("Please select a staff to delete");
+            showError("Hãy chọn một nhân viên để xoá");
             return;
         }
         int result = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete this staff?",
-                "Confirm Delete",
+                "Bạn có chắc muốn xoá nhân viên này?",
+                "Xác nhận xoá",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             controller.deleteStaff(selectedStaffId);
@@ -328,9 +328,9 @@ public class StaffManagementView extends JInternalFrame {
             // All stores
             loadStaffs();
         } else {
-            // Specific store - you'd need to implement this in controller
+            // Specific store
             String storeText = (String) cmbStoreFilter.getSelectedItem();
-            int storeId = Integer.parseInt(storeText.replace("Store ", ""));
+            int storeId = Integer.parseInt(storeText.replace("Cửa hàng ", ""));
             controller.loadStaffsByStore(storeId);
         }
     }
@@ -339,15 +339,14 @@ public class StaffManagementView extends JInternalFrame {
         User currentUser = sessionManager.getCurrentUser();
 
         switch (currentUser.getRole()) {
-            case EMPLOYEE: {
+            case EMPLOYEE ->  {
                 btnAdd.setEnabled(false);
                 btnUpdate.setEnabled(false);
                 btnDelete.setEnabled(false);
                 // Make all form fields read-only
                 setFormFieldsEnabled(false);
-                break;
             }
-            case STORE_MANAGER: {
+            case STORE_MANAGER ->  {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
@@ -359,14 +358,12 @@ public class StaffManagementView extends JInternalFrame {
                     txtStoreID.setText(String.valueOf(accessibleStores.get(0)));
                     txtStoreID.setEnabled(false);
                 }
-                break;
             }
-            case CHIEF_MANAGER: {
+            case CHIEF_MANAGER ->  {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
                 setFormFieldsEnabled(true);
-                break;
             }
         }
     }
@@ -383,22 +380,22 @@ public class StaffManagementView extends JInternalFrame {
 
     private boolean validateInput() {
         if (txtFirstName.getText().trim().isEmpty()) {
-            showError("First name is required");
+            showError("Phải có họ và tên");
             return false;
         }
         if (txtLastName.getText().trim().isEmpty()) {
-            showError("Last name is required");
+            showError("Phải có họ và tên");
             return false;
         }
         if (txtEmail.getText().trim().isEmpty()) {
-            showError("Email is required");
+            showError("Phải cung cấp email nhân viên");
             return false;
         }
 
         try {
             Integer.valueOf(txtStoreID.getText().trim());
         } catch (NumberFormatException e) {
-            showError("Store ID must be a valid number");
+            showError("Mã cửa hàng không hợp lệ");
             return false;
         }
 
@@ -407,7 +404,7 @@ public class StaffManagementView extends JInternalFrame {
             try {
                 Integer.valueOf(txtManagerID.getText().trim());
             } catch (NumberFormatException e) {
-                showError("Manager ID must be a valid number");
+                showError("Mã quản lý không hợp hệ");
                 return false;
             }
         }

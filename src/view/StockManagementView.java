@@ -49,15 +49,13 @@ public class StockManagementView extends JInternalFrame {
     }
 
     public StockManagementView() {
-        super("Manage Stocks", true, true, true, true);
+        super("Quản lý kho", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         this.storeService = new StoreService(); // Initialize StoreService
         controller = new StockController(this);
         initializeUI();
         populateStoreDropdown();
         applyRoleBasedPermissions();
-        // Initial load can be triggered by store selection or a default store if
-        // applicable
     }
 
     private void initializeUI() {
@@ -69,23 +67,23 @@ public class StockManagementView extends JInternalFrame {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
 
         JPanel storeSelectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        storeSelectionPanel.add(new JLabel("Select Store:"));
+        storeSelectionPanel.add(new JLabel("Chọn cửa hàng:"));
         cmbStoreSelector = new JComboBox<>();
         storeSelectionPanel.add(cmbStoreSelector);
-        btnRefreshStocks = new JButton("Load/Refresh Stocks for Store");
+        btnRefreshStocks = new JButton("Tải/Làm mới kho hàng");
         storeSelectionPanel.add(btnRefreshStocks);
         topPanel.add(storeSelectionPanel, BorderLayout.NORTH);
 
         // --- Stock Update Panel (within topPanel or separate) ---
         JPanel updatePanel = new JPanel(new GridBagLayout());
-        updatePanel.setBorder(BorderFactory.createTitledBorder("Update Stock Quantity"));
+        updatePanel.setBorder(BorderFactory.createTitledBorder("Cập nhật số lượng hàng"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        updatePanel.add(new JLabel("Product ID:"), gbc);
+        updatePanel.add(new JLabel("Mã sản phẩm:"), gbc);
         txtSelectedProductId = new JTextField(5);
         txtSelectedProductId.setEditable(false);
         gbc.gridx = 1;
@@ -94,7 +92,7 @@ public class StockManagementView extends JInternalFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        updatePanel.add(new JLabel("Product Name:"), gbc);
+        updatePanel.add(new JLabel("Tên sản phẩm:"), gbc);
         txtSelectedProductName = new JTextField(20);
         txtSelectedProductName.setEditable(false);
         gbc.gridx = 1;
@@ -105,13 +103,13 @@ public class StockManagementView extends JInternalFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        updatePanel.add(new JLabel("New Quantity:"), gbc);
+        updatePanel.add(new JLabel("Số lượng mới:"), gbc);
         txtNewQuantity = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 2;
         updatePanel.add(txtNewQuantity, gbc);
 
-        btnUpdateQuantity = new JButton("Update Quantity");
+        btnUpdateQuantity = new JButton("Cập nhật");
         gbc.gridx = 2;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
@@ -122,7 +120,7 @@ public class StockManagementView extends JInternalFrame {
         add(topPanel, BorderLayout.NORTH);
 
         // --- Table Panel ---
-        String[] columnNames = { "Product ID", "Product Name", "Current Quantity", "List Price" };
+        String[] columnNames = { "Mã sản phẩm", "Tên sản phẩm", "Số lượng trong kho", "Giá niêm yết" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -159,7 +157,7 @@ public class StockManagementView extends JInternalFrame {
             if (selectedStoreIdForTable > 0) {
                 controller.loadStocksByStore(selectedStoreIdForTable);
             } else {
-                showError("Please select a store first.");
+                showError("Hãy chọn một cửa hàng");
             }
         });
 
@@ -174,9 +172,9 @@ public class StockManagementView extends JInternalFrame {
 
     private void populateStoreDropdown() {
         cmbStoreSelector.removeAllItems();
-        cmbStoreSelector.addItem(new StoreItem(0, "Select a Store")); // Placeholder
+        cmbStoreSelector.addItem(new StoreItem(0, "Chọn một cửa hàng")); 
         try {
-            ArrayList<Stores> stores = storeService.getAllStores(); // Fetch stores
+            ArrayList<Stores> stores = storeService.getAllStores();
             if (stores != null) {
                 for (Stores store : stores) {
                     cmbStoreSelector.addItem(new StoreItem(store.getStoreID(), store.getStoreName()));
@@ -193,7 +191,7 @@ public class StockManagementView extends JInternalFrame {
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
-            showError("No user logged in. Access denied.");
+            showError("Không có tài khoản! Quyền truy cập bị từ chối");
             cmbStoreSelector.setEnabled(false);
             btnRefreshStocks.setEnabled(false);
             btnUpdateQuantity.setEnabled(false);
@@ -248,13 +246,13 @@ public class StockManagementView extends JInternalFrame {
         try {
             int newQuantity = Integer.parseInt(txtNewQuantity.getText().trim());
             if (newQuantity < 0) {
-                showError("Quantity cannot be negative.");
+                showError("Số lượng không được phép âm!");
                 return;
             }
             controller.updateStockQuantity(selectedStoreIdForTable, selectedProductIdForUpdate, newQuantity);
             // The controller's updateStockQuantity should trigger a refresh of the view
         } catch (NumberFormatException e) {
-            showError("Invalid quantity format. Please enter a number.");
+            showError("Số lượng không hợp lệ!");
         }
     }
 

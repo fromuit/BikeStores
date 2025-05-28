@@ -24,7 +24,7 @@ public class StoreManagementView extends JInternalFrame {
     private final SessionManager sessionManager;
 
     public StoreManagementView() {
-        super("Manage Stores", true, true, true, true);
+        super("Quản lý cửa hàng", true, true, true, true);
         this.sessionManager = SessionManager.getInstance();
         controller = new StoreController(this);
         initializeUI();
@@ -39,20 +39,20 @@ public class StoreManagementView extends JInternalFrame {
         // --- Search Panel ---
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(new JLabel("Tìm kiếm:"));
         txtSearch = new JTextField(25);
         searchPanel.add(txtSearch);
-        btnSearch = new JButton("Search");
+        btnSearch = new JButton("Tìm");
         searchPanel.add(btnSearch);
-        btnClearSearch = new JButton("Clear Search");
+        btnClearSearch = new JButton("Xoá");
         searchPanel.add(btnClearSearch);
 
         // --- Table Panel ---
-        String[] columnNames = { "ID", "Store Name", "Phone", "Email", "City", "State" };
+        String[] columnNames = { "Mã cửa hàng", "Tên cửa hàng", "SĐT", "Email", "Thành phố", "Bang" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table cells non-editable
+                return false;
             }
         };
         storeTable = new JTable(tableModel);
@@ -71,7 +71,7 @@ public class StoreManagementView extends JInternalFrame {
         // Row 0
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Name:"), gbc);
+        formPanel.add(new JLabel("Tên CH:"), gbc);
         txtStoreName = new JTextField(20);
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -82,7 +82,7 @@ public class StoreManagementView extends JInternalFrame {
         // Row 1
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Phone:"), gbc);
+        formPanel.add(new JLabel("SĐT:"), gbc);
         txtPhone = new JTextField(20);
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -118,7 +118,7 @@ public class StoreManagementView extends JInternalFrame {
 
         gbc.gridx = 2;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("State:"), gbc);
+        formPanel.add(new JLabel("Bang:"), gbc);
         txtState = new JTextField(20);
         gbc.gridx = 3;
         gbc.gridy = 3;
@@ -127,7 +127,7 @@ public class StoreManagementView extends JInternalFrame {
         // Row 4
         gbc.gridx = 0;
         gbc.gridy = 4;
-        formPanel.add(new JLabel("Zip Code:"), gbc);
+        formPanel.add(new JLabel("Mã ZIP:"), gbc);
         txtZipCode = new JTextField(20);
         gbc.gridx = 1;
         gbc.gridy = 4;
@@ -135,11 +135,11 @@ public class StoreManagementView extends JInternalFrame {
 
         // --- Button Panel ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        btnAdd = new JButton("Add Store");
-        btnUpdate = new JButton("Update Store");
-        btnDelete = new JButton("Delete Store");
-        btnRefresh = new JButton("Refresh List");
-        btnClearForm = new JButton("Clear Form");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Sửa");
+        btnDelete = new JButton("Xoá");
+        btnRefresh = new JButton("Làm mới");
+        btnClearForm = new JButton("Xoá trường");
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
@@ -178,7 +178,7 @@ public class StoreManagementView extends JInternalFrame {
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
-            showError("No user logged in. Access denied.");
+            showError("Không có tài khoản! Quyền truy cập bị từ chối");
             // Disable all functionalities
             btnAdd.setEnabled(false);
             btnUpdate.setEnabled(false);
@@ -198,7 +198,7 @@ public class StoreManagementView extends JInternalFrame {
             // read-only form.
             setFormFieldsEditable(false);
         } else if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
-            btnAdd.setEnabled(true); // Or false, depending on policy
+            btnAdd.setEnabled(false); 
             btnUpdate.setEnabled(true);
             btnDelete.setEnabled(false); // Store managers typically cannot delete stores
             setFormFieldsEditable(true);
@@ -236,7 +236,7 @@ public class StoreManagementView extends JInternalFrame {
                 txtZipCode.setText(store.getZipCode());
             } else {
                 clearForm(); // If store not found (e.g. deleted after table load)
-                showError("Could not retrieve store details.");
+                showError("Khoảng thể lấy thông tin cửa hàng này!");
             }
         }
     }
@@ -250,7 +250,7 @@ public class StoreManagementView extends JInternalFrame {
 
     private void updateStore() {
         if (selectedStoreId == -1) {
-            showError("Please select a store to update.");
+            showError("Hãy chọn một cửa hàng để cập nhật");
             return;
         }
         Stores store = createStoreFromForm();
@@ -262,12 +262,12 @@ public class StoreManagementView extends JInternalFrame {
 
     private void deleteStore() {
         if (selectedStoreId == -1) {
-            showError("Please select a store to delete.");
+            showError("Hãy chọn một cửa hàng để xoá");
             return;
         }
         int confirmation = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete store ID: " + selectedStoreId + "?",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                "Bạn có chắc muốn xoá cửa hàng có mã: " + selectedStoreId + "?",
+                "Xác nhận xoá", JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
             controller.deleteStore(selectedStoreId);
         }
