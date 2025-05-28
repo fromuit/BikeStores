@@ -47,7 +47,7 @@ public class StoreManagementView extends JInternalFrame {
         searchPanel.add(btnClearSearch);
 
         // --- Table Panel ---
-        String[] columnNames = { "Mã cửa hàng", "Tên cửa hàng", "SĐT", "Email", "Thành phố", "Bang" };
+        String[] columnNames = { "Mã cửa hàng", "Tên cửa hàng", "SĐT", "Email","Đường" ,"Thành phố", "Bang", "Ma zip" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -61,7 +61,7 @@ public class StoreManagementView extends JInternalFrame {
 
         // --- Form Panel ---
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createTitledBorder("Store Details"));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Chi tiết cửa hàng"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
@@ -98,7 +98,7 @@ public class StoreManagementView extends JInternalFrame {
         // Row 2
         gbc.gridx = 0;
         gbc.gridy = 2;
-        formPanel.add(new JLabel("Street:"), gbc);
+        formPanel.add(new JLabel("Đường:"), gbc);
         txtStreet = new JTextField(20);
         gbc.gridx = 1;
         gbc.gridy = 2;
@@ -109,7 +109,7 @@ public class StoreManagementView extends JInternalFrame {
         // Row 3
         gbc.gridx = 0;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("City:"), gbc);
+        formPanel.add(new JLabel("Thành phố:"), gbc);
         txtCity = new JTextField(20);
         gbc.gridx = 1;
         gbc.gridy = 3;
@@ -359,8 +359,10 @@ public class StoreManagementView extends JInternalFrame {
                         store.getStoreName(),
                         store.getPhone(),
                         store.getEmail(),
+                        store.getStreet(),
                         store.getCity(),
-                        store.getState()
+                        store.getState(),
+                        store.getZipCode()  
                 };
                 tableModel.addRow(row);
             }

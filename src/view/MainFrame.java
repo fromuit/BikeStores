@@ -20,7 +20,7 @@ public class MainFrame extends JFrame {
     private JDesktopPane desktopPane;
     private JInternalFrame welcomeInternalFrame;
     private JSplitPane splitPane;
-    private JPanel navigationPanel; 
+    private JPanel navigationPanel;
 
     public MainFrame() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -145,11 +145,9 @@ public class MainFrame extends JFrame {
         logoutButton.setFocusPainted(false);
         logoutButton.setMargin(new Insets(8, 15, 8, 15));
 
-        logoutButton.setBackground(new Color(220, 53, 69)); 
+        logoutButton.setBackground(new Color(220, 53, 69));
         logoutButton.setForeground(Color.WHITE);
-        logoutButton.setOpaque(true); 
-        logoutButton.setBorderPainted(false); 
-
+        logoutButton.setOpaque(true);
 
         logoutButton.addActionListener(e -> {
             int confirmation = JOptionPane.showConfirmDialog(
@@ -160,10 +158,9 @@ public class MainFrame extends JFrame {
                     JOptionPane.QUESTION_MESSAGE);
 
             if (confirmation == JOptionPane.YES_OPTION) {
-                SessionManager.getInstance().setCurrentUser(null); 
-                this.dispose(); 
+                SessionManager.getInstance().setCurrentUser(null);
+                this.dispose();
 
-  
                 SwingUtilities.invokeLater(() -> {
                     LoginView loginView = new LoginView();
                     loginView.setVisible(true);
@@ -175,7 +172,6 @@ public class MainFrame extends JFrame {
 
         return panel;
     }
-
 
     private void configureNavButton(JButton button, Font font, Dimension size, String itemName) {
         button.setFont(font);
@@ -247,14 +243,14 @@ public class MainFrame extends JFrame {
 
     private void setupLayout() {
 
-        JScrollPane navigationScrollPane = new JScrollPane(navigationPanel); 
-        navigationScrollPane.setMinimumSize(new Dimension(220, 0)); 
-        navigationScrollPane.setBorder(BorderFactory.createEmptyBorder()); 
+        JScrollPane navigationScrollPane = new JScrollPane(navigationPanel);
+        navigationScrollPane.setMinimumSize(new Dimension(220, 0));
+        navigationScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, navigationScrollPane, desktopPane);
         splitPane.setDividerLocation(250);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setBorder(null); 
+        splitPane.setBorder(null);
 
         setLayout(new BorderLayout());
         add(splitPane, BorderLayout.CENTER);
@@ -265,8 +261,8 @@ public class MainFrame extends JFrame {
                 desktopPane.add(welcomeInternalFrame);
             }
             welcomeInternalFrame.setVisible(true);
-  
-            // SwingUtilities.invokeLater(this::centerWelcomeFrame); 
+
+            // SwingUtilities.invokeLater(this::centerWelcomeFrame);
         }
     }
 
@@ -274,13 +270,13 @@ public class MainFrame extends JFrame {
         if (welcomeInternalFrame != null && welcomeInternalFrame.isVisible() && desktopPane.getWidth() > 0
                 && desktopPane.getHeight() > 0) {
             Dimension desktopSize = desktopPane.getSize();
-            Dimension welcomeSize = welcomeInternalFrame.getPreferredSize(); 
-            // welcomeInternalFrame.pack(); 
+            Dimension welcomeSize = welcomeInternalFrame.getPreferredSize();
+            // welcomeInternalFrame.pack();
 
             int x = (desktopSize.width - welcomeSize.width) / 2;
             int y = (desktopSize.height - welcomeSize.height) / 2;
-            x = Math.max(0, x); 
-            y = Math.max(0, y); 
+            x = Math.max(0, x);
+            y = Math.max(0, y);
             welcomeInternalFrame.setLocation(x, y);
         }
     }
@@ -350,13 +346,14 @@ public class MainFrame extends JFrame {
                     | UnsupportedLookAndFeelException e) {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
+                        | UnsupportedLookAndFeelException ex) {
                     // ex.printStackTrace();
                 }
             }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
-            
+
             // mainFrame.centerWelcomeFrame(); // Được xử lý bởi component listener
         });
     }

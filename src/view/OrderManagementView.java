@@ -91,9 +91,9 @@ public class OrderManagementView extends JInternalFrame {
         txtSearch = new JTextField(20);
 
         // Placeholder text to date fields
-        txtOrderDate.setToolTipText("Format: yyyy-MM-dd HH:mm:ss (e.g., 2024-01-15 10:30:00)");
-        txtRequiredDate.setToolTipText("Format: yyyy-MM-dd HH:mm:ss (e.g., 2024-01-15 10:30:00)");
-        txtShippedDate.setToolTipText("Format: yyyy-MM-dd HH:mm:ss (e.g., 2024-01-15 10:30:00)");
+        txtOrderDate.setToolTipText("Định dạng: yyyy-MM-dd HH:mm:ss (VD, 2024-01-15 10:30:00)");
+        txtRequiredDate.setToolTipText("Định dạng: yyyy-MM-dd HH:mm:ss (VD, 2024-01-15 10:30:00)");
+        txtShippedDate.setToolTipText("Định dạng: yyyy-MM-dd HH:mm:ss (VD, 2024-01-15 10:30:00)");
 
         // Combo boxes
         cmbCustomer = new JComboBox<>();
@@ -324,7 +324,7 @@ public class OrderManagementView extends JInternalFrame {
     private void applyRoleBasedPermissions() {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) { // Added null check for currentUser
-            showError("No user logged in. Access denied.");
+            showError("Không có tài khoản đăng nhập. Truy cập bị từ chối.");
             setFormFieldsEnabled(false); // Disable all form fields
             btnAdd.setEnabled(false); // Disable all buttons
             btnUpdate.setEnabled(false);
@@ -452,7 +452,7 @@ public class OrderManagementView extends JInternalFrame {
                     int storeId = Integer.parseInt(selectedItem.split("ID: ")[1].split(" ")[0]);
                     controller.loadOrdersByStore(storeId);
                 } catch (NumberFormatException e) {
-                    showError("Error parsing store ID");
+                    showError("Lỗi phân giải mã cửa hàng.");
                 }
             }
         }
@@ -482,7 +482,7 @@ public class OrderManagementView extends JInternalFrame {
                 String staffName = (String) tableModel.getValueAt(selectedRow, 7);
                 String currentUserName = getCurrentUserName();
                 if (!staffName.contains(currentUserName)) {
-                    showError("You can only update orders assigned to you");
+                    showError("Chỉ có thể cập nhật hoá đơn bạn được phân công.");
                     return;
                 }
             }
@@ -499,7 +499,7 @@ public class OrderManagementView extends JInternalFrame {
 
     private void deleteOrder() {
         if (selectedOrderId == -1) {
-            showError("Please select an order to delete");
+            showError("Vui lòng chọn hoá đơn để xoá.");
             return;
         }
         int result = JOptionPane.showConfirmDialog(this,
@@ -554,7 +554,7 @@ public class OrderManagementView extends JInternalFrame {
                     return staff.getFirstName() + " " + staff.getLastName();
                 }
             } catch (Exception e) {
-                System.err.println("Error getting current user name: " + e.getMessage());
+                System.err.println("Lỗi truy xuất tên hiện tại: " + e.getMessage());
             }
         }
         return "";
@@ -701,7 +701,7 @@ public class OrderManagementView extends JInternalFrame {
         try {
             dateFormat.parse(txtOrderDate.getText().trim());
         } catch (ParseException e) {
-            showError("Invalid order date format. Use: yyyy-MM-dd HH:mm:ss");
+            showError("Định dạng ngày đặt hàng không hợp lệ. Sử dụng: yyyy-MM-dd HH:mm:ss");
             txtOrderDate.requestFocus();
             return false;
         }
@@ -709,7 +709,7 @@ public class OrderManagementView extends JInternalFrame {
         try {
             dateFormat.parse(txtRequiredDate.getText().trim());
         } catch (ParseException e) {
-            showError("Invalid required date format. Use: yyyy-MM-dd HH:mm:ss");
+            showError("Định dạng ngày dự tính không hợp lệ. Sử dụng: yyyy-MM-dd HH:mm:ss");
             txtRequiredDate.requestFocus();
             return false;
         }
@@ -719,7 +719,7 @@ public class OrderManagementView extends JInternalFrame {
             try {
                 dateFormat.parse(txtShippedDate.getText().trim());
             } catch (ParseException e) {
-                showError("Invalid shipped date format. Use: yyyy-MM-dd HH:mm:ss");
+                showError("Định dạng ngày giao không hợp lệ. Sử dụng: yyyy-MM-dd HH:mm:ss");
                 txtShippedDate.requestFocus();
                 return false;
             }
@@ -759,8 +759,8 @@ public class OrderManagementView extends JInternalFrame {
 
             // Create order
             Orders order = new Orders(
-                    0, // ID will be auto-generated
-                    cmbOrderStatus.getSelectedIndex() + 1, // Convert to 1-based status
+                    0, 
+                    cmbOrderStatus.getSelectedIndex() + 1, 
                     orderDate,
                     requiredDate,
                     storeId,
@@ -770,7 +770,7 @@ public class OrderManagementView extends JInternalFrame {
 
             return order;
         } catch (Exception e) {
-            showError("Error creating order: " + e.getMessage());
+            showError("Lỗi tạo hoá đơn: " + e.getMessage());
             return null;
         }
     }
@@ -784,7 +784,7 @@ public class OrderManagementView extends JInternalFrame {
 
     private void populateCustomerDropdown() {
         cmbCustomer.removeAllItems();
-        cmbCustomer.addItem("Select Customer");
+        cmbCustomer.addItem("Chọn khách hàng");
 
         try {
             ArrayList<Customers> customers = customerDAO.getAllCustomers();
@@ -797,13 +797,13 @@ public class OrderManagementView extends JInternalFrame {
                 cmbCustomer.addItem(item);
             }
         } catch (Exception e) {
-            showError("Error loading customers: " + e.getMessage());
+            showError("Lỗi tải khách hàng: " + e.getMessage());
         }
     }
 
     private void populateStaffDropdown() {
         cmbStaff.removeAllItems();
-        cmbStaff.addItem("Select Staff");
+        cmbStaff.addItem("Chọn nhân viên");
 
         try {
             ArrayList<Staffs> staffs = staffDAO.getAllStaffs();
@@ -816,13 +816,13 @@ public class OrderManagementView extends JInternalFrame {
                 cmbStaff.addItem(item);
             }
         } catch (Exception e) {
-            showError("Error loading staff: " + e.getMessage());
+            showError("Lỗi tải nhân viên: " + e.getMessage());
         }
     }
 
     private void populateStoreDropdown() {
         cmbStore.removeAllItems();
-        cmbStore.addItem("Select Store");
+        cmbStore.addItem("Chọn cửa hàng");
 
         StoresDAO storesDAO = new StoresDAO();
         ArrayList<Stores> stores = storesDAO.getAllStores();
@@ -853,9 +853,9 @@ public class OrderManagementView extends JInternalFrame {
                 return customer.getFirstName() + " " + customer.getLastName();
             }
         } catch (Exception e) {
-            System.err.println("Error getting customer name: " + e.getMessage());
+            System.err.println("Lỗi tải tên khách hàng: " + e.getMessage());
         }
-        return "Customer ID: " + customerId;
+        return "Mã khách hàng: " + customerId;
     }
 
     private String getStaffName(int staffId) {
@@ -865,7 +865,7 @@ public class OrderManagementView extends JInternalFrame {
                 return staff.getFirstName() + " " + staff.getLastName();
             }
         } catch (Exception e) {
-            System.err.println("Error getting staff name: " + e.getMessage());
+            System.err.println("Lỗi tải tên nhân viên: " + e.getMessage());
         }
         return "Staff ID: " + staffId;
     }

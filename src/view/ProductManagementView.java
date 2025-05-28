@@ -56,7 +56,7 @@ public class ProductManagementView extends JInternalFrame {
     private void initializeComponents() {
         // Table setup
         String[] columnNames = { "Mã SP", "Tên sản phẩm", "Mã nhãn hàng", "Mã danh mục", "Năm sản xuất", "Giá niêm yết", "Danh mục",
-                "" };
+                "Nhãn hàng" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
