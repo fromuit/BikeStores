@@ -14,17 +14,23 @@ public class Orders {
     private int orderStatus; // Order status: 1 = Pending; 2 = Processing; 3 = Rejected; 4 = Completed
     private Timestamp orderDate;
     private Timestamp requiredDate;
-    private Timestamp shippedDate;
+    private Timestamp shippedDate = null;
     private int storeID;
     private int staffID;
 
-    public Orders(int orderID, int orderStatus, Timestamp orderDate, Timestamp requiredDate, int storeID, int staffID) {
+    public Orders(int orderID, int custID, int orderStatus, Timestamp orderDate, Timestamp requiredDate, Timestamp shippedDate, int storeID, int staffID) {
         this.orderID = orderID;
+        this.custID = custID;
         this.orderStatus = orderStatus;
         this.orderDate = orderDate;
         this.requiredDate = requiredDate;
+        this.shippedDate = shippedDate;
         this.storeID = storeID;
         this.staffID = staffID;
+    }
+
+    public Orders(int i, int i0, Timestamp orderDate, Timestamp requiredDate, int storeId, int staffId) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     public int getOrderID() {

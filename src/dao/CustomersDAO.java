@@ -4,18 +4,48 @@
  */
 package dao;
 
+import dao.interfaces.ICustomersDAO;
 import java.sql.*;
 import java.util.ArrayList;
 import model.Sales.Customers;
 import utils.DatabaseUtil;
 
 /**
- *
- * @author duyng
+ * Customer Data Access Object Implementation
  */
-public class CustomersDAO {
+public class CustomersDAO implements ICustomersDAO {
     
-    // Create - Add new customer
+    @Override
+    public boolean insert(Customers customer) {
+        return addCustomer(customer);
+    }
+    
+    @Override
+    public boolean update(Customers customer) {
+        return updateCustomer(customer);
+    }
+    
+    @Override
+    public boolean delete(Integer customerId) {
+        return deleteCustomer(customerId);
+    }
+    
+    @Override
+    public ArrayList<Customers> selectAll() {
+        return getAllCustomers();
+    }
+    
+    @Override
+    public Customers selectById(Integer customerId) {
+        return getCustomerById(customerId);
+    }
+    
+    @Override
+    public ArrayList<Customers> search(String searchTerm) {
+        return searchCustomers(searchTerm);
+    }
+    
+    // Existing methods (keeping for backward compatibility)
     public boolean addCustomer(Customers customer) {
         String query = "INSERT INTO sales.customers (first_name, last_name, email, phone, street, city, state, zip_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -29,11 +59,11 @@ public class CustomersDAO {
             pstmt.setString(8, customer.getZipCode());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error adding customer: " + e.getMessage());
             return false;
         }
     }
     
-    // Read - Get all customers
     public ArrayList<Customers> getAllCustomers() {
         ArrayList<Customers> customers = new ArrayList<>();
         String query = "SELECT * FROM sales.customers";
@@ -43,11 +73,11 @@ public class CustomersDAO {
                 customers.add(mapResultSetToCustomer(rs));
             }
         } catch (SQLException e) {
+            System.err.println("Error getting all customers: " + e.getMessage());
         }
         return customers;
     }
     
-    // Read - Get customer by ID
     public Customers getCustomerById(int customerId) {
         String query = "SELECT * FROM sales.customers WHERE customer_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -57,11 +87,11 @@ public class CustomersDAO {
                 return mapResultSetToCustomer(rs);
             }
         } catch (SQLException e) {
+            System.err.println("Error getting customer by ID: " + e.getMessage());
         }
         return null;
     }
     
-    // Update - Update existing customer
     public boolean updateCustomer(Customers customer) {
         String query = "UPDATE sales.customers SET first_name=?, last_name=?, email=?, phone=?, street=?, city=?, state=?, zip_code=? WHERE customer_id=?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -76,22 +106,22 @@ public class CustomersDAO {
             pstmt.setInt(9, customer.getPersonID());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error updating customer: " + e.getMessage());
             return false;
         }
     }
     
-    // Delete - Delete customer
     public boolean deleteCustomer(int customerId) {
         String query = "DELETE FROM sales.customers WHERE customer_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, customerId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Error deleting customer: " + e.getMessage());
             return false;
         }
     }
     
-    //Search customer
     public ArrayList<Customers> searchCustomers(String searchTerm) {
         ArrayList<Customers> customers = new ArrayList<>();
         String query = "SELECT * FROM sales.customers WHERE " +
@@ -103,13 +133,9 @@ public class CustomersDAO {
                        "LOWER(state) LIKE LOWER(?)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             String searchPattern = "%" + searchTerm + "%";
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
-            pstmt.setString(3, searchPattern);
-            pstmt.setString(4, searchPattern);
-            pstmt.setString(5, searchPattern);
-            pstmt.setString(6, searchPattern);
-
+            for (int i = 1; i <= 6; i++) {
+                pstmt.setString(i, searchPattern);
+            }
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 customers.add(mapResultSetToCustomer(rs));
@@ -118,8 +144,10 @@ public class CustomersDAO {
             System.err.println("Error searching customers: " + e.getMessage());
         }
         return customers;
-    }    
+    }
     
+    // Business-specific methods implementation
+    @Override
     public ArrayList<Customers> getCustomersByState(String state) {
         ArrayList<Customers> customers = new ArrayList<>();
         String query = "SELECT * FROM sales.customers WHERE LOWER(state) = LOWER(?)";
@@ -135,6 +163,7 @@ public class CustomersDAO {
         return customers;
     }
     
+    @Override
     public ArrayList<Customers> getCustomersByCity(String city) {
         ArrayList<Customers> customers = new ArrayList<>();
         String query = "SELECT * FROM sales.customers WHERE LOWER(city) = LOWER(?)";
@@ -149,7 +178,8 @@ public class CustomersDAO {
         }
         return customers;
     }
-
+    
+    @Override
     public ArrayList<String> getCitiesForState(String state) {
         ArrayList<String> cities = new ArrayList<>();
         String query = "SELECT DISTINCT city FROM sales.customers WHERE LOWER(state) = LOWER(?) AND city IS NOT NULL AND city != '' ORDER BY city";
@@ -164,7 +194,38 @@ public class CustomersDAO {
         }
         return cities;
     }
-
+    
+    @Override
+    public ArrayList<String> getDistinctStates() {
+        ArrayList<String> states = new ArrayList<>();
+        String query = "SELECT DISTINCT state FROM sales.customers WHERE state IS NOT NULL AND state != '' ORDER BY state";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                states.add(rs.getString("state"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting distinct states: " + e.getMessage());
+        }
+        return states;
+    }
+    
+    @Override
+    public ArrayList<String> getDistinctCities() {
+        ArrayList<String> cities = new ArrayList<>();
+        String query = "SELECT DISTINCT city FROM sales.customers WHERE city IS NOT NULL AND city != '' ORDER BY city";
+        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                cities.add(rs.getString("city"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting distinct cities: " + e.getMessage());
+        }
+        return cities;
+    }
+    
+    @Override
     public boolean existsByEmail(String email) {
         String query = "SELECT COUNT(*) FROM sales.customers WHERE LOWER(email) = LOWER(?)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -178,7 +239,8 @@ public class CustomersDAO {
         }
         return false;
     }
-
+    
+    @Override
     public boolean existsByEmailExcluding(String email, int excludeCustomerId) {
         String query = "SELECT COUNT(*) FROM sales.customers WHERE LOWER(email) = LOWER(?) AND customer_id != ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -193,7 +255,8 @@ public class CustomersDAO {
         }
         return false;
     }
-
+    
+    @Override
     public boolean existsByPhone(String phone) {
         String query = "SELECT COUNT(*) FROM sales.customers WHERE phone = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -207,7 +270,8 @@ public class CustomersDAO {
         }
         return false;
     }
-
+    
+    @Override
     public boolean existsByPhoneExcluding(String phone, int excludeCustomerId) {
         String query = "SELECT COUNT(*) FROM sales.customers WHERE phone = ? AND customer_id != ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -222,9 +286,10 @@ public class CustomersDAO {
         }
         return false;
     }
-
+    
+    @Override
     public boolean hasActiveOrders(int customerId) {
-        String query = "SELECT COUNT(*) FROM sales.orders WHERE customer_id = ? AND order_status IN (1, 2)"; // Assuming 1=Pending, 2=Processing
+        String query = "SELECT COUNT(*) FROM sales.orders WHERE customer_id = ? AND order_status IN (1, 2, 3)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, customerId);
             ResultSet rs = pstmt.executeQuery();
@@ -236,40 +301,12 @@ public class CustomersDAO {
         }
         return false;
     }
-
-    public ArrayList<String> getDistinctStates() {
-        ArrayList<String> states = new ArrayList<>();
-        String query = "SELECT DISTINCT state FROM sales.customers WHERE state IS NOT NULL AND state != '' ORDER BY state";
-        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                states.add(rs.getString("state"));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting distinct states: " + e.getMessage());
-        }
-        return states;
-    }
-
-    public ArrayList<String> getDistinctCities() {
-        ArrayList<String> cities = new ArrayList<>();
-        String query = "SELECT DISTINCT city FROM sales.customers WHERE city IS NOT NULL AND city != '' ORDER BY city";
-        try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                cities.add(rs.getString("city"));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting distinct cities: " + e.getMessage());
-        }
-        return cities;
-    }    
-    // Helper method to map ResultSet to Customer object
+    
     private Customers mapResultSetToCustomer(ResultSet rs) throws SQLException {
         return new Customers(
             rs.getInt("customer_id"),
             rs.getString("first_name"),
-            rs.getString("last_name"),
+            rs.getString("last_name"), 
             rs.getString("email"),
             rs.getString("phone"),
             rs.getString("street"),

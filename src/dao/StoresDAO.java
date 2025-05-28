@@ -4,17 +4,48 @@
  */
 package dao;
 
-import model.Sales.Stores;
-import utils.DatabaseUtil;
+import dao.interfaces.IStoresDAO;
 import java.sql.*;
 import java.util.ArrayList;
+import model.Sales.Stores;
+import utils.DatabaseUtil;
 
 /**
- *
- * @author duyng
+ * Store Data Access Object Implementation
  */
-public class StoresDAO {
-
+public class StoresDAO implements IStoresDAO {
+    
+    @Override
+    public boolean insert(Stores store) {
+        return addStore(store);
+    }
+    
+    @Override
+    public boolean update(Stores store) {
+        return updateStore(store);
+    }
+    
+    @Override
+    public boolean delete(Integer storeId) {
+        return deleteStore(storeId);
+    }
+    
+    @Override
+    public ArrayList<Stores> selectAll() {
+        return getAllStores();
+    }
+    
+    @Override
+    public Stores selectById(Integer storeId) {
+        return getStoreById(storeId);
+    }
+    
+    @Override
+    public ArrayList<Stores> search(String searchTerm) {
+        return searchStores(searchTerm);
+    }
+    
+    // Existing methods (keeping for backward compatibility)
     public boolean addStore(Stores store) {
         String query = "INSERT INTO sales.stores (store_name, phone, email, street, city, state, zip_code) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
@@ -111,11 +142,9 @@ public class StoresDAO {
         try (Connection conn = DatabaseUtil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query)) {
             String searchPattern = "%" + searchTerm + "%";
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
-            pstmt.setString(3, searchPattern);
-            pstmt.setString(4, searchPattern);
-            pstmt.setString(5, searchPattern);
+            for (int i = 1; i <= 5; i++) {
+                pstmt.setString(i, searchPattern);
+            }
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 stores.add(mapResultSetToStore(rs));

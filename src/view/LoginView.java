@@ -249,11 +249,21 @@ public class LoginView extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            // Thiết lập Look and Feel giống MainFrame
             try {
-                // Comment out or remove this line if it causes issues with color override
-                // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                // Use default look and feel
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
+                    | UnsupportedLookAndFeelException e) {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception ex) {
+                    // Use default
+                }
             }
             new LoginView().setVisible(true);
         });

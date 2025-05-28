@@ -5,6 +5,7 @@
 package service;
 
 import dao.StaffsDAO;
+import dao.interfaces.IStaffsDAO;
 import java.util.ArrayList;
 import model.Administration.User;
 import model.Sales.Staffs;
@@ -15,7 +16,7 @@ import utils.ValidationException;
  * @author duyng
  */
 public class StaffService {
-    private final StaffsDAO staffDAO;
+    private final IStaffsDAO staffDAO;
     private final SessionManager sessionManager;
     
     public StaffService() {
@@ -23,13 +24,18 @@ public class StaffService {
         this.sessionManager = SessionManager.getInstance();
     }
     
+    public StaffService(IStaffsDAO staffDAO) {
+        this.staffDAO = staffDAO;
+        this.sessionManager = SessionManager.getInstance();
+    }
+    
     public ArrayList<Staffs> getAllStaffs() {
-        ArrayList<Staffs> allStaffs = staffDAO.getAllStaffs();
+        ArrayList<Staffs> allStaffs = staffDAO.selectAll();
         return filterStaffsByAccess(allStaffs);
     }
     
     public Staffs getStaffById(int id) {
-        return staffDAO.getStaffById(id);
+        return staffDAO.selectById(id);
     }
     
     public ArrayList<Staffs> getStaffsByStore(int storeId) {
@@ -40,7 +46,7 @@ public class StaffService {
     }
     
     public ArrayList<Staffs> searchStaffs(String searchTerm) {
-        ArrayList<Staffs> allStaffs = staffDAO.searchStaffs(searchTerm);
+        ArrayList<Staffs> allStaffs = staffDAO.search(searchTerm);
         return filterStaffsByAccess(allStaffs);
     }
     
@@ -81,7 +87,7 @@ public class StaffService {
             throw new ValidationException("Email already exists in the system");
         }
         
-        return staffDAO.addStaff(staff);
+        return staffDAO.insert(staff);
     }
     
     public boolean updateStaff(Staffs staff) throws ValidationException {
@@ -89,7 +95,7 @@ public class StaffService {
         validateBusinessRules(staff);
         
         // Get existing staff to check permissions
-        Staffs existingStaff = staffDAO.getStaffById(staff.getPersonID());
+        Staffs existingStaff = staffDAO.selectById(staff.getPersonID());
         if (existingStaff == null) {
             throw new ValidationException("Staff not found");
         }
@@ -110,11 +116,11 @@ public class StaffService {
             throw new ValidationException("Email already exists in the system");
         }
         
-        return staffDAO.updateStaff(staff);
+        return staffDAO.update(staff);
     }
     
     public boolean deleteStaff(int staffId) throws ValidationException {
-        Staffs staff = staffDAO.getStaffById(staffId);
+        Staffs staff = staffDAO.selectById(staffId);
         if (staff == null) {
             throw new ValidationException("Staff not found");
         }
@@ -139,7 +145,7 @@ public class StaffService {
             throw new ValidationException("Cannot delete staff who is managing other staff members");
         }
         
-        return staffDAO.deleteStaff(staffId);
+        return staffDAO.delete(staffId);
     }
     
     private void validateStaff(Staffs staff) throws ValidationException {
@@ -168,7 +174,7 @@ public class StaffService {
         
         // Validate manager exists and is in same store (if manager is specified)
         if (staff.getManagerID() != null) {
-            Staffs manager = staffDAO.getStaffById((Integer) staff.getManagerID());
+            Staffs manager = staffDAO.selectById((Integer) staff.getManagerID());
             if (manager == null) {
                 throw new ValidationException("Invalid manager ID");
             }

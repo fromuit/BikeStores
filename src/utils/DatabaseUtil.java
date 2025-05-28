@@ -28,17 +28,18 @@ public class DatabaseUtil {
                     connection = DriverManager.getConnection(dbURL);
                 }
         } catch (ClassNotFoundException e) {
-                throw new SQLException("Khong tim thay JDBC Driver!", e);
+            throw new SQLException("Không tìm thấy JDBC Driver!", e);
         }
         return connection;
-        }
-        
-        public static void closeConnection() {
-            try {
-                if (connection !=null || !connection.isClosed()) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
+    }
+    
+    public static void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
             }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi đóng kết nối: " + e.getMessage());
         }
+    }
 }

@@ -136,141 +136,148 @@ public class OrderManagementView extends JInternalFrame {
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         searchPanel.add(new JLabel("Tìm kiếm:"));
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnClearSearch);
         searchPanel.add(Box.createHorizontalStrut(20));
-        searchPanel.add(new JLabel("Lọc theo tình trạng đơn hàng:"));
+        searchPanel.add(new JLabel("Lọc theo tình trạng:"));
         searchPanel.add(cmbStatusFilter);
         searchPanel.add(Box.createHorizontalStrut(10));
         searchPanel.add(new JLabel("Lọc theo cửa hàng:"));
         searchPanel.add(cmbStoreFilter);
 
-        // Table panel with limited height
+        // Table panel
         JScrollPane scrollPane = new JScrollPane(orderTable);
-        scrollPane.setPreferredSize(new Dimension(1200, 220)); // Set fixed height for table area
+        scrollPane.setPreferredSize(new Dimension(1200, 250)); // Adjusted height
 
-        // Combine search and table
+        // Center panel for search and table
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(searchPanel, BorderLayout.NORTH);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
-
         add(centerPanel, BorderLayout.CENTER);
 
-        // Form panel with more compact layout
+        // Form Panel (South)
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(10, 10, 10, 10), // Outer padding
+                BorderFactory.createEtchedBorder() // Inner border for visual separation
+        ));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 5, 3, 5); // Reduced vertical spacing
+        gbc.insets = new Insets(5, 5, 5, 5); // Padding between components
+        gbc.anchor = GridBagConstraints.WEST; // Align components to the left
 
-        // Order Information Section Header
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
+        // === Left Column: Order Information ===
+        int currentRow = 0;
         JLabel orderInfoLabel = new JLabel("Thông tin đơn hàng");
         orderInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
         orderInfoLabel.setForeground(new Color(0, 102, 204));
-        formPanel.add(orderInfoLabel, gbc);
-
-        // Assignment Information Section Header
-        gbc.gridx = 2;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        JLabel assignmentInfoLabel = new JLabel("Phụ trách đơn hàng");
-        assignmentInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        assignmentInfoLabel.setForeground(new Color(0, 102, 204));
-        formPanel.add(assignmentInfoLabel, gbc);
-
-        // Reset gridwidth for form fields
-        gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-
-        // Order Information Fields
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = currentRow;
+        gbc.gridwidth = 2; // Span two columns
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(orderInfoLabel, gbc);
+        gbc.anchor = GridBagConstraints.WEST; // Reset anchor
+        gbc.gridwidth = 1; // Reset gridwidth
+
+        currentRow++;
+        gbc.gridx = 0;
+        gbc.gridy = currentRow;
         formPanel.add(new JLabel("Khách hàng:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        cmbCustomer.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"); // Set prototype for width
         formPanel.add(cmbCustomer, gbc);
+        gbc.fill = GridBagConstraints.NONE;
 
+
+        currentRow++;
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = currentRow;
         formPanel.add(new JLabel("Tình trạng:"), gbc);
         gbc.gridx = 1;
         formPanel.add(cmbOrderStatus, gbc);
-
-        // Order Date with helper button
+        
+        currentRow++;
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = currentRow;
         formPanel.add(new JLabel("Ngày đặt hàng:"), gbc);
         gbc.gridx = 1;
-        JPanel orderDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        orderDatePanel.add(txtOrderDate);
-        JButton btnSetOrderDateNow = new JButton("Now");
-        btnSetOrderDateNow.setPreferredSize(new Dimension(50, txtOrderDate.getPreferredSize().height));
-        btnSetOrderDateNow.addActionListener(e -> setCurrentDateTime(txtOrderDate));
-        orderDatePanel.add(btnSetOrderDateNow);
-        formPanel.add(orderDatePanel, gbc);
+        formPanel.add(createDateFieldWithButton(txtOrderDate), gbc);
 
-        // Required Date with helper button
+        currentRow++;
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = currentRow;
         formPanel.add(new JLabel("Ngày dự tính:"), gbc);
         gbc.gridx = 1;
-        JPanel requiredDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        requiredDatePanel.add(txtRequiredDate);
-        JButton btnSetRequiredDateNow = new JButton("Now");
-        btnSetRequiredDateNow.setPreferredSize(new Dimension(50, txtRequiredDate.getPreferredSize().height));
-        btnSetRequiredDateNow.addActionListener(e -> setCurrentDateTime(txtRequiredDate));
-        requiredDatePanel.add(btnSetRequiredDateNow);
-        formPanel.add(requiredDatePanel, gbc);
+        formPanel.add(createDateFieldWithButton(txtRequiredDate), gbc);
 
-        // Shipped Date with helper button
+        currentRow++;
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = currentRow;
         formPanel.add(new JLabel("Ngày giao hàng:"), gbc);
         gbc.gridx = 1;
-        JPanel shippedDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        shippedDatePanel.add(txtShippedDate);
-        JButton btnSetShippedDateNow = new JButton("Now");
-        btnSetShippedDateNow.setPreferredSize(new Dimension(50, txtShippedDate.getPreferredSize().height));
-        btnSetShippedDateNow.addActionListener(e -> setCurrentDateTime(txtShippedDate));
-        shippedDatePanel.add(btnSetShippedDateNow);
-        formPanel.add(shippedDatePanel, gbc);
-
-        // Assignment Information Fields
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        formPanel.add(new JLabel("Cửa hàng:"), gbc);
-        gbc.gridx = 3;
-        formPanel.add(cmbStore, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 2;
-        formPanel.add(new JLabel("Nhân viên:"), gbc);
-        gbc.gridx = 3;
-        formPanel.add(cmbStaff, gbc);
-
-        // Add some spacing between sections
-        gbc.gridx = 1;
+        formPanel.add(createDateFieldWithButton(txtShippedDate), gbc);
+        
+        // Vertical separator (empty space or a line)
+        gbc.gridx = 2; 
         gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 6;
-        formPanel.add(Box.createHorizontalStrut(30), gbc);
+        gbc.gridheight = currentRow + 1;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        formPanel.add(Box.createHorizontalStrut(30), gbc); // Creates a 30px horizontal gap
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridheight = 1; // Reset gridheight
 
-        // Add date format hints - more compact
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 4;
+
+        // === Right Column: Order Assignment ===
+        currentRow = 0; // Reset row counter for the right column
+        JLabel assignmentInfoLabel = new JLabel("Phụ trách đơn hàng");
+        assignmentInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        assignmentInfoLabel.setForeground(new Color(0, 102, 204));
+        gbc.gridx = 3; // Start at column 3
+        gbc.gridy = currentRow;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        JLabel dateHintLabel = new JLabel("Định dạng ngày: yyyy-MM-dd HH:mm:ss");
-        dateHintLabel.setFont(new Font("Arial", Font.ITALIC, 11)); // Smaller font
+        formPanel.add(assignmentInfoLabel, gbc);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridwidth = 1;
+
+        currentRow++;
+        gbc.gridx = 3;
+        gbc.gridy = currentRow;
+        formPanel.add(new JLabel("Cửa hàng:"), gbc);
+        gbc.gridx = 4;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        cmbStore.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"); // Set prototype for width
+        formPanel.add(cmbStore, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+
+        currentRow++;
+        gbc.gridx = 3;
+        gbc.gridy = currentRow;
+        formPanel.add(new JLabel("Nhân viên:"), gbc);
+        gbc.gridx = 4;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        cmbStaff.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"); // Set prototype for width
+        formPanel.add(cmbStaff, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+
+        // Add date format hint at the bottom of the form, spanning all form columns
+        currentRow = Math.max(5, currentRow); // Ensure hint is below both columns
+        currentRow++; 
+        gbc.gridx = 0;
+        gbc.gridy = currentRow;
+        gbc.gridwidth = 5; // Span all 5 columns (0 to 4)
+        gbc.anchor = GridBagConstraints.CENTER;
+        JLabel dateHintLabel = new JLabel("Định dạng ngày: yyyy-MM-dd HH:mm:ss (Hoặc click 'Now')");
+        dateHintLabel.setFont(new Font("Arial", Font.ITALIC, 11));
         dateHintLabel.setForeground(Color.GRAY);
         formPanel.add(dateHintLabel, gbc);
 
-        // Button panel with better spacing
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5)); // Reduced vertical padding
+
+        // Button Panel (below the form)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
@@ -278,15 +285,27 @@ public class OrderManagementView extends JInternalFrame {
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnClear);
 
-        // Combine form and button panels
-        JPanel southPanel = new JPanel(new BorderLayout());
+        // South Panel to hold form and buttons
+        JPanel southPanel = new JPanel(new BorderLayout(0,10)); // Add vertical gap between form and buttons
         southPanel.add(formPanel, BorderLayout.CENTER);
         southPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        // Set preferred size for the south panel to ensure buttons are visible
-        southPanel.setPreferredSize(new Dimension(1200, 220)); // Increased slightly for the new buttons
-
+        
         add(southPanel, BorderLayout.SOUTH);
+    }
+
+    // Helper method to create a panel with a JTextField and a "Now" button
+    private JPanel createDateFieldWithButton(JTextField dateField) {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panel.add(dateField);
+        JButton btnSetDateNow = new JButton("Now");
+        // Adjust button size to match text field height
+        Dimension textFieldSize = dateField.getPreferredSize();
+        btnSetDateNow.setPreferredSize(new Dimension(60, textFieldSize.height)); 
+        btnSetDateNow.setMargin(new Insets(2,2,2,2)); // Reduce padding
+        btnSetDateNow.addActionListener(e -> setCurrentDateTime(dateField));
+        panel.add(Box.createHorizontalStrut(5)); // Small gap
+        panel.add(btnSetDateNow);
+        return panel;
     }
 
     private void setupEventListeners() {
@@ -334,7 +353,7 @@ public class OrderManagementView extends JInternalFrame {
         }
 
         switch (currentUser.getRole()) {
-            case EMPLOYEE:
+            case EMPLOYEE -> {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(false);
@@ -342,29 +361,30 @@ public class OrderManagementView extends JInternalFrame {
                 setFormFieldsEnabled(true);
                 preselectCurrentUserAsStaff();
                 cmbStaff.setEnabled(false);
-                break;
-            case STORE_MANAGER:
+            }
+            case STORE_MANAGER -> {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
                 btnViewDetails.setEnabled(true);
                 setFormFieldsEnabled(true);
                 limitStoreSelectionToUserStore();
-                break;
-            case CHIEF_MANAGER:
+            }
+            case CHIEF_MANAGER -> {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
                 btnViewDetails.setEnabled(true);
                 setFormFieldsEnabled(true);
-                break;
-            default: // Handle unexpected role or no role
+            }
+            default -> {
+                // Handle unexpected role or no role
                 setFormFieldsEnabled(false);
                 btnAdd.setEnabled(false);
                 btnUpdate.setEnabled(false);
                 btnDelete.setEnabled(false);
                 btnViewDetails.setEnabled(false);
-                break;
+            }
         }
     }
 
@@ -769,7 +789,7 @@ public class OrderManagementView extends JInternalFrame {
             order.setShippedDate(shippedDate);
 
             return order;
-        } catch (Exception e) {
+        } catch (NumberFormatException | ParseException e) {
             showError("Lỗi tạo hoá đơn: " + e.getMessage());
             return null;
         }

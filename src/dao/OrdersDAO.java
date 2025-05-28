@@ -4,6 +4,7 @@
  */
 package dao;
 
+import dao.interfaces.IOrdersDAO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
@@ -11,12 +12,46 @@ import model.Sales.Orders;
 import utils.DatabaseUtil;
 
 /**
- *
- * @author duyng
+ * Order Data Access Object Implementation
  */
-public class OrdersDAO {
+public class OrdersDAO implements IOrdersDAO {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Override
+    public boolean insert(Orders order) {
+        return addOrderWithId(order) > 0;
+    }
+    
+    @Override
+    public boolean update(Orders order) {
+        return updateOrder(order);
+    }
+    
+    @Override
+    public boolean delete(Integer orderId) {
+        return deleteOrder(orderId);
+    }
+    
+    @Override
+    public ArrayList<Orders> selectAll() {
+        return getAllOrders();
+    }
+    
+    @Override
+    public Orders selectById(Integer orderId) {
+        return getOrderById(orderId);
+    }
+    
+    @Override
+    public ArrayList<Orders> search(String searchTerm) {
+        return searchOrders(searchTerm);
+    }
+
+    @Override
+    public int addOrderWithId(Orders order) {
+        return addOrder(order);
+    }
 
     // Create - Add new order
     public int addOrder(Orders order) {
@@ -138,6 +173,7 @@ public class OrdersDAO {
     }
 
     // Get orders by status
+    @Override
     public ArrayList<Orders> getOrdersByStatus(int status) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders WHERE order_status = ? ORDER BY order_date DESC";
@@ -170,6 +206,7 @@ public class OrdersDAO {
     }
 
     // Get orders by store
+    @Override
     public ArrayList<Orders> getOrdersByStore(int storeId) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders WHERE store_id = ? ORDER BY order_date DESC";
@@ -186,6 +223,7 @@ public class OrdersDAO {
     }
 
     // Get orders by staff
+    @Override
     public ArrayList<Orders> getOrdersByStaff(int staffId) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders WHERE staff_id = ? ORDER BY order_date DESC";
@@ -202,6 +240,7 @@ public class OrdersDAO {
     }
 
     // Check if order has items
+    @Override
     public boolean hasOrderItems(int orderId) {
         String query = "SELECT COUNT(*) FROM sales.order_items WHERE order_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -217,29 +256,19 @@ public class OrdersDAO {
     }
 
     // Get order status name
+    @Override
     public String getOrderStatusName(int status) {
-        String statusName;
-        switch (status) {
-            case 1:
-                statusName = "Pending";
-                break;
-            case 2:
-                statusName = "Processing";
-                break;
-            case 3:
-                statusName = "Rejected";
-                break;
-            case 4:
-                statusName = "Completed";
-                break;
-            default:
-                statusName = "Unknown";
-                break;
-        }
-        return statusName;
+        return switch (status) {
+            case 1 -> "Pending";
+            case 2 -> "Processing";
+            case 3 -> "Rejected";
+            case 4 -> "Completed";
+            default -> "Unknown";
+        };
     }
 
     // Get orders within date range
+    @Override
     public ArrayList<Orders> getOrdersByDateRange(Timestamp startDate, Timestamp endDate) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders WHERE order_date BETWEEN ? AND ? ORDER BY order_date DESC";
@@ -257,15 +286,15 @@ public class OrdersDAO {
     }
 
     private Orders mapResultSetToOrder(ResultSet rs) throws SQLException {
-        Orders order = new Orders(
+        return new Orders(
                 rs.getInt("order_id"),
+                rs.getInt("customer_id"),
                 rs.getInt("order_status"),
                 rs.getTimestamp("order_date"),
                 rs.getTimestamp("required_date"),
+                rs.getTimestamp("shipped_date"),
                 rs.getInt("store_id"),
-                rs.getInt("staff_id"));
-        order.setCustID(rs.getInt("customer_id"));
-        order.setShippedDate(rs.getTimestamp("shipped_date"));
-        return order;
+                rs.getInt("staff_id")
+        );
     }
 }

@@ -5,18 +5,19 @@
 package service;
 
 import dao.UserDAO;
-import model.Administration.User;
-import utils.PasswordUtil;
-import utils.ValidationException;
+import dao.interfaces.IUserDAO;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import model.Administration.User;
+import utils.PasswordUtil;
+import utils.ValidationException;
 /**
  *
  * @author duyng
  */
 public class AuthenticationService {
-    private final UserDAO userDAO;
+    private final IUserDAO userDAO;
     private final Map<String, Integer> loginAttempts;
     private final Map<String, LocalDateTime> lockoutTime;
     private static final int MAX_LOGIN_ATTEMPTS = 3;
@@ -24,6 +25,13 @@ public class AuthenticationService {
     
     public AuthenticationService() {
         this.userDAO = new UserDAO();
+        this.loginAttempts = new HashMap<>();
+        this.lockoutTime = new HashMap<>();
+    }
+    
+    // Alternative constructor for dependency injection
+    public AuthenticationService(IUserDAO userDAO) {
+        this.userDAO = userDAO;
         this.loginAttempts = new HashMap<>();
         this.lockoutTime = new HashMap<>();
     }
@@ -111,7 +119,7 @@ public class AuthenticationService {
     }
     
     public boolean changePassword(int userId, String currentPassword, String newPassword) throws ValidationException {
-        User user = userDAO.getUserById(userId);
+        User user = userDAO.selectById(userId);
         if (user == null) {
             throw new ValidationException("User not found");
         }

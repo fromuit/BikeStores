@@ -5,6 +5,7 @@
 package view;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
@@ -17,6 +18,17 @@ import utils.SessionManager;
  * @author duyng
  */
 public class MainFrame extends JFrame {
+    // Constants for better maintainability
+    private static final String WINDOW_TITLE = "Phần mềm quản lý chuỗi cửa hàng Xe đạp";
+    private static final Color NAVIGATION_BACKGROUND = new Color(220, 220, 220);
+    private static final Color USER_INFO_BACKGROUND = new Color(52, 73, 94);
+    private static final Color LOGOUT_BUTTON_COLOR = new Color(220, 53, 69);
+    
+    private static final Font CATEGORY_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Font ITEM_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+    private static final Dimension BUTTON_SIZE = new Dimension(Integer.MAX_VALUE, 35);
+    
+    // UI Components
     private JDesktopPane desktopPane;
     private JInternalFrame welcomeInternalFrame;
     private JSplitPane splitPane;
@@ -24,14 +36,19 @@ public class MainFrame extends JFrame {
     private JPanel userInfoPanel;
 
     public MainFrame() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
         initializeComponents();
-        // setupMenu(); // Đã bỏ
         setupLayout();
+        configureWindow();
+        setupEventListeners();
+    }
+
+    private void configureWindow() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setTitle("Phần mềm quản lý chuỗi cửa hàng Xe đạp");
+        setTitle(WINDOW_TITLE);
+    }
 
+    private void setupEventListeners() {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -46,12 +63,118 @@ public class MainFrame extends JFrame {
     }
 
     private void initializeComponents() {
-        desktopPane = new JDesktopPane();
-        desktopPane.setBackground(Color.LIGHT_GRAY);
+        desktopPane = createDesktopPane();
         welcomeInternalFrame = createWelcomeInternalFrame();
-        // navigationTree = createNavigationTree(); // Thay thế dòng này
-        navigationPanel = createButtonNavigationPanel(); // Gọi phương thức mới
-        userInfoPanel = createUserInfoPanel(); // Thêm panel thông tin user
+        navigationPanel = createNavigationPanel();
+        userInfoPanel = createUserInfoPanel();
+    }
+
+    private JDesktopPane createDesktopPane() {
+        JDesktopPane desktop = new JDesktopPane();
+        desktop.setBackground(Color.LIGHT_GRAY);
+        return desktop;
+    }
+
+    private JPanel createNavigationPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(NAVIGATION_BACKGROUND);
+
+        addNavigationSection(panel, "Sales", getSalesMenuItems());
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
+        addNavigationSection(panel, "Production", getProductionMenuItems());
+        
+        panel.add(Box.createVerticalGlue());
+        addLogoutButton(panel);
+
+        return panel;
+    }
+
+    private String[] getSalesMenuItems() {
+        return new String[]{"Quản lý khách hàng", "Quản lý đơn hàng", "Quản lý nhân viên", "Quản lý cửa hàng"};
+    }
+
+    private String[] getProductionMenuItems() {
+        return new String[]{"Quản lý sản phẩm", "Quản lý danh mục", "Quản lý nhãn hàng", "Quản lý kho"};
+    }
+
+    private void addNavigationSection(JPanel panel, String sectionTitle, String[] menuItems) {
+        // Section header
+        JLabel sectionLabel = new JLabel(sectionTitle);
+        sectionLabel.setFont(CATEGORY_FONT);
+        sectionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sectionLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
+        panel.add(sectionLabel);
+
+        // Menu items
+        for (String itemName : menuItems) {
+            JButton button = createNavigationButton(itemName);
+            panel.add(button);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        }
+    }
+
+    private JButton createNavigationButton(String itemName) {
+        JButton button = new JButton(itemName);
+        configureNavigationButton(button, itemName);
+        return button;
+    }
+
+    private void configureNavigationButton(JButton button, String itemName) {
+        button.setFont(ITEM_FONT);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(BUTTON_SIZE);
+        button.setFocusPainted(false);
+        button.setMargin(new Insets(8, 15, 8, 15));
+        
+        button.addActionListener(e -> handleNavigation(itemName));
+    }
+
+    private void addLogoutButton(JPanel panel) {
+        JButton logoutButton = createLogoutButton();
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(logoutButton);
+    }
+
+    private JButton createLogoutButton() {
+        JButton logoutButton = new JButton("Đăng xuất");
+        logoutButton.setFont(ITEM_FONT);
+        logoutButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        logoutButton.setHorizontalAlignment(SwingConstants.LEFT);
+        logoutButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        logoutButton.setFocusPainted(false);
+        logoutButton.setMargin(new Insets(8, 15, 8, 15));
+        logoutButton.setBackground(LOGOUT_BUTTON_COLOR);
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setOpaque(true);
+        
+        logoutButton.addActionListener(this::handleLogout);
+        return logoutButton;
+    }
+
+    private void handleLogout(ActionEvent e) {
+        int confirmation = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có muốn đăng xuất không?",
+                "Đăng xuất",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirmation == JOptionPane.YES_OPTION) {
+            performLogout();
+        }
+    }
+
+    private void performLogout() {
+        SessionManager.getInstance().setCurrentUser(null);
+        this.dispose();
+        
+        SwingUtilities.invokeLater(() -> {
+            LoginView loginView = new LoginView();
+            loginView.setVisible(true);
+        });
     }
 
     private JInternalFrame createWelcomeInternalFrame() {
@@ -91,88 +214,6 @@ public class MainFrame extends JFrame {
             ((javax.swing.plaf.basic.BasicInternalFrameUI) internalFrame.getUI()).setNorthPane(null);
         }
         return internalFrame;
-    }
-
-    private JPanel createButtonNavigationPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.setBackground(new Color(220, 220, 220));
-
-        Font categoryFont = new Font("Segoe UI", Font.BOLD, 16);
-        Font itemFont = new Font("Segoe UI", Font.PLAIN, 14);
-        Dimension buttonSize = new Dimension(Integer.MAX_VALUE, 35);
-
-        // Sales Category
-        JLabel salesLabel = new JLabel("Sales");
-        salesLabel.setFont(categoryFont);
-        salesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        salesLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
-        panel.add(salesLabel);
-
-        String[] salesItems = { "Quản lý khách hàng", "Quản lý đơn hàng", "Quản lý nhân viên", "Quản lý cửa hàng" };
-        for (String itemName : salesItems) {
-            JButton button = new JButton(itemName);
-            configureNavButton(button, itemFont, buttonSize, itemName);
-            panel.add(button);
-            panel.add(Box.createRigidArea(new Dimension(0, 5)));
-        }
-
-        panel.add(Box.createRigidArea(new Dimension(0, 15)));
-
-        // Production Category
-        JLabel productionLabel = new JLabel("Production");
-        productionLabel.setFont(categoryFont);
-        productionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        productionLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
-        panel.add(productionLabel);
-
-        String[] productionItems = { "Quản lý sản phẩm", "Quản lý danh mục", "Quản lý nhãn hàng", "Quản lý kho" };
-        for (String itemName : productionItems) {
-            JButton button = new JButton(itemName);
-            configureNavButton(button, itemFont, buttonSize, itemName);
-            panel.add(button);
-            panel.add(Box.createRigidArea(new Dimension(0, 5)));
-        }
-
-        // Thêm một empty component để đẩy các button chức năng lên trên
-        panel.add(Box.createVerticalGlue());
-
-        // Log Out Button
-        JButton logoutButton = new JButton("Đăng xuất");
-        logoutButton.setFont(itemFont);
-        logoutButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        logoutButton.setHorizontalAlignment(SwingConstants.LEFT);
-        logoutButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        logoutButton.setFocusPainted(false);
-        logoutButton.setMargin(new Insets(8, 15, 8, 15));
-
-        logoutButton.setBackground(new Color(220, 53, 69));
-        logoutButton.setForeground(Color.WHITE);
-        logoutButton.setOpaque(true);
-
-        logoutButton.addActionListener(e -> {
-            int confirmation = JOptionPane.showConfirmDialog(
-                    this,
-                    "Bạn có muốn đăng xuất không?",
-                    "Đăng xuất",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
-
-            if (confirmation == JOptionPane.YES_OPTION) {
-                SessionManager.getInstance().setCurrentUser(null);
-                this.dispose();
-
-                SwingUtilities.invokeLater(() -> {
-                    LoginView loginView = new LoginView();
-                    loginView.setVisible(true);
-                });
-            }
-        });
-        panel.add(Box.createRigidArea(new Dimension(0, 10)));
-        panel.add(logoutButton);
-
-        return panel;
     }
 
     private JPanel createUserInfoPanel() {
@@ -271,17 +312,6 @@ public class MainFrame extends JFrame {
             System.err.println("Error getting store info: " + e.getMessage());
         }
         return "";
-    }
-
-    private void configureNavButton(JButton button, Font font, Dimension size, String itemName) {
-        button.setFont(font);
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setMaximumSize(size);
-        button.setFocusPainted(false);
-        button.setMargin(new Insets(5, 15, 5, 15));
-
-        button.addActionListener(e -> handleNavigation(itemName));
     }
 
     private void handleNavigation(String menuItemName) {

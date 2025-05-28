@@ -14,8 +14,26 @@ public class TestGUI {
     public static void main(String[] args) {
         System.out.println("=== Testing GUI Components ===");
         
-        // Test main application
-         testMainFrame();
+        // Thiết lập Look and Feel TRƯỚC khi test
+        SwingUtilities.invokeLater(() -> {
+            try {
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+                    // Use default
+                }
+            }
+            
+            // Test main application
+            testMainFrame();
+        });
     }
     
     private static void testMainFrame() {

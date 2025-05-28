@@ -3,7 +3,10 @@ package service;
 import dao.ProductsDAO;
 import dao.StocksDAO;
 import dao.StoresDAO;
-import java.util.ArrayList; 
+import dao.interfaces.IProductsDAO;
+import dao.interfaces.IStocksDAO;
+import dao.interfaces.IStoresDAO;
+import java.util.ArrayList;
 import model.Administration.User;
 import model.Production.Products;
 import model.Production.Stocks;
@@ -12,9 +15,9 @@ import utils.SessionManager;
 import utils.ValidationException;
 
 public class StockService {
-    private final StocksDAO stocksDAO;
-    private final ProductsDAO productsDAO; 
-    private final StoresDAO storesDAO; 
+    private final IStocksDAO stocksDAO;
+    private final IProductsDAO productsDAO; 
+    private final IStoresDAO storesDAO; 
     private final SessionManager sessionManager;
 
     public StockService() {
@@ -24,13 +27,20 @@ public class StockService {
         this.sessionManager = SessionManager.getInstance();
     }
 
+    // Alternative constructor for dependency injection
+    public StockService(IStocksDAO stocksDAO, IProductsDAO productsDAO, IStoresDAO storesDAO) {
+        this.stocksDAO = stocksDAO;
+        this.productsDAO = productsDAO;
+        this.storesDAO = storesDAO;
+        this.sessionManager = SessionManager.getInstance();
+    }
+
     public Stocks getStockByStoreAndProduct(int storeId, int productId) throws SecurityException, ValidationException {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required to view stock.");
         }
         
-        // Check if user can view this store's stock
         if (!canViewStoreStock(storeId)) {
             throw new SecurityException("You do not have permission to view stock for this store.");
         }
@@ -47,7 +57,6 @@ public class StockService {
             throw new SecurityException("Authentication required.");
         }
         
-        // Check if user can view this store's stock
         if (!canViewStoreStock(storeId)) {
             throw new SecurityException("Permission denied to view stock for store ID: " + storeId);
         }
@@ -76,7 +85,6 @@ public class StockService {
             throw new SecurityException("Authentication required to update stock.");
         }
 
-        // Check if user can update stock for this store
         if (!canUpdateStoreStock(storeId)) {
             throw new SecurityException("You do not have permission to update stock for store ID: " + storeId);
         }
@@ -85,60 +93,38 @@ public class StockService {
         return stocksDAO.updateStockQuantity(storeId, productId, quantity);
     }
 
-    /**
-     * Get list of stores that current user can view stock for
-     */
     public ArrayList<Stores> getAccessibleStoresForStockView() throws SecurityException {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required.");
         }
 
-        ArrayList<Stores> allStores = storesDAO.getAllStores();
-        
-        // Debug logging
-        System.out.println("Current user role: " + currentUser.getRole());
-        System.out.println("Current user staff ID: " + currentUser.getStaffID());
+        ArrayList<Stores> allStores = storesDAO.selectAll();
         
         return switch (currentUser.getRole()) {
-            case CHIEF_MANAGER, STORE_MANAGER -> {
-                System.out.println("Returning all stores for CHIEF_MANAGER/STORE_MANAGER: " + allStores.size());
-                yield allStores; // Can view all stores
-            }
+            case CHIEF_MANAGER, STORE_MANAGER -> allStores;
             case EMPLOYEE -> {
-                // Employees can view their own store
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
-                System.out.println("Employee accessible stores: " + accessibleStores);
-                
                 ArrayList<Stores> filteredStores = new ArrayList<>();
                 for (Stores store : allStores) {
                     if (accessibleStores.contains(store.getStoreID())) {
                         filteredStores.add(store);
-                        System.out.println("Added store: " + store.getStoreID() + " - " + store.getStoreName());
                     }
                 }
-                System.out.println("Filtered stores count: " + filteredStores.size());
                 yield filteredStores;
             }
-            default -> {
-                System.out.println("Unknown role, returning empty list");
-                yield new ArrayList<>();
-            }
+            default -> new ArrayList<>();
         };
     }
 
-    /**
-     * Check if current user can view stock for a specific store
-     */
     private boolean canViewStoreStock(int storeId) {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) return false;
 
         return switch (currentUser.getRole()) {
-            case CHIEF_MANAGER -> true; // Can view all stores
-            case STORE_MANAGER -> true; // Can view all stores (but can only update their own)
+            case CHIEF_MANAGER -> true;
+            case STORE_MANAGER -> true;
             case EMPLOYEE -> {
-                // Can view their own store
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
                 yield accessibleStores.contains(storeId);
             }
@@ -146,17 +132,13 @@ public class StockService {
         };
     }
 
-    /**
-     * Check if current user can update stock for a specific store
-     */
     private boolean canUpdateStoreStock(int storeId) {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) return false;
 
         return switch (currentUser.getRole()) {
-            case CHIEF_MANAGER -> true; // Can update all stores
+            case CHIEF_MANAGER -> true;
             case STORE_MANAGER, EMPLOYEE -> {
-                // Can only update their own store
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
                 yield accessibleStores.contains(storeId);
             }
@@ -175,16 +157,14 @@ public class StockService {
             throw new ValidationException("Stock quantity cannot be negative.");
         }
 
-        // Check if product and store exist before attempting to update stock
-        Products product = productsDAO.getProductById(productId);
+        Products product = productsDAO.selectById(productId);
         if (product == null) {
             throw new ValidationException("Product with ID " + productId + " not found.");
         }
 
-        Stores store = storesDAO.getStoreById(storeId);
+        Stores store = storesDAO.selectById(storeId);
         if (store == null) {
             throw new ValidationException("Store with ID " + storeId + " not found.");
         }
-        // Further business rules can be added here, e.g., max stock quantity, etc.
     }
 }

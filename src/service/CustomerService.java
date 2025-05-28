@@ -5,6 +5,7 @@
 package service;
 
 import dao.CustomersDAO;
+import dao.interfaces.ICustomersDAO;
 import java.util.ArrayList;
 import model.Sales.Customers;
 import utils.SessionManager;
@@ -14,7 +15,7 @@ import utils.ValidationException;
  * @author duyng
  */
 public class CustomerService {
-    private final CustomersDAO customerDAO;
+    private final ICustomersDAO customerDAO;
     private final SessionManager sessionManager;
     
     public CustomerService() {
@@ -22,16 +23,22 @@ public class CustomerService {
         this.sessionManager = SessionManager.getInstance();
     }
     
+    // Alternative constructor for dependency injection
+    public CustomerService(ICustomersDAO customerDAO) {
+        this.customerDAO = customerDAO;
+        this.sessionManager = SessionManager.getInstance();
+    }
+    
     public ArrayList<Customers> getAllCustomers() {
-        return customerDAO.getAllCustomers();
+        return customerDAO.selectAll();
     }
     
     public Customers getCustomerById(int id) {
-        return customerDAO.getCustomerById(id);
+        return customerDAO.selectById(id);
     }
 
     public ArrayList<Customers> searchCustomers(String searchTerm) {
-        return customerDAO.searchCustomers(searchTerm);
+        return customerDAO.search(searchTerm);
     }    
     
     public boolean addCustomer(Customers customer) throws ValidationException {
@@ -53,7 +60,7 @@ public class CustomerService {
             throw new ValidationException("Phone number already exists in the system");
         }
         
-        return customerDAO.addCustomer(customer);
+        return customerDAO.insert(customer);
     }
     
     public boolean updateCustomer(Customers customer) throws ValidationException {
@@ -66,7 +73,7 @@ public class CustomerService {
         }
         
         // Get existing customer to check permissions
-        Customers existingCustomer = customerDAO.getCustomerById(customer.getPersonID());
+        Customers existingCustomer = customerDAO.selectById(customer.getPersonID());
         if (existingCustomer == null) {
             throw new ValidationException("Customer not found");
         }
@@ -81,11 +88,11 @@ public class CustomerService {
             throw new ValidationException("Phone number already exists in the system");
         }
         
-        return customerDAO.updateCustomer(customer);
+        return customerDAO.update(customer);
     }
     
     public boolean deleteCustomer(int customerId) throws ValidationException {
-        Customers customer = customerDAO.getCustomerById(customerId);
+        Customers customer = customerDAO.selectById(customerId);
         if (customer == null) {
             throw new ValidationException("Customer not found");
         }
@@ -100,7 +107,7 @@ public class CustomerService {
             throw new ValidationException("Cannot delete customer with active orders");
         }
         
-        return customerDAO.deleteCustomer(customerId);
+        return customerDAO.delete(customerId);
     }
 
     public ArrayList<String> getDistinctStates() {
