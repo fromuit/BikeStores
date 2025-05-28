@@ -16,17 +16,14 @@ public class OrderItems {
     private double listPrice;
     private double discount = 0;
 
-    // Additional fields for display purposes
     private String productName;
     private String brandName;
     private String categoryName;
     private int modelYear;
 
-    // Default constructor (ensuring it exists)
     public OrderItems() {
     }
 
-    // Constructor with all direct fields from sales.order_items
     public OrderItems(int orderID, int itemID, int productID, int quantity, double listPrice, double discount) {
         this.orderID = orderID;
         this.itemID = itemID;
@@ -116,7 +113,6 @@ public class OrderItems {
         this.modelYear = modelYear;
     }
 
-    // Calculate item total (quantity * price * (1 - discount))
     public double getItemTotal() {
         return quantity * listPrice * (1 - discount);
     }

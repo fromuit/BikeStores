@@ -17,8 +17,7 @@ public class CategoryService {
     public CategoryService() {
         this.categoryDAO = new CategoriesDAO();
     }
-    
-    // Alternative constructor for dependency injection
+
     public CategoryService(ICategoriesDAO categoryDAO) {
         this.categoryDAO = categoryDAO;
     }
@@ -32,7 +31,6 @@ public class CategoryService {
     }
     
     public boolean addCategory(Categories category) {
-        // Add business logic validation here if needed
         if (category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
             return false;
         }

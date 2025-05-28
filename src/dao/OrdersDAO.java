@@ -53,7 +53,6 @@ public class OrdersDAO implements IOrdersDAO {
         return addOrder(order);
     }
 
-    // Create - Add new order
     public int addOrder(Orders order) {
         String query = "INSERT INTO sales.orders (customer_id, order_status, order_date, required_date, shipped_date, store_id, staff_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
@@ -82,7 +81,6 @@ public class OrdersDAO implements IOrdersDAO {
         }
     }
 
-    // Read - Get all orders
     public ArrayList<Orders> getAllOrders() {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders ORDER BY order_date DESC";
@@ -97,7 +95,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Read - Get order by ID
     public Orders getOrderById(int orderId) {
         String query = "SELECT * FROM sales.orders WHERE order_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -112,7 +109,6 @@ public class OrdersDAO implements IOrdersDAO {
         return null;
     }
 
-    // Update - Update existing order
     public boolean updateOrder(Orders order) {
         String query = "UPDATE sales.orders SET customer_id=?, order_status=?, order_date=?, required_date=?, shipped_date=?, store_id=?, staff_id=? WHERE order_id=?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -131,7 +127,6 @@ public class OrdersDAO implements IOrdersDAO {
         }
     }
 
-    // Delete - Delete order
     public boolean deleteOrder(int orderId) {
         String query = "DELETE FROM sales.orders WHERE order_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -143,7 +138,6 @@ public class OrdersDAO implements IOrdersDAO {
         }
     }
 
-    // Search orders
     public ArrayList<Orders> searchOrders(String searchTerm) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT o.* FROM sales.orders o " +
@@ -172,7 +166,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Get orders by status
     @Override
     public ArrayList<Orders> getOrdersByStatus(int status) {
         ArrayList<Orders> orders = new ArrayList<>();
@@ -189,7 +182,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Get orders by customer
     public ArrayList<Orders> getOrdersByCustomer(int customerId) {
         ArrayList<Orders> orders = new ArrayList<>();
         String query = "SELECT * FROM sales.orders WHERE customer_id = ? ORDER BY order_date DESC";
@@ -205,7 +197,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Get orders by store
     @Override
     public ArrayList<Orders> getOrdersByStore(int storeId) {
         ArrayList<Orders> orders = new ArrayList<>();
@@ -222,7 +213,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Get orders by staff
     @Override
     public ArrayList<Orders> getOrdersByStaff(int staffId) {
         ArrayList<Orders> orders = new ArrayList<>();
@@ -239,7 +229,6 @@ public class OrdersDAO implements IOrdersDAO {
         return orders;
     }
 
-    // Check if order has items
     @Override
     public boolean hasOrderItems(int orderId) {
         String query = "SELECT COUNT(*) FROM sales.order_items WHERE order_id = ?";
@@ -255,7 +244,6 @@ public class OrdersDAO implements IOrdersDAO {
         return false;
     }
 
-    // Get order status name
     @Override
     public String getOrderStatusName(int status) {
         return switch (status) {
@@ -267,7 +255,6 @@ public class OrdersDAO implements IOrdersDAO {
         };
     }
 
-    // Get orders within date range
     @Override
     public ArrayList<Orders> getOrdersByDateRange(Timestamp startDate, Timestamp endDate) {
         ArrayList<Orders> orders = new ArrayList<>();

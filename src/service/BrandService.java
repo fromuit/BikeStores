@@ -18,7 +18,6 @@ public class BrandService {
         this.brandDAO = new BrandsDAO();
     }
     
-    // Alternative constructor for dependency injection
     public BrandService(IBrandsDAO brandDAO) {
         this.brandDAO = brandDAO;
     }

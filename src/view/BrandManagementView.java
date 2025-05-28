@@ -49,12 +49,10 @@ public class BrandManagementView extends JInternalFrame {
         sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
         brandTable.setRowSorter(sorter);
         
-        
-        
-        // Input fields
+
         txtBrandName = new JTextField(20);
         
-        // Buttons
+
         btnAdd = new JButton("Thêm");
         btnUpdate = new JButton("Sửa");
         btnDelete = new JButton("Xoá");
@@ -64,25 +62,21 @@ public class BrandManagementView extends JInternalFrame {
     
     private void setupLayout() {
         setLayout(new BorderLayout());
-        
-        // Table panel
+
         JScrollPane scrollPane = new JScrollPane(brandTable);
         add(scrollPane, BorderLayout.CENTER);
-        
-        // Form panel
+
         JPanel formPanel = new JPanel(new FlowLayout());
         formPanel.add(new JLabel("Tên nhãn hàng:"));
         formPanel.add(txtBrandName);
-        
-        // Button panel
+
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnClear);
-        
-        // Combine form and button panels
+
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(formPanel, BorderLayout.CENTER);
         southPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -91,7 +85,6 @@ public class BrandManagementView extends JInternalFrame {
     }
     
     private void setupEventListeners() {
-        // Table selection listener
         brandTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = brandTable.getSelectedRow();
@@ -101,7 +94,6 @@ public class BrandManagementView extends JInternalFrame {
             }
         });
         
-        // Button listeners
         btnAdd.addActionListener(e -> addBrand());
         btnUpdate.addActionListener(e -> updateBrand());
         btnDelete.addActionListener(e -> deleteBrand());
@@ -109,7 +101,6 @@ public class BrandManagementView extends JInternalFrame {
         btnClear.addActionListener(e -> clearForm());
     }
     
-    // Methods called by controller
     public void displayBrands(ArrayList<Brands> brands) {
         tableModel.setRowCount(0);
         for (Brands brand : brands) {
@@ -129,7 +120,6 @@ public class BrandManagementView extends JInternalFrame {
         JOptionPane.showMessageDialog(this, error, "Error", JOptionPane.ERROR_MESSAGE);
     }
     
-    // Private helper methods
     private void loadBrands() {
         controller.loadBrands();
     }

@@ -47,7 +47,6 @@ public class CustomerManagementView extends JInternalFrame {
     }
 
     private void initializeComponents() {
-        // Table setup
         String[] columnNames = { "ID", "Tên", "Họ", "Email", "SĐT", "Đường", "TP", "Bang",
                 "Mã ZIP" };
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -63,7 +62,6 @@ public class CustomerManagementView extends JInternalFrame {
         sorter.setComparator(8, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
         customerTable.setRowSorter(sorter);
 
-        // Input fields
         txtFirstName = new JTextField(15);
         txtLastName = new JTextField(15);
         txtPhone = new JTextField(15);
@@ -74,7 +72,6 @@ public class CustomerManagementView extends JInternalFrame {
         txtZipCode = new JTextField(15);
         txtSearch = new JTextField(20);
 
-        // Buttons
         btnAdd = new JButton("Thêm");
         btnUpdate = new JButton("Sửa");
         btnDelete = new JButton("Xoá");
@@ -83,7 +80,6 @@ public class CustomerManagementView extends JInternalFrame {
         btnSearch = new JButton("Tìm");
         btnClearSearch = new JButton("Xoá");
 
-        // Filter dropdowns
         cmbStateFilter = new JComboBox<>();
         cmbCityFilter = new JComboBox<>();
         populateFilters();
@@ -244,11 +240,9 @@ public class CustomerManagementView extends JInternalFrame {
         btnRefresh.addActionListener(e -> loadCustomers());
         btnClear.addActionListener(e -> clearForm());
 
-        // Clear status when typing
         txtFirstName.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                // Clear any previous error highlighting
             }
         });
     }
@@ -504,14 +498,11 @@ public class CustomerManagementView extends JInternalFrame {
     private void filterByState() {
         int selectedIndex = cmbStateFilter.getSelectedIndex();
         if (selectedIndex == 0) {
-            // All states - reload all customers
             loadCustomers();
-            // Reset city filter to show all cities
             populateCityFilter();
         } else {
             String state = (String) cmbStateFilter.getSelectedItem();
             controller.loadCustomersByState(state);
-            // Update city filter to show only cities in selected state
             populateCitiesForState(state);
         }
     }
@@ -519,10 +510,9 @@ public class CustomerManagementView extends JInternalFrame {
     private void filterByCity() {
         int selectedIndex = cmbCityFilter.getSelectedIndex();
         if (selectedIndex == 0) {
-            // All cities - check if state is selected
             int stateIndex = cmbStateFilter.getSelectedIndex();
             if (stateIndex == 0) {
-                loadCustomers(); // No state selected, show all
+                loadCustomers(); 
             } else {
                 String state = (String) cmbStateFilter.getSelectedItem();
                 controller.loadCustomersByState(state); // Show all customers in selected state

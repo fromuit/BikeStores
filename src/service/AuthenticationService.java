@@ -28,8 +28,7 @@ public class AuthenticationService {
         this.loginAttempts = new HashMap<>();
         this.lockoutTime = new HashMap<>();
     }
-    
-    // Alternative constructor for dependency injection
+
     public AuthenticationService(IUserDAO userDAO) {
         this.userDAO = userDAO;
         this.loginAttempts = new HashMap<>();
@@ -37,7 +36,6 @@ public class AuthenticationService {
     }
     
     public User authenticate(String username, String password) throws ValidationException {
-        // Input validation
         if (username == null || username.trim().isEmpty()) {
             throw new ValidationException("Username is required");
         }
@@ -46,35 +44,29 @@ public class AuthenticationService {
         }
         
         username = username.trim().toLowerCase();
-        
-        // Check if account is locked
+    
         if (isAccountLocked(username)) {
             throw new ValidationException("Account is temporarily locked due to multiple failed login attempts. Please try again later.");
         }
         
         try {
-            // Get user from database
             User user = userDAO.getUserByUsername(username);
             if (user == null) {
                 recordFailedAttempt(username);
                 throw new ValidationException("Invalid username or password");
             }
             
-            // Verify password
             if (!PasswordUtil.verifyPassword(password, user.getPassword())) {
                 recordFailedAttempt(username);
                 throw new ValidationException("Invalid username or password");
             }
-            
-            // Check if user is active
+
             if (!user.isActive()) {
                 throw new ValidationException("Account is disabled. Please contact administrator.");
             }
-            
-            // Successful login - clear failed attempts
+
             clearFailedAttempts(username);
-            
-            // Update last login time
+
             userDAO.updateLastLogin(user.getUserID());
             
             return user;
@@ -95,7 +87,6 @@ public class AuthenticationService {
         LocalDateTime unlockTime = lockTime.plusMinutes(LOCKOUT_DURATION_MINUTES);
         
         if (LocalDateTime.now().isAfter(unlockTime)) {
-            // Lockout period has expired
             lockoutTime.remove(username);
             loginAttempts.remove(username);
             return false;

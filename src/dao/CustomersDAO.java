@@ -45,7 +45,6 @@ public class CustomersDAO implements ICustomersDAO {
         return searchCustomers(searchTerm);
     }
     
-    // Existing methods (keeping for backward compatibility)
     public boolean addCustomer(Customers customer) {
         String query = "INSERT INTO sales.customers (first_name, last_name, email, phone, street, city, state, zip_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {

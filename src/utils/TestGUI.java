@@ -27,12 +27,10 @@ public class TestGUI {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
-                    // Use default
+
                 }
             }
-            
-            // Test main application
-            testMainFrame();
+           testMainFrame();
         });
     }
     

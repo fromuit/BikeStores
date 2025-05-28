@@ -53,7 +53,7 @@ public class StaffService {
     private ArrayList<Staffs> filterStaffsByAccess(ArrayList<Staffs> staffs) {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser.getRole() == User.UserRole.CHIEF_MANAGER) {
-            return staffs; // Chief managers see all
+            return staffs; 
         }
         
         ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
@@ -70,19 +70,16 @@ public class StaffService {
     public boolean addStaff(Staffs staff) throws ValidationException {
         validateStaff(staff);
         validateBusinessRules(staff);
-        
-        // Check permissions - CHIEF_MANAGER has full access
+
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required");
         }
-        
-        // CHIEF_MANAGER can manage all staff, others need specific permission check
+
         if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(staff)) {
             throw new SecurityException("You don't have permission to add staff to store " + staff.getStoreID());
         }
-        
-        // Check for duplicate email
+
         if (staffDAO.existsByEmail(staff.getEmail())) {
             throw new ValidationException("Email already exists in the system");
         }
@@ -93,25 +90,21 @@ public class StaffService {
     public boolean updateStaff(Staffs staff) throws ValidationException {
         validateStaff(staff);
         validateBusinessRules(staff);
-        
-        // Get existing staff to check permissions
+
         Staffs existingStaff = staffDAO.selectById(staff.getPersonID());
         if (existingStaff == null) {
             throw new ValidationException("Staff not found");
         }
-        
-        // Check permissions - CHIEF_MANAGER has full access
+
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required");
         }
-        
-        // CHIEF_MANAGER can manage all staff, others need specific permission check
+
         if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(existingStaff)) {
             throw new SecurityException("You don't have permission to update this staff member");
         }
-        
-        // Check for duplicate email (excluding current staff)
+
         if (staffDAO.existsByEmailExcluding(staff.getEmail(), staff.getPersonID())) {
             throw new ValidationException("Email already exists in the system");
         }
@@ -124,19 +117,16 @@ public class StaffService {
         if (staff == null) {
             throw new ValidationException("Staff not found");
         }
-        
-        // Check permissions - CHIEF_MANAGER has full access
+
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser == null) {
             throw new SecurityException("Authentication required");
         }
-        
-        // CHIEF_MANAGER can manage all staff, others need specific permission check
+
         if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER && !sessionManager.canManageStaff(staff)) {
             throw new SecurityException("You don't have permission to delete this staff member");
         }
-        
-        // Check if staff has active orders or is managing other staff
+
         if (staffDAO.hasActiveOrders(staffId)) {
             throw new ValidationException("Cannot delete staff with active orders");
         }
@@ -167,19 +157,16 @@ public class StaffService {
     }
     
     private void validateBusinessRules(Staffs staff) throws ValidationException {
-        // Validate store exists
         if (!staffDAO.storeExists(staff.getStoreID())) {
             throw new ValidationException("Invalid store ID");
         }
-        
-        // Validate manager exists and is in same store (if manager is specified)
+
         if (staff.getManagerID() != null) {
             Staffs manager = staffDAO.selectById((Integer) staff.getManagerID());
             if (manager == null) {
                 throw new ValidationException("Invalid manager ID");
             }
-            
-            // CHIEF_MANAGER can assign managers from different stores
+
             User currentUser = sessionManager.getCurrentUser();
             if (currentUser != null && currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
                 if (manager.getStoreID() != staff.getStoreID()) {

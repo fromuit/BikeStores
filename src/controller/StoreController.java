@@ -3,12 +3,12 @@ package controller;
 import java.util.ArrayList;
 import model.Sales.Stores;
 import service.StoreService;
-import utils.ValidationException; // Assuming this view will be created
+import utils.ValidationException; 
 import view.StoreManagementView;
 
 public class StoreController {
     private final StoreService storeService;
-    private StoreManagementView view; // View can be set later if using a MainAppFrame structure
+    private StoreManagementView view; 
 
     public StoreController() {
         this.storeService = new StoreService();
@@ -44,9 +44,8 @@ public class StoreController {
             if (storeService.addStore(store)) {
                 if (view != null)
                     view.showMessage("Store added successfully!");
-                loadStores(); // Refresh the table
+                loadStores();
             } else {
-                // This 'else' might not be reached if DAO/Service throws exception on failure
                 if (view != null)
                     view.showError("Failed to add store. Check input data and logs.");
             }
@@ -91,12 +90,12 @@ public class StoreController {
             if (storeService.deleteStore(storeId)) {
                 if (view != null)
                     view.showMessage("Store deleted successfully!");
-                loadStores(); // Refresh the table
+                loadStores(); 
             } else {
                 if (view != null)
                     view.showError("Failed to delete store. It might be in use or not exist.");
             }
-        } catch (ValidationException e) { // Catching specific exception for store in use, if service throws it
+        } catch (ValidationException e) { 
             if (view != null)
                 view.showError("Validation Error: " + e.getMessage());
         } catch (SecurityException e) {

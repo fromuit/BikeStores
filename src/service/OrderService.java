@@ -43,7 +43,6 @@ public class OrderService {
         this.orderItemsDAO = new OrderItemsDAO();
     }
 
-    // Alternative constructor for dependency injection
     public OrderService(IOrdersDAO orderDAO, ICustomersDAO customerDAO, IStoresDAO storeDAO, IStaffsDAO staffDAO, IOrderItemsDAO orderItemsDAO) {
         this.orderDAO = orderDAO;
         this.customerDAO = customerDAO;

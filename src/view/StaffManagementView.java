@@ -48,7 +48,6 @@ public class StaffManagementView extends JInternalFrame {
     }
 
     private void initializeComponents() {
-        // Table setup
         String[] columnNames = { "Mã nhân viên", "Tên", "Họ", "Email", "SĐT", "Tình trạng", "Mã cửa hàng",
                 "Mã quản lý" };
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -114,7 +113,6 @@ public class StaffManagementView extends JInternalFrame {
 
         // Table panel
         JScrollPane scrollPane = new JScrollPane(staffTable);
-        // add(scrollPane, BorderLayout.CENTER);
 
         // Combine search and table
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -325,10 +323,8 @@ public class StaffManagementView extends JInternalFrame {
     private void filterByStore() {
         int selectedIndex = cmbStoreFilter.getSelectedIndex();
         if (selectedIndex == 0) {
-            // All stores
             loadStaffs();
         } else {
-            // Specific store
             String storeText = (String) cmbStoreFilter.getSelectedItem();
             int storeId = Integer.parseInt(storeText.replace("Cửa hàng ", ""));
             controller.loadStaffsByStore(storeId);
@@ -343,7 +339,6 @@ public class StaffManagementView extends JInternalFrame {
                 btnAdd.setEnabled(false);
                 btnUpdate.setEnabled(false);
                 btnDelete.setEnabled(false);
-                // Make all form fields read-only
                 setFormFieldsEnabled(false);
             }
             case STORE_MANAGER ->  {
@@ -351,22 +346,19 @@ public class StaffManagementView extends JInternalFrame {
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
                 setFormFieldsEnabled(true);
-                
-                // Restrict store ID to their own store
+
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
                 if (!accessibleStores.isEmpty()) {
                     txtStoreID.setText(String.valueOf(accessibleStores.get(0)));
                     txtStoreID.setEnabled(false);
                 }
-                
-                // Store managers cannot change manager assignments
+
                 txtManagerID.setEnabled(false);
             }
             case CHIEF_MANAGER ->  {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
-                // CHIEF_MANAGER has full access to all fields
                 setFormFieldsEnabled(true);
             }
         }
@@ -403,7 +395,6 @@ public class StaffManagementView extends JInternalFrame {
             return false;
         }
 
-        // Manager ID is optional, but if provided, must be a valid number
         if (!txtManagerID.getText().trim().isEmpty()) {
             try {
                 Integer.valueOf(txtManagerID.getText().trim());

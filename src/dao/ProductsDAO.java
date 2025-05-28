@@ -16,7 +16,6 @@ import utils.DatabaseUtil;
  */
 public class ProductsDAO implements IProductsDAO {
     
-    // ========== BaseDAO Implementation ==========
     
     @Override
     public boolean insert(Products product) {
@@ -147,7 +146,6 @@ public class ProductsDAO implements IProductsDAO {
         return productsList;
     }
 
-    // ========== IProductsDAO Specific Methods ==========
 
     @Override
     public ArrayList<Products> getProductsByCategoryId(int categoryId) {
@@ -236,8 +234,6 @@ public class ProductsDAO implements IProductsDAO {
         return products;
     }
 
-    // ========== Legacy Methods (để backward compatibility) ==========
-    
     /**
      * @deprecated Use selectAll() instead
      */

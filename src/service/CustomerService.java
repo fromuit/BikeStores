@@ -22,8 +22,7 @@ public class CustomerService {
         this.customerDAO = new CustomersDAO();
         this.sessionManager = SessionManager.getInstance();
     }
-    
-    // Alternative constructor for dependency injection
+
     public CustomerService(ICustomersDAO customerDAO) {
         this.customerDAO = customerDAO;
         this.sessionManager = SessionManager.getInstance();
@@ -44,18 +43,15 @@ public class CustomerService {
     public boolean addCustomer(Customers customer) throws ValidationException {
         validateCustomer(customer);
         validateBusinessRules(customer);
-        
-        // Check permissions
+
         if (!sessionManager.hasPermission("MANAGE_CUSTOMERS")) {
             throw new SecurityException("You don't have permission to add customers");
         }
-        
-        // Check for duplicate email
+
         if (customerDAO.existsByEmail(customer.getEmail())) {
             throw new ValidationException("Email already exists in the system");
         }
-        
-        // Check for duplicate phone
+
         if (customerDAO.existsByPhone(customer.getPhone())) {
             throw new ValidationException("Phone number already exists in the system");
         }
@@ -66,24 +62,20 @@ public class CustomerService {
     public boolean updateCustomer(Customers customer) throws ValidationException {
         validateCustomer(customer);
         validateBusinessRules(customer);
-        
-        // Check permissions
+
         if (!sessionManager.hasPermission("MANAGE_CUSTOMERS")) {
             throw new SecurityException("You don't have permission to update customers");
         }
-        
-        // Get existing customer to check permissions
+
         Customers existingCustomer = customerDAO.selectById(customer.getPersonID());
         if (existingCustomer == null) {
             throw new ValidationException("Customer not found");
         }
-        
-        // Check for duplicate email (excluding current customer)
+
         if (customerDAO.existsByEmailExcluding(customer.getEmail(), customer.getPersonID())) {
             throw new ValidationException("Email already exists in the system");
         }
-        
-        // Check for duplicate phone (excluding current customer)
+
         if (customerDAO.existsByPhoneExcluding(customer.getPhone(), customer.getPersonID())) {
             throw new ValidationException("Phone number already exists in the system");
         }
@@ -96,13 +88,11 @@ public class CustomerService {
         if (customer == null) {
             throw new ValidationException("Customer not found");
         }
-        
-        // Check permissions
+
         if (!sessionManager.hasPermission("MANAGE_CUSTOMERS")) {
             throw new SecurityException("You don't have permission to delete customers");
         }
-        
-        // Check if customer has active orders
+
         if (customerDAO.hasActiveOrders(customerId)) {
             throw new ValidationException("Cannot delete customer with active orders");
         }
@@ -152,14 +142,12 @@ public class CustomerService {
     }
     
     private void validateBusinessRules(Customers customer) throws ValidationException {
-        // Validate state code (if provided)
         if (customer.getState() != null && !customer.getState().trim().isEmpty()) {
             if (!isValidStateCode(customer.getState())) {
                 throw new ValidationException("Invalid state code. Please use 2-letter state abbreviation (e.g., CA, NY, TX)");
             }
         }
-        
-        // Validate required address fields if any address field is provided
+
         boolean hasAddressInfo = (customer.getStreet() != null && !customer.getStreet().trim().isEmpty()) ||
                                 (customer.getCity() != null && !customer.getCity().trim().isEmpty()) ||
                                 (customer.getState() != null && !customer.getState().trim().isEmpty()) ||

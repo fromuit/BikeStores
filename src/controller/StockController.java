@@ -67,14 +67,9 @@ public class StockController {
             if (stockService.updateStockQuantity(storeId, productId, quantity)) {
                 if (view != null) {
                     view.showMessage("Stock quantity updated successfully!");
-                    // Depending on the view's current filter, reload appropriately
-                    // For example, if view is showing stocks for a specific store:
-                    // loadStocksByStore(storeId);
-                    // Or, if it's a general view, it might need a more generic refresh or re-search
-                    view.refreshCurrentView(); // A new method in the view to handle this
+                    view.refreshCurrentView(); 
                 }
             } else {
-                // This might not be reached if service throws exception for all failures
                 if (view != null)
                     view.showError("Failed to update stock quantity.");
             }

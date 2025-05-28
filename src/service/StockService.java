@@ -27,7 +27,6 @@ public class StockService {
         this.sessionManager = SessionManager.getInstance();
     }
 
-    // Alternative constructor for dependency injection
     public StockService(IStocksDAO stocksDAO, IProductsDAO productsDAO, IStoresDAO storesDAO) {
         this.stocksDAO = stocksDAO;
         this.productsDAO = productsDAO;

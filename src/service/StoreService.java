@@ -13,13 +13,10 @@ public class StoreService {
     private final IStoresDAO storesDAO;
     private final SessionManager sessionManager;
 
-    // Basic email regex pattern
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
                     "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
-    // Basic phone regex pattern (allows for some variation, e.g. spaces, hyphens)
-    // This is a simple example; a more robust regex might be needed for
-    // international numbers.
+
     private static final Pattern PHONE_PATTERN = Pattern.compile(
             "^\\+?[0-9. ()-]{7,25}$");
 
@@ -28,7 +25,6 @@ public class StoreService {
         this.sessionManager = SessionManager.getInstance();
     }
 
-    // Alternative constructor for dependency injection
     public StoreService(IStoresDAO storesDAO) {
         this.storesDAO = storesDAO;
         this.sessionManager = SessionManager.getInstance();
@@ -47,15 +43,14 @@ public class StoreService {
     private ArrayList<Stores> filterStoresByAccess(ArrayList<Stores> stores) {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser.getRole() == User.UserRole.CHIEF_MANAGER) {
-            return stores; // Chief managers see all stores
+            return stores; 
         }
         
         if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
-            return stores; // Store managers can see all stores but can only edit their own
+            return stores; 
         }
         
         if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            // Employees can only see their own store
             ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
             ArrayList<Stores> filteredStores = new ArrayList<>();
             
@@ -67,7 +62,7 @@ public class StoreService {
             return filteredStores;
         }
         
-        return new ArrayList<>(); // Default: no access
+        return new ArrayList<>(); 
     }
 
     public Stores getStoreById(int storeId) throws SecurityException {
@@ -76,7 +71,6 @@ public class StoreService {
             throw new SecurityException("Authentication required to view store details.");
         }
         
-        // Check if user can access this specific store
         if (!canAccessStore(storeId)) {
             throw new SecurityException("You don't have permission to view this store.");
         }
@@ -89,9 +83,9 @@ public class StoreService {
         if (currentUser == null) return false;
         
         return switch (currentUser.getRole()) {
-            case CHIEF_MANAGER -> true; // Can access all stores
-            case STORE_MANAGER -> true; // Can view all stores
-            case EMPLOYEE -> sessionManager.getAccessibleStoreIds().contains(storeId); // Only their store
+            case CHIEF_MANAGER -> true; 
+            case STORE_MANAGER -> true; 
+            case EMPLOYEE -> sessionManager.getAccessibleStoreIds().contains(storeId); 
             default -> false;
         };
     }
@@ -101,8 +95,7 @@ public class StoreService {
         if (currentUser == null) {
             throw new SecurityException("Authentication required to add stores.");
         }
-        
-        // Only CHIEF_MANAGER can add new stores
+
         if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
             throw new SecurityException("Only Chief Managers can add new stores.");
         }
@@ -120,20 +113,16 @@ public class StoreService {
         if (store.getStoreID() <= 0) {
             throw new ValidationException("Store ID for update is invalid.");
         }
-        
-        // Check permissions based on role
+
         if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
             throw new SecurityException("Employees cannot update store information.");
         }
         
         if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
-            // Store managers can only update their own store
             if (!sessionManager.canAccessStore(store.getStoreID())) {
                 throw new SecurityException("You can only update information for your own store.");
             }
-        }
-        
-        // CHIEF_MANAGER can update any store (no additional check needed)
+        } 
         
         validateStore(store);
         return storesDAO.update(store);
@@ -144,8 +133,7 @@ public class StoreService {
         if (currentUser == null) {
             throw new SecurityException("Authentication required to delete stores.");
         }
-        
-        // Only CHIEF_MANAGER can delete stores
+
         if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
             throw new SecurityException("Only Chief Managers can delete stores.");
         }

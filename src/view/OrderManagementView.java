@@ -493,10 +493,8 @@ public class OrderManagementView extends JInternalFrame {
             return;
         }
 
-        // Additional check for employees - they can only update their own orders
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser != null && currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            // Get the selected order to check staff assignment
             int selectedRow = orderTable.getSelectedRow();
             if (selectedRow >= 0) {
                 String staffName = (String) tableModel.getValueAt(selectedRow, 7);
@@ -530,8 +528,7 @@ public class OrderManagementView extends JInternalFrame {
             controller.deleteOrder(selectedOrderId);
         }
     }
-
-    // Method to pre-select current user as staff for employees
+    
     private void preselectCurrentUserAsStaff() {
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser != null && currentUser.getStaffID() != null) {
@@ -608,8 +605,6 @@ public class OrderManagementView extends JInternalFrame {
             } else if (statusStringFromTable.equalsIgnoreCase("Completed")) {
                 statusIndexToSelect = 3; // "Đã hoàn tất"
             } else {
-                // Fallback: If the table string is already Vietnamese or an unexpected value,
-                // try to find a direct match in the JComboBox items.
                 for (int i = 0; i < cmbOrderStatus.getItemCount(); i++) {
                     if (cmbOrderStatus.getItemAt(i).equalsIgnoreCase(statusStringFromTable)) {
                         statusIndexToSelect = i;
@@ -623,10 +618,9 @@ public class OrderManagementView extends JInternalFrame {
             } else {
                 // If no mapping or direct match is found, print a warning and clear selection or set a default.
                 System.err.println("OrderManagementView: Status '" + statusStringFromTable + "' from table could not be mapped to cmbOrderStatus. Clearing selection.");
-                cmbOrderStatus.setSelectedIndex(-1); // Clears selection, or you could set a default like 0.
+                cmbOrderStatus.setSelectedIndex(-1);
             }
         } else {
-            // If status from table is not a String or is null
             System.err.println("OrderManagementView: Status from table is not a String or is null. Clearing selection.");
             cmbOrderStatus.setSelectedIndex(-1); 
         }
@@ -734,7 +728,6 @@ public class OrderManagementView extends JInternalFrame {
             return false;
         }
 
-        // Validate shipped date if provided
         if (!txtShippedDate.getText().trim().isEmpty()) {
             try {
                 dateFormat.parse(txtShippedDate.getText().trim());
@@ -744,7 +737,6 @@ public class OrderManagementView extends JInternalFrame {
                 return false;
             }
 
-            // If shipped date is provided, status should be completed
             if (cmbOrderStatus.getSelectedIndex() != 3) { // 3 = Completed (0-based index)
                 showError("Đơn hàng đã được giao phải có tình trạng là Hoàn thành!! ");
                 cmbOrderStatus.requestFocus();
@@ -987,27 +979,22 @@ public class OrderManagementView extends JInternalFrame {
     public void showAddItemToOrderDialog(int orderId) {
         JDialog addItemDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Add Items to Order #" + orderId, true);
-        addItemDialog.setSize(900, 700); // Adjusted size for better layout
+        addItemDialog.setSize(900, 700); 
         addItemDialog.setLocationRelativeTo(this);
-        addItemDialog.setLayout(new BorderLayout(10, 10)); // Add gaps
-        addItemDialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding for dialog
+        addItemDialog.setLayout(new BorderLayout(10, 10));
+        addItemDialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
 
-        // --- Header Panel (Order ID) ---
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Centered header
-        // headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); No,
-        // use dialog padding
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); 
+
         JLabel orderIdLabel = new JLabel("Order ID: " + orderId);
         orderIdLabel.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(orderIdLabel);
-        // addItemDialog.add(headerPanel, BorderLayout.NORTH); // Will add later as part
-        // of a combined top panel
 
-        // --- Product Selection Panel ---
         JPanel productSelectionPanel = new JPanel(new GridBagLayout());
         productSelectionPanel.setBorder(BorderFactory.createTitledBorder("Add New Product to Order"));
         GridBagConstraints gbcSelection = new GridBagConstraints();
         gbcSelection.insets = new Insets(5, 5, 5, 5);
-        gbcSelection.anchor = GridBagConstraints.WEST; // Align labels to left
+        gbcSelection.anchor = GridBagConstraints.WEST; 
 
         gbcSelection.gridx = 0;
         gbcSelection.gridy = 0;
@@ -1015,7 +1002,7 @@ public class OrderManagementView extends JInternalFrame {
         JComboBox<Products> cmbSelectProduct = new JComboBox<>();
         ArrayList<Products> availableProducts = controller.getAllProductsForSelection();
         if (availableProducts.isEmpty()) {
-            cmbSelectProduct.addItem(null); // Add a placeholder if no products
+            cmbSelectProduct.addItem(null);
             cmbSelectProduct.setEnabled(false);
         } else {
             for (Products p : availableProducts) {
@@ -1069,7 +1056,7 @@ public class OrderManagementView extends JInternalFrame {
             btnAddItem.setEnabled(false);
 
         // Combine header and product selection into a top panel
-        JPanel topPanelContainer = new JPanel(new BorderLayout(0, 15)); // 0 horizontal gap, 15 vertical
+        JPanel topPanelContainer = new JPanel(new BorderLayout(0, 15)); 
         topPanelContainer.add(headerPanel, BorderLayout.NORTH);
         topPanelContainer.add(productSelectionPanel, BorderLayout.CENTER);
         addItemDialog.add(topPanelContainer, BorderLayout.NORTH);
@@ -1088,7 +1075,6 @@ public class OrderManagementView extends JInternalFrame {
         itemsScrollPane.setBorder(BorderFactory.createTitledBorder("Products in this Order"));
         addItemDialog.add(itemsScrollPane, BorderLayout.CENTER);
 
-        // --- Footer Panel (Total and Close Button) ---
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // Top padding
 
@@ -1105,7 +1091,6 @@ public class OrderManagementView extends JInternalFrame {
 
         addItemDialog.add(footerPanel, BorderLayout.SOUTH);
 
-        // Function to refresh current items table and total
         Runnable refreshItemsTableAndTotal = () -> {
             currentItemsTableModel.setRowCount(0);
             ArrayList<OrderItems> currentItems = controller.getOrderItemsForDialog(orderId);
@@ -1115,9 +1100,9 @@ public class OrderManagementView extends JInternalFrame {
                         item.getItemID(),
                         item.getProductID(),
                         item.getProductName(),
-                        item.getBrandName(), // Assuming OrderItems has these from join
-                        item.getCategoryName(), // Assuming OrderItems has these from join
-                        item.getModelYear(), // Assuming OrderItems has these from join
+                        item.getBrandName(), 
+                        item.getCategoryName(),
+                        item.getModelYear(), 
                         item.getQuantity(),
                         String.format("$%.2f", item.getListPrice()),
                         String.format("%.1f%%", item.getDiscount() * 100),
@@ -1127,9 +1112,8 @@ public class OrderManagementView extends JInternalFrame {
             }
             lblOrderTotal.setText(String.format("Order Total: $%.2f", runningOrderTotal));
         };
-        refreshItemsTableAndTotal.run(); // Initial load
+        refreshItemsTableAndTotal.run(); 
 
-        // Action for btnAddItem
         btnAddItem.addActionListener(e -> {
             Products selectedProduct = (Products) cmbSelectProduct.getSelectedItem();
             int quantity = (Integer) spnQuantity.getValue();
@@ -1148,7 +1132,6 @@ public class OrderManagementView extends JInternalFrame {
             newItem.setDiscount(discountPercentage / 100.0);
 
             if (controller.addItemToOrder(newItem)) {
-                // showMessage("Product added to order!"); // Can be too noisy
                 refreshItemsTableAndTotal.run();
                 spnQuantity.setValue(1);
                 spnDiscount.setValue(0.0);
@@ -1159,7 +1142,6 @@ public class OrderManagementView extends JInternalFrame {
             }
         });
 
-        // Action for btnCloseDialog
         btnCloseDialog.addActionListener(e -> addItemDialog.dispose());
 
         addItemDialog.setVisible(true);

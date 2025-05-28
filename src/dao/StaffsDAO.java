@@ -45,7 +45,6 @@ public class StaffsDAO implements IStaffsDAO {
         return searchStaffs(searchTerm);
     }
     
-    // Create - Add new staff
     public boolean addStaff(Staffs staff) {
         String query = "INSERT INTO sales.staffs (first_name, last_name, email, phone, active, store_id, manager_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -67,7 +66,6 @@ public class StaffsDAO implements IStaffsDAO {
         }
     }
     
-    // Read - Get all staffs
     public ArrayList<Staffs> getAllStaffs() {
         ArrayList<Staffs> staffs = new ArrayList<>();
         String query = "SELECT * FROM sales.staffs";
@@ -82,7 +80,6 @@ public class StaffsDAO implements IStaffsDAO {
         return staffs;
     }
     
-    // Read - Get staff by ID
     public Staffs getStaffById(int staffId) {
         String query = "SELECT * FROM sales.staffs WHERE staff_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -112,7 +109,6 @@ public class StaffsDAO implements IStaffsDAO {
         return staffs;
     }
     
-    // Update - Update existing staff
     public boolean updateStaff(Staffs staff) {
         String query = "UPDATE sales.staffs SET first_name=?, last_name=?, email=?, phone=?, active=?, store_id=?, manager_id=? WHERE staff_id=?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -135,7 +131,6 @@ public class StaffsDAO implements IStaffsDAO {
         }
     }
     
-    // Delete - Delete staff
     public boolean deleteStaff(int staffId) {
         String query = "DELETE FROM sales.staffs WHERE staff_id = ?";
         try (PreparedStatement pstmt = DatabaseUtil.getConnection().prepareStatement(query)) {
@@ -147,7 +142,6 @@ public class StaffsDAO implements IStaffsDAO {
         }
     }
     
-    //Search staffs
     public ArrayList<Staffs> searchStaffs(String searchTerm) {
         ArrayList<Staffs> staffs = new ArrayList<>();
         String query = "SELECT * FROM sales.staffs WHERE " +
@@ -240,7 +234,7 @@ public class StaffsDAO implements IStaffsDAO {
         }
         return false;
     }    
-    // Helper method to map ResultSet to Staff object
+
     private Staffs mapResultSetToStaff(ResultSet rs) throws SQLException {
         return new Staffs(
             rs.getInt("staff_id"),

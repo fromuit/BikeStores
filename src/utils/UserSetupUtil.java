@@ -18,12 +18,10 @@ public class UserSetupUtil {
     
     public static void setupInitialUsers() {
         try {
-            // Hash passwords for initial users
             String chiefPassword = PasswordUtil.hashPassword("123");
             String managerPassword = PasswordUtil.hashPassword("123");
             String employeePassword = PasswordUtil.hashPassword("123");
             
-            // Insert users with hashed passwords
             insertUser("chief", chiefPassword, "CHIEF_MANAGER", null);
             insertUser("manager", managerPassword, "STORE_MANAGER", 1);
             insertUser("employee", employeePassword, "EMPLOYEE", 2);

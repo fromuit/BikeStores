@@ -45,7 +45,6 @@ public class StoresDAO implements IStoresDAO {
         return searchStores(searchTerm);
     }
     
-    // Existing methods (keeping for backward compatibility)
     public boolean addStore(Stores store) {
         String query = "INSERT INTO sales.stores (store_name, phone, email, street, city, state, zip_code) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
@@ -120,15 +119,9 @@ public class StoresDAO implements IStoresDAO {
             pstmt.setInt(1, storeId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            // Check for foreign key constraint violation (e.g., if store is in use by
-            // orders or staff)
             if (e.getSQLState().startsWith("23")) { // SQLState for integrity constraint violation
                 System.err.println("Error deleting store: Store is currently in use and cannot be deleted. SQLState: "
                         + e.getSQLState());
-                // Optionally, throw a custom exception or return a specific error code/message
-                // to the service layer
-                // throw new DataIntegrityViolationException("Cannot delete store as it is in
-                // use.");
             } else {
                 System.err.println("Error deleting store: " + e.getMessage());
             }

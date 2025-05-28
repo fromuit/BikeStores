@@ -6,8 +6,8 @@ package dao;
 
 import dao.interfaces.IStocksDAO;
 import java.sql.*;
-import java.util.ArrayList; // For joining and displaying product name
-import model.Production.Products; // For joining and displaying store name
+import java.util.ArrayList; 
+import model.Production.Products; 
 import model.Production.Stocks;
 import model.Sales.Stores;
 import utils.DatabaseUtil;

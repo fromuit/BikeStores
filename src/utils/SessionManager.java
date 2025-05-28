@@ -64,51 +64,47 @@ public class SessionManager {
         
         return false;
     }
-    
-    // New method: Check if user can add orders
+
     public boolean canAddOrder(Orders order) {
         if (currentUser == null) return false;
         
         return switch (currentUser.getRole()) {
             case CHIEF_MANAGER -> true;
             case STORE_MANAGER -> canAccessStore(order.getStoreID());
-            case EMPLOYEE -> true; // Employees can add orders
+            case EMPLOYEE -> true; 
             default -> false;
         };
     }
-    
-    // New method: Check if user can update specific order
+
     public boolean canUpdateOrder(Orders order) {
         if (currentUser == null) return false;
         
         return switch (currentUser.getRole()) {
             case CHIEF_MANAGER -> true;
             case STORE_MANAGER -> canAccessStore(order.getStoreID());
-            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); // Only their own orders
+            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); 
             default -> false;
         };
     }
-    
-    // New method: Check if user can delete specific order
+
     public boolean canDeleteOrder(Orders order) {
         if (currentUser == null) return false;
         
         return switch (currentUser.getRole()) {
             case CHIEF_MANAGER -> true;
             case STORE_MANAGER -> canAccessStore(order.getStoreID());
-            case EMPLOYEE -> false; // Employees cannot delete orders
+            case EMPLOYEE -> false;
             default -> false;
         };
     }
-    
-    // New method: Check if user can view specific order
+
     public boolean canViewOrder(Orders order) {
         if (currentUser == null) return false;
         
         return switch (currentUser.getRole()) {
             case CHIEF_MANAGER -> true;
             case STORE_MANAGER -> canAccessStore(order.getStoreID());
-            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); // Only their own orders
+            case EMPLOYEE -> order.getStaffID() == currentUser.getStaffID(); 
             default -> false;
         };
     }
@@ -120,7 +116,6 @@ public class SessionManager {
         }
 
         try {
-            // Get store ID from staff record using DAO
             StaffsDAO staffDAO = new StaffsDAO();
             Staffs staff = staffDAO.getStaffById(staffID);
             if (staff != null) {
@@ -155,14 +150,11 @@ public class SessionManager {
 
         switch (currentUser.getRole()) {
             case CHIEF_MANAGER -> {
-                // Chief managers can access all stores
-                // You might want to fetch this from database
                 for (int i = 1; i <= 5; i++) { 
                     storeIds.add(i);
                 }
             }
             case STORE_MANAGER, EMPLOYEE -> {
-                // Store managers and employees can only access their own store
                 int storeId = getStaffStoreId(currentUser.getStaffID());
                 if (storeId > 0) {
                     storeIds.add(storeId);

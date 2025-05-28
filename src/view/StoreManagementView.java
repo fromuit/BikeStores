@@ -33,7 +33,7 @@ public class StoreManagementView extends JInternalFrame {
 
     private void initializeUI() {
         setSize(1000, 600);
-        setLayout(new BorderLayout(10, 10)); // Add gaps between components
+        setLayout(new BorderLayout(10, 10)); 
 
         // --- Search Panel ---
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -228,22 +228,18 @@ public class StoreManagementView extends JInternalFrame {
             
             User currentUser = sessionManager.getCurrentUser();
             
-            // For store managers, check if they can edit this store
             if (currentUser != null && currentUser.getRole() == User.UserRole.STORE_MANAGER) {
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
                 boolean canEdit = accessibleStores.contains(selectedStoreId);
                 
-                // Update button state based on whether they can edit this store
                 btnUpdate.setEnabled(canEdit);
                 setFormFieldsEditable(canEdit);
                 
                 if (!canEdit) {
-                    // Show a visual indicator that this store is read-only
                     showMessage("Bạn chỉ có thể xem thông tin cửa hàng này");
                 }
             }
             
-            // Fetch full store details to populate form
             Stores store = controller.getStoreById(selectedStoreId);
             if (store != null) {
                 txtStoreName.setText(store.getStoreName());
@@ -275,7 +271,6 @@ public class StoreManagementView extends JInternalFrame {
         
         User currentUser = sessionManager.getCurrentUser();
         
-        // Additional client-side check for store managers
         if (currentUser != null && currentUser.getRole() == User.UserRole.STORE_MANAGER) {
             ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
             if (!accessibleStores.contains(selectedStoreId)) {
@@ -318,16 +313,13 @@ public class StoreManagementView extends JInternalFrame {
         String state = txtState.getText().trim();
         String zip = txtZipCode.getText().trim();
 
-        // Basic validation (more detailed validation should be in Service layer)
         if (name.isEmpty()) {
             showError("Store Name cannot be empty.");
             txtStoreName.requestFocus();
             return null;
         }
-        // You can add more client-side quick validations here if desired
 
         Stores store = new Stores();
-        // For add, ID is set by DB. For update, selectedStoreId is used.
         store.setStoreName(name);
         store.setPhone(phone.isEmpty() ? null : phone);
         store.setEmail(email.isEmpty() ? null : email);
@@ -351,7 +343,7 @@ public class StoreManagementView extends JInternalFrame {
     }
 
     public void displayStores(ArrayList<Stores> stores) {
-        tableModel.setRowCount(0); // Clear existing data
+        tableModel.setRowCount(0); 
         if (stores != null) {
             for (Stores store : stores) {
                 Object[] row = {

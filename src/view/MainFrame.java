@@ -320,7 +320,6 @@ public class MainFrame extends JFrame {
                 try {
                     frame.setClosed(true);
                 } catch (PropertyVetoException ex) {
-                    // ex.printStackTrace();
                 }
             }
         }
@@ -357,7 +356,6 @@ public class MainFrame extends JFrame {
             default:
 
                 if (welcomeInternalFrame != null && !welcomeInternalFrame.isVisible()) {
-                    // Đảm bảo welcome frame được thêm vào desktopPane nếu chưa có
                     if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
                         desktopPane.add(welcomeInternalFrame);
                     }
@@ -384,7 +382,7 @@ public class MainFrame extends JFrame {
         add(splitPane, BorderLayout.CENTER);
 
         if (welcomeInternalFrame != null) {
-            // Kiểm tra xem welcomeInternalFrame đã được thêm vào desktopPane chưa
+
             if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
                 desktopPane.add(welcomeInternalFrame);
             }
@@ -463,7 +461,6 @@ public class MainFrame extends JFrame {
         addAndMaximizeInternalFrame(orderView);
     }
 
-    // Phương thức tiện ích để thêm và phóng to JInternalFrame
     private void addAndMaximizeInternalFrame(JInternalFrame frame) {
         desktopPane.add(frame);
         frame.setVisible(true);

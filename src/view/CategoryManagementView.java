@@ -48,12 +48,9 @@ public class CategoryManagementView extends JInternalFrame {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         sorter.setComparator(0, Comparator.comparingInt(o -> Integer.valueOf(o.toString()))); 
         categoryTable.setRowSorter(sorter);
-        
-        
-        // Input fields
+
         txtCategoryName = new JTextField(20);
-        
-        // Buttons
+
         btnAdd = new JButton("Thêm");
         btnUpdate = new JButton("Sửa");
         btnDelete = new JButton("Xoá");
@@ -63,25 +60,21 @@ public class CategoryManagementView extends JInternalFrame {
     
     private void setupLayout() {
         setLayout(new BorderLayout());
-        
-        // Table panel
+
         JScrollPane scrollPane = new JScrollPane(categoryTable);
         add(scrollPane, BorderLayout.CENTER);
-        
-        // Form panel
+ 
         JPanel formPanel = new JPanel(new FlowLayout());
         formPanel.add(new JLabel("Tên danh mục:"));
         formPanel.add(txtCategoryName);
-        
-        // Button panel
+
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnClear);
-        
-        // Combine form and button panels
+
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(formPanel, BorderLayout.CENTER);
         southPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -90,7 +83,6 @@ public class CategoryManagementView extends JInternalFrame {
     }
     
     private void setupEventListeners() {
-        // Table selection listener
         categoryTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = categoryTable.getSelectedRow();
@@ -99,16 +91,14 @@ public class CategoryManagementView extends JInternalFrame {
                 }
             }
         });
-        
-        // Button listeners
+
         btnAdd.addActionListener(e -> addCategory());
         btnUpdate.addActionListener(e -> updateCategory());
         btnDelete.addActionListener(e -> deleteCategory());
         btnRefresh.addActionListener(e -> loadCategories());
         btnClear.addActionListener(e -> clearForm());
     }
-    
-    // Methods called by controller
+
     public void displayCategories(ArrayList<Categories> categories) {
         tableModel.setRowCount(0);
         for (Categories category : categories) {
@@ -127,8 +117,7 @@ public class CategoryManagementView extends JInternalFrame {
     public void showError(String error) {
         JOptionPane.showMessageDialog(this, error, "Error", JOptionPane.ERROR_MESSAGE);
     }
-    
-    // Private helper methods
+
     private void loadCategories() {
         controller.loadCategories();
     }
@@ -188,7 +177,7 @@ public class CategoryManagementView extends JInternalFrame {
     
     private Categories createCategoryFromForm() {
         return new Categories(
-            0, // ID will be auto-generated
+            0,
             txtCategoryName.getText().trim()
         );
     }

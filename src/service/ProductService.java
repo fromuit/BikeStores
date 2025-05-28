@@ -69,9 +69,8 @@ public class ProductService {
         try {
             return productDAO.getAllProductsBasicInfo();
         } catch (Exception e) {
-            // Handle or log the exception appropriately
             System.err.println("Error in ProductService.getAllProductsBasicInfo: " + e.getMessage());
-            return new ArrayList<>(); // Return empty list on error
+            return new ArrayList<>(); 
         }
     }
 
@@ -102,7 +101,6 @@ public class ProductService {
         return productDAO.delete(id);
     }
 
-    // Helper methods for better organization
     private void validateUserPermission(User.UserRole restrictedRole, boolean onlyChiefManager) 
             throws SecurityException {
         User currentUser = sessionManager.getCurrentUser();

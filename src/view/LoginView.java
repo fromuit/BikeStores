@@ -249,7 +249,6 @@ public class LoginView extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Thiết lập Look and Feel giống MainFrame
             try {
                 for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus".equals(info.getName())) {
@@ -262,7 +261,7 @@ public class LoginView extends JFrame {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (Exception ex) {
-                    // Use default
+                    
                 }
             }
             new LoginView().setVisible(true);
