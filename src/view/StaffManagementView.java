@@ -350,19 +350,23 @@ public class StaffManagementView extends JInternalFrame {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
-                txtManagerID.setEnabled(false);
-
+                setFormFieldsEnabled(true);
+                
                 // Restrict store ID to their own store
                 ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
                 if (!accessibleStores.isEmpty()) {
                     txtStoreID.setText(String.valueOf(accessibleStores.get(0)));
                     txtStoreID.setEnabled(false);
                 }
+                
+                // Store managers cannot change manager assignments
+                txtManagerID.setEnabled(false);
             }
             case CHIEF_MANAGER ->  {
                 btnAdd.setEnabled(true);
                 btnUpdate.setEnabled(true);
                 btnDelete.setEnabled(true);
+                // CHIEF_MANAGER has full access to all fields
                 setFormFieldsEnabled(true);
             }
         }

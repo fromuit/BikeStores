@@ -1,12 +1,12 @@
 package service;
 
 import dao.StoresDAO;
-import model.Sales.Stores;
-import model.Administration.User;
-import utils.SessionManager;
-import utils.ValidationException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import model.Administration.User;
+import model.Sales.Stores;
+import utils.SessionManager;
+import utils.ValidationException;
 
 public class StoreService {
     private final StoresDAO storesDAO;
@@ -29,61 +29,137 @@ public class StoreService {
 
     public ArrayList<Stores> getAllStores() throws SecurityException {
         User currentUser = sessionManager.getCurrentUser();
-        // For now, assuming all authenticated users can view all stores.
-        // Add role-specific logic if needed, e.g.:
-        // if (currentUser == null || currentUser.getRole() ==
-        // User.UserRole.SOME_RESTRICTED_ROLE) {
-        // throw new SecurityException("You do not have permission to view stores.");
-        // }
-        return storesDAO.getAllStores();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to view stores.");
+        }
+        
+        ArrayList<Stores> allStores = storesDAO.getAllStores();
+        return filterStoresByAccess(allStores);
+    }
+
+    private ArrayList<Stores> filterStoresByAccess(ArrayList<Stores> stores) {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser.getRole() == User.UserRole.CHIEF_MANAGER) {
+            return stores; // Chief managers see all stores
+        }
+        
+        if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+            return stores; // Store managers can see all stores but can only edit their own
+        }
+        
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            // Employees can only see their own store
+            ArrayList<Integer> accessibleStores = sessionManager.getAccessibleStoreIds();
+            ArrayList<Stores> filteredStores = new ArrayList<>();
+            
+            for (Stores store : stores) {
+                if (accessibleStores.contains(store.getStoreID())) {
+                    filteredStores.add(store);
+                }
+            }
+            return filteredStores;
+        }
+        
+        return new ArrayList<>(); // Default: no access
     }
 
     public Stores getStoreById(int storeId) throws SecurityException {
-        // Similar permission check as getAllStores if needed
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to view store details.");
+        }
+        
+        // Check if user can access this specific store
+        if (!canAccessStore(storeId)) {
+            throw new SecurityException("You don't have permission to view this store.");
+        }
+        
         return storesDAO.getStoreById(storeId);
+    }
+
+    private boolean canAccessStore(int storeId) {
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) return false;
+        
+        return switch (currentUser.getRole()) {
+            case CHIEF_MANAGER -> true; // Can access all stores
+            case STORE_MANAGER -> true; // Can view all stores
+            case EMPLOYEE -> sessionManager.getAccessibleStoreIds().contains(storeId); // Only their store
+            default -> false;
+        };
     }
 
     public boolean addStore(Stores store) throws ValidationException, SecurityException {
         User currentUser = sessionManager.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            throw new SecurityException("You do not have permission to add new stores.");
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to add stores.");
         }
+        
+        // Only CHIEF_MANAGER can add new stores
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
+            throw new SecurityException("Only Chief Managers can add new stores.");
+        }
+        
         validateStore(store);
         return storesDAO.addStore(store);
     }
 
     public boolean updateStore(Stores store) throws ValidationException, SecurityException {
         User currentUser = sessionManager.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() == User.UserRole.EMPLOYEE) {
-            throw new SecurityException("You do not have permission to update stores.");
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to update stores.");
         }
+        
         if (store.getStoreID() <= 0) {
             throw new ValidationException("Store ID for update is invalid.");
         }
+        
+        // Check permissions based on role
+        if (currentUser.getRole() == User.UserRole.EMPLOYEE) {
+            throw new SecurityException("Employees cannot update store information.");
+        }
+        
+        if (currentUser.getRole() == User.UserRole.STORE_MANAGER) {
+            // Store managers can only update their own store
+            if (!sessionManager.canAccessStore(store.getStoreID())) {
+                throw new SecurityException("You can only update information for your own store.");
+            }
+        }
+        
+        // CHIEF_MANAGER can update any store (no additional check needed)
+        
         validateStore(store);
         return storesDAO.updateStore(store);
     }
 
     public boolean deleteStore(int storeId) throws ValidationException, SecurityException {
         User currentUser = sessionManager.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() != User.UserRole.CHIEF_MANAGER) { // Only Chief Manager can
-                                                                                           // delete
-            throw new SecurityException("You do not have permission to delete stores.");
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to delete stores.");
         }
+        
+        // Only CHIEF_MANAGER can delete stores
+        if (currentUser.getRole() != User.UserRole.CHIEF_MANAGER) {
+            throw new SecurityException("Only Chief Managers can delete stores.");
+        }
+        
         if (storeId <= 0) {
             throw new ValidationException("Store ID for delete is invalid.");
         }
+        
         // Add business logic here: e.g., check if store has associated staff/orders
-        // that need to be handled
-        // For example, prevent deletion if there are active orders or staff assigned to
-        // this store.
-        // This logic might involve calling other DAOs/Services.
+        // For example, prevent deletion if there are active orders or staff assigned to this store.
         return storesDAO.deleteStore(storeId);
     }
 
     public ArrayList<Stores> searchStores(String searchTerm) throws SecurityException {
-        // Similar permission check as getAllStores if needed
-        return storesDAO.searchStores(searchTerm);
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser == null) {
+            throw new SecurityException("Authentication required to search stores.");
+        }
+        
+        ArrayList<Stores> searchResults = storesDAO.searchStores(searchTerm);
+        return filterStoresByAccess(searchResults);
     }
 
     private void validateStore(Stores store) throws ValidationException {

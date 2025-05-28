@@ -1,10 +1,11 @@
 package controller;
 
+import java.util.ArrayList;
 import model.Production.Stocks;
+import model.Sales.Stores;
 import service.StockService;
 import utils.ValidationException;
-import view.StockManagementView; // Will be created
-import java.util.ArrayList;
+import view.StockManagementView;
 
 public class StockController {
     private final StockService stockService;
@@ -90,7 +91,19 @@ public class StockController {
         }
     }
 
-    // Potentially, a method to get a single stock item if needed by the view for
-    // detailed display
-    // public Stocks getStockItemDetails(int storeId, int productId) { ... }
+    public ArrayList<Stores> getAccessibleStoresForStockView() {
+        try {
+            return stockService.getAccessibleStoresForStockView();
+        } catch (SecurityException e) {
+            if (view != null)
+                view.showError("Permission Denied: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (Exception e) {
+            if (view != null)
+                view.showError("Error loading accessible stores: " + e.getMessage());
+            System.err.println("Error in StockController.getAccessibleStoresForStockView: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
 }
