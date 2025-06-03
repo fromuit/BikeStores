@@ -288,16 +288,12 @@ public class MainFrame extends JFrame {
     private String getRoleDisplayName(User.UserRole role) {
         if (role == null) return "Không xác định";
         
-        switch (role) {
-            case EMPLOYEE:
-                return "Nhân viên";
-            case STORE_MANAGER:
-                return "Quản lý cửa hàng";
-            case CHIEF_MANAGER:
-                return "Quản lý tổng";
-            default:
-                return "Không xác định";
-        }
+        return switch (role) {
+            case EMPLOYEE -> "Nhân viên";
+            case STORE_MANAGER -> "Quản lý cửa hàng";
+            case CHIEF_MANAGER -> "Quản lý tổng";
+            default -> "Không xác định";
+        };
     }
     
     private String getStoreInfo(User user) {
@@ -329,32 +325,15 @@ public class MainFrame extends JFrame {
         }
 
         switch (menuItemName) {
-            case "Quản lý khách hàng":
-                openCustomerManagement();
-                break;
-            case "Quản lý đơn hàng":
-                openOrderManagement();
-                break;
-            case "Quản lý nhân viên":
-                openStaffManagement();
-                break;
-            case "Quản lý cửa hàng":
-                openStoreManagement();
-                break;
-            case "Quản lý sản phẩm":
-                openProductManagement();
-                break;
-            case "Quản lý danh mục":
-                openCategoryManagement();
-                break;
-            case "Quản lý nhãn hàng":
-                openBrandManagement();
-                break;
-            case "Quản lý kho":
-                openStockManagement();
-                break;
-            default:
-
+            case "Quản lý khách hàng" -> openCustomerManagement();
+            case "Quản lý đơn hàng" -> openOrderManagement();
+            case "Quản lý nhân viên" -> openStaffManagement();
+            case "Quản lý cửa hàng" -> openStoreManagement();
+            case "Quản lý sản phẩm" -> openProductManagement();
+            case "Quản lý danh mục" -> openCategoryManagement();
+            case "Quản lý nhãn hàng" -> openBrandManagement();
+            case "Quản lý kho" -> openStockManagement();
+            default -> {
                 if (welcomeInternalFrame != null && !welcomeInternalFrame.isVisible()) {
                     if (!desktopPane.isAncestorOf(welcomeInternalFrame)) {
                         desktopPane.add(welcomeInternalFrame);
@@ -362,7 +341,7 @@ public class MainFrame extends JFrame {
                     welcomeInternalFrame.setVisible(true);
                     centerWelcomeFrame();
                 }
-                break;
+            }
         }
     }
 

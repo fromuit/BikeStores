@@ -7,7 +7,6 @@ package controller;
 import java.util.ArrayList;
 import model.Sales.Customers;
 import service.CustomerService;
-import utils.SessionManager;
 import utils.ValidationException;
 import view.CustomerManagementView;
 /**

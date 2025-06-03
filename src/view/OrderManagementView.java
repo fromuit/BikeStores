@@ -771,13 +771,13 @@ public class OrderManagementView extends JInternalFrame {
 
             // Create order
             Orders order = new Orders(
-                    0, 
+                    0,
+                    customerId,
                     cmbOrderStatus.getSelectedIndex() + 1, 
                     orderDate,
                     requiredDate,
                     storeId,
                     staffId);
-            order.setCustID(customerId);
             order.setShippedDate(shippedDate);
 
             return order;

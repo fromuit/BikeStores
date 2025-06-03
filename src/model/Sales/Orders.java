@@ -29,9 +29,16 @@ public class Orders {
         this.staffID = staffID;
     }
 
-    public Orders(int i, int i0, Timestamp orderDate, Timestamp requiredDate, int storeId, int staffId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Orders(int orderID, int custID, int orderStatus, Timestamp orderDate, Timestamp requiredDate, int storeID, int staffID) {
+        this.orderID = orderID;
+        this.custID = custID;
+        this.orderStatus = orderStatus;
+        this.orderDate = orderDate;
+        this.requiredDate = requiredDate;
+        this.storeID = storeID;
+        this.staffID = staffID;
     }
+
 
     public int getOrderID() {
         return orderID;

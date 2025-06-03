@@ -47,7 +47,7 @@ public class StoreManagementView extends JInternalFrame {
         searchPanel.add(btnClearSearch);
 
         // --- Table Panel ---
-        String[] columnNames = { "Mã cửa hàng", "Tên cửa hàng", "SĐT", "Email","Đường" ,"Thành phố", "Bang", "Ma zip" };
+        String[] columnNames = { "Mã cửa hàng", "Tên cửa hàng", "SĐT", "Email","Đường" ,"Thành phố", "Bang", "Mã ZIP" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
